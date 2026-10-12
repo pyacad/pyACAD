@@ -1,0 +1,2 @@
+title: Lisp Result
+tooltip: Smoke probe. Returns {"n": 3, "args": [...]} to (pyacad "PYLISPRESULT" ...).

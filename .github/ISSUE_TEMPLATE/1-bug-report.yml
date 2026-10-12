@@ -1,0 +1,71 @@
+name: Bug report
+description: Something in pyACAD does not work the way the guide says it should.
+title: "[Bug] "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for the report. The dropdowns below are what we sort by, so please fill them in.
+        The logs in `%APPDATA%\pyACAD\logs\` usually have the answer, so paste the relevant lines if you can.
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which part of pyACAD is this about?
+      options:
+        - Installer or loading
+        - pyACAD panel (Settings, Shortcuts, Console, Reload)
+        - AI (beta) panel
+        - Commands and command line (PYACAD, pyacad.exe, AutoLISP)
+        - Writing my own bundle (Python API, hooks, dock panes)
+        - Documentation
+        - Not sure
+    validations:
+      required: true
+  - type: dropdown
+    id: acad-version
+    attributes:
+      label: AutoCAD version
+      options:
+        - "2026"
+        - "2025"
+        - "2024"
+        - "2023"
+        - "2022"
+        - "2021"
+        - Other or older
+    validations:
+      required: true
+  - type: input
+    id: pyacad-version
+    attributes:
+      label: pyACAD version
+      description: Shown in Settings, or in the installer file name.
+      placeholder: e.g. 0.1.0
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you did, what you expected, and what you saw instead.
+      placeholder: |
+        1. Open a drawing with xrefs
+        2. Click a button on the pyACAD tab
+        3. Expected a report, got a toast saying ...
+    validations:
+      required: true
+  - type: textarea
+    id: log
+    attributes:
+      label: Log lines
+      description: Paste the relevant lines from `%APPDATA%\pyACAD\logs\`. Remove file paths or project names you do not want public.
+      render: text
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before filing
+      options:
+        - label: I clicked Reload on the pyACAD panel and the problem is still there.
+        - label: I searched the existing issues and did not find this one.

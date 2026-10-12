@@ -1,0 +1,35 @@
+<!-- @dsCard group="Components" -->
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Numbers and status</title>
+<style>
+  body { margin:0; padding:24px; font-family:'Segoe UI Variable Text','Segoe UI',sans-serif;
+         background:#fff; color:#1a1a1a; font-size:13px; line-height:1.5; }
+  h1 { font-size:14px; font-weight:600; margin:0 0 2px; }
+  .lead { font-size:12px; color:#6b6b6b; margin:0 0 20px; max-width:60ch; }
+  .demo { max-width:460px; border:1px solid #e0e0e0; border-radius:4px; margin-bottom:6px; }
+  .r { height:32px; display:flex; align-items:center; gap:10px; padding:0 12px;
+       border-bottom:1px solid #eee; }
+  .r:last-child { border-bottom:none; }
+  .n { margin-left:auto; font-variant-numeric:tabular-nums; color:#6b6b6b; }
+  .meta { font-family:Consolas,monospace; font-size:11.5px; color:#6b6b6b; margin:0 0 18px; }
+  .tag { font-size:11px; font-weight:500; padding:1px 7px; border-radius:3px; border:1px solid; }
+  .tag.new { color:#005fb8; border-color:#bcd6ee; background:#f2f7fc; }
+  .tag.ok { color:#0f6c33; border-color:#bfe0cc; background:#f2faf5; }
+  .tag.err { color:#c50f1f; border-color:#e8c4c8; background:#fdf3f4; }
+</style></head><body>
+<h1>Numbers and status</h1>
+<p class="lead">Counts are plain right-aligned text in tabular figures, muted so names stay
+primary. A count never wears a colored background. The only chip in the system is the status tag,
+and it exists solely because status is categorical.</p>
+<div class="demo">
+  <div class="r">ELA VS ARCH: Linear Pendant Light - 8'-0"<span class="n">163</span></div>
+  <div class="r">ELA VS ARCH: Duplex Standard - Not Controlled<span class="n">74</span></div>
+  <div class="r">ELA VS MECH: 18" x 4"<span class="n">43</span></div>
+</div>
+<p class="meta">counts: 13px tabular, muted, right edge</p>
+<div style="display:flex; gap:8px; margin-bottom:6px">
+  <span class="tag new">New</span><span class="tag ok">Resolved</span><span class="tag err">Failed</span>
+</div>
+<p class="meta">status tags: 11px, outlined wash, radius 3; used for audit status only, never for
+counts, labels or recommendations</p>
+</body></html>

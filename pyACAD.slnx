@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/PyAcad.Runtime/PyAcad.Runtime.csproj" />
+    <Project Path="src/PyAcad.Tests/PyAcad.Tests.csproj">
+      <Platform Project="x64" />
+    </Project>
+    <Project Path="src/PyAcad/PyAcad.csproj" />
+    <Project Path="src/PyAcad.Cli/PyAcad.Cli.csproj" />
+  </Folder>
+</Solution>

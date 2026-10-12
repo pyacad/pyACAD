@@ -1,0 +1,62 @@
+<!-- @dsCard group="Rules" -->
+<!doctype html>
+<html><head><meta charset="utf-8"><title>The slop test</title>
+<style>
+  body { margin:0; padding:24px; font-family:'Segoe UI Variable Text','Segoe UI',sans-serif;
+         background:#fff; color:#1a1a1a; font-size:13px; line-height:1.55; }
+  h1 { font-size:14px; font-weight:600; margin:0 0 2px; }
+  .lead { font-size:12px; color:#6b6b6b; margin:0 0 18px; max-width:62ch; }
+  h2 { font-size:12px; font-weight:500; color:#6b6b6b; margin:18px 0 6px; }
+  ul { margin:0; padding-left:18px; max-width:62ch; }
+  li { margin:5px 0; }
+  li b { font-weight:600; }
+</style></head><body>
+<h1>The slop test</h1>
+<p class="lead">Before shipping any surface, check it against the tells. If a screenshot could
+pass for a template demo, it fails. The goal is an interface a Windows user trusts instantly and
+stops noticing.</p>
+<h2>Banned tells</h2>
+<ul>
+  <li><b>Gradients</b> in text, fills or backgrounds. Anywhere.</li>
+  <li><b>Glassmorphism</b>: blur, translucency, acrylic on content surfaces.</li>
+  <li><b>Tint-soup</b>: accent-alpha washes as default backgrounds or borders.</li>
+  <li><b>Pill-soup</b>: rounded chips carrying plain data that should be text.</li>
+  <li><b>Badge marketing</b>: "Recommended" stickers, sparkle icons, emoji in UI.</li>
+  <li><b>Hero cards</b> for what is simply a choice between two options.</li>
+  <li><b>Centered content</b> in rows, lists or forms.</li>
+  <li><b>Hover-only affordances</b>: controls invisible until pointed at.</li>
+  <li><b>Decorative motion</b>: entrance animations, fades for their own sake.</li>
+  <li><b>Opacity as disabled</b>: dimming a control that still responds. It stays
+      clickable and its text drops below contrast.</li>
+  <li><b>Mouse-only controls</b>: anything unreachable by Tab, or a field that
+      swallows Tab and traps the user inside it.</li>
+  <li><b>A control per row</b>: building one element for every item in a list.
+      A list of thousands must virtualize, or it is a defect.</li>
+  <li><b>Blank waiting</b>: an empty framed box where an empty state, a
+      no-results state, or a busy state belongs.</li>
+  <li><b>Hand-drawn OS chrome</b>: a custom titlebar imitating the real one.</li>
+</ul>
+<h2>What to do instead</h2>
+<ul>
+  <li>Neutral grays and whitespace set the tone, but structure is BOLD: group
+      frames (#A6A6A6) with straddling titles, not faint hard-to-see hairlines.</li>
+  <li>Affordances are visible: circled expander chevrons, a diagonal-dot resize
+      grip on resizable windows, quiet-but-present scrollbars.</li>
+  <li>Accent in three places only: primary action, selection rail, focus ring.</li>
+  <li>Numbers are text: tabular, right-aligned, muted.</li>
+  <li>Native Windows affordances: checkbox, toggle, segmented, standard captions.</li>
+  <li>The default option is the recommendation; a caption explains why.</li>
+  <li>One signature moment per tool: the readout. Everything else whispers.</li>
+  <li>Sentence case, plain verbs, no em dashes; errors say the fix.</li>
+  <li>Motion only as state feedback, 120ms, ease-out.</li>
+  <li>Every control has rest, pressed, focused and disabled; a disabled control
+      says why in a caption beside it.</li>
+  <li>White on the accent is not automatic: pick the foreground by luminance,
+      because a light Windows accent makes white text unreadable.</li>
+  <li>Bulk work shows counted progress and can be cancelled, and lands as one
+      undo step, not thousands.</li>
+  <li>Dialogs set their owner to the host window, close on Esc, and never let
+      Enter trigger a destructive default.</li>
+  <li>Right-click is a shortcut, never the only route to a command.</li>
+</ul>
+</body></html>

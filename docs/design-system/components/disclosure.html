@@ -1,0 +1,51 @@
+<!-- @dsCard group="Components" -->
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Disclosure</title>
+<style>
+  body { margin:0; padding:24px; font-family:'Segoe UI Variable Text','Segoe UI',sans-serif;
+         background:#fff; color:#1a1a1a; font-size:13px; line-height:1.5; }
+  h1 { font-size:14px; font-weight:600; margin:0 0 2px; }
+  .lead { font-size:12px; color:#6b6b6b; margin:0 0 20px; max-width:60ch; }
+  .form { max-width:520px; border:1px solid #c9c9c9; border-radius:8px; overflow:hidden; }
+  .hdr { height:40px; display:flex; align-items:center; padding:0 20px 0 14px; gap:9px;
+         border-bottom:1px solid #c9c9c9; font-weight:500; }
+  .hdr:hover { background:#f7f7f7; }
+  .ch { width:18px; height:18px; border-radius:9px; border:1px solid #1a1a1a; flex:none;
+        display:inline-flex; align-items:center; justify-content:center; font-size:8px; }
+  .hdr .sum { margin-left:auto; color:#6b6b6b; font-size:12px; font-weight:400; }
+  .open { padding:2px 20px 14px; }
+  .frame { border:1px solid #a6a6a6; border-radius:2px; padding:12px 14px; margin-top:8px; }
+  .gtitle { position:relative; top:-21px; left:12px; background:#fff; padding:0 5px;
+            font-size:12px; font-weight:500; display:inline-block; margin-bottom:-18px; }
+  .list { border:1px solid #c9c9c9; border-radius:4px; }
+  .r { height:32px; display:flex; align-items:center; padding:0 12px; border-bottom:1px solid #eee; }
+  .r:last-child { border-bottom:none; }
+  .n { margin-left:auto; font-variant-numeric:tabular-nums; color:#6b6b6b; }
+  .meta { font-family:Consolas,monospace; font-size:11.5px; color:#6b6b6b; margin:8px 0 18px; }
+  .readout { font-size:28px; font-weight:300; font-variant-numeric:tabular-nums; }
+  .readout .a { color:#005fb8; font-weight:400; }
+  .readout .arr { color:#9a9a9a; font-size:20px; margin:0 6px; }
+</style></head><body>
+<h1>Disclosure</h1>
+<p class="lead">Never put the whole form in the user's face. Sections collapse behind a header
+whose affordance is unmistakable: a CIRCLED chevron on the left (pyRevit-settings style), the
+title, and a live summary on the right, with a clearly visible separator under every header.
+Collapsed is the default when the defaults are right; a section auto-expands only when it needs
+attention and never auto-closes. The payoff section never collapses.</p>
+<div class="form">
+  <div class="hdr"><span class="ch">&#9650;</span>Layouts<span class="sum">0 of 3 selected</span></div>
+  <div class="open"><div class="frame">
+    <div class="list">
+      <div class="r">ELA VS MECH<span class="n">226</span></div>
+      <div class="r">ELA VS STR<span class="n">184</span></div>
+    </div>
+  </div></div>
+  <div class="hdr"><span class="ch">&#9660;</span>How to group<span class="sum">Smart</span></div>
+  <div class="open"><div class="frame"><span class="gtitle">Preview</span>
+    <div class="readout"><span class="a">1,270</span><span class="arr">&#8594;</span>110</div>
+  </div></div>
+</div>
+<p class="meta">header: 40px, circled chevron flips up/down, bold separator &#183; expanded content
+sits inside a bold group frame (#A6A6A6), never floating on faint hairlines &#183; the always-open
+payoff section is a titled group frame &#183; tabs are avoided: they hide the payoff</p>
+</body></html>

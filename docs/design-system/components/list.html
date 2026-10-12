@@ -1,0 +1,93 @@
+<!-- @dsCard group="Components" -->
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Data list</title>
+<style>
+  body { margin:0; padding:24px; font-family:'Segoe UI Variable Text','Segoe UI',sans-serif;
+         background:#fff; color:#1a1a1a; font-size:13px; line-height:1.5; }
+  h1 { font-size:14px; font-weight:600; margin:0 0 2px; }
+  h2 { font-size:12px; font-weight:600; margin:22px 0 6px; }
+  .lead { font-size:12px; color:#6b6b6b; margin:0 0 18px; max-width:64ch; }
+  .meta { font-family:Consolas,monospace; font-size:11.5px; color:#6b6b6b; margin:8px 0 0; }
+  .frame { border:1px solid #a6a6a6; border-radius:4px; overflow:hidden; max-width:620px; }
+  .bar { display:flex; align-items:center; gap:8px; padding:8px; border-bottom:1px solid #e0e0e0; }
+  .search { flex:0 0 200px; height:28px; border:1px solid #c9c9c9; border-radius:4px;
+            display:flex; align-items:center; padding:0 8px; color:#9a9a9a; font-size:12.5px; }
+  .chip { height:28px; padding:0 10px; border:1px solid #c9c9c9; border-radius:4px;
+          display:flex; align-items:center; font-size:12.5px; }
+  .chip.on { background:#005fb8; border-color:#005fb8; color:#fff; }
+  .count { margin-left:auto; font-size:12px; color:#6b6b6b; font-variant-numeric:tabular-nums; }
+  .head { display:grid; grid-template-columns:34px 1fr 150px 90px; height:30px; align-items:center;
+          border-bottom:1px solid #c9c9c9; font-size:11.5px; color:#6b6b6b; }
+  .head > *, .row > * { padding:0 8px; }
+  .row { display:grid; grid-template-columns:34px 1fr 150px 90px; height:32px; align-items:center;
+         border-bottom:1px solid #e0e0e0; border-left:3px solid transparent; }
+  .row.sel { background:#f0f0f0; border-left-color:#005fb8; }
+  .row.hov { background:#f7f7f7; }
+  .box { width:16px; height:16px; border:1px solid #c9c9c9; border-radius:3px; margin:0 auto; }
+  .row.sel .box { background:#005fb8; border-color:#005fb8; }
+  .ico { display:inline-block; width:14px; height:11px; border:1.2px solid #6b6b6b; border-radius:2px;
+         margin-right:7px; vertical-align:-1px; }
+  .muted { color:#6b6b6b; font-size:12px; }
+  .num { font-variant-numeric:tabular-nums; text-align:right; }
+  .strip { display:flex; align-items:center; gap:8px; padding:8px; border-top:1px solid #e0e0e0;
+           background:#f7f7f7; font-size:12.5px; }
+  .strip .quiet { padding:0 8px; height:26px; display:flex; align-items:center; border-radius:4px; }
+  .strip .right { margin-left:auto; display:flex; gap:8px; }
+  .primary { background:#005fb8; color:#fff; border:1px solid #005fb8; height:28px; padding:0 12px;
+             border-radius:4px; display:flex; align-items:center; }
+  .empty { padding:30px; text-align:center; color:#6b6b6b; font-size:12.5px; }
+  .empty b { display:block; color:#1a1a1a; font-size:13px; font-weight:600; margin-bottom:4px; }
+</style></head><body>
+<h1>Data list</h1>
+<p class="lead">How pyACAD shows a set of things a user must find, select, and act on. Search is
+the entry point, not scrolling. The list is always virtualized: only rows on screen may exist as
+controls, so a document with two hundred thousand items costs the same to show as one with twenty.
+Folders and other containers live in a rail beside the list, never interleaved as rows.</p>
+
+<div class="frame">
+  <div class="bar">
+    <div class="search">Search</div>
+    <div class="chip on">Animations</div>
+    <div class="chip">Duplicates</div>
+    <div class="count">Showing 1,284 of 200,000</div>
+  </div>
+  <div class="head"><div></div><div>Name</div><div>Folder</div><div class="num">Comments</div></div>
+  <div class="row sel"><div><div class="box"></div></div>
+    <div><span class="ico"></span>L03 HVAC vs Structure</div>
+    <div class="muted">Coordination/Level 03</div><div class="muted num">2</div></div>
+  <div class="row hov"><div><div class="box"></div></div>
+    <div><span class="ico"></span>Grid E7 Section</div>
+    <div class="muted">Coordination/Level 03</div><div class="muted num"></div></div>
+  <div class="row"><div><div class="box"></div></div>
+    <div><span class="ico"></span>Walkthrough North</div>
+    <div class="muted">Progress/2026-07</div><div class="muted num">1</div></div>
+  <div class="strip">
+    <span><b>412</b> selected</span>
+    <span class="muted">398 blocks, 14 layouts</span>
+    <span class="quiet">All</span><span class="quiet">None</span><span class="quiet">Invert</span>
+    <span class="right"><span class="primary">Rename</span></span>
+  </div>
+</div>
+<p class="meta">32px rows &#183; hairline separator &#183; hover = surface &#183; selected = neutral wash
++ 3px accent rail &#183; counts are muted tabular text</p>
+
+<h2>Rules</h2>
+<p class="lead">
+1. <b>Virtualize.</b> A list that builds one control per item is a defect, not a slow path.<br>
+2. <b>Search first.</b> A search field, live result count, and filter chips sit above the list.
+Chips filter the view; they never silently change a selection.<br>
+3. <b>Standard selection.</b> Click, Shift+click range, Ctrl+click add, Ctrl+A over what is shown,
+arrows to move, Space to tick. Rows are focusable and show the focus ring.<br>
+4. <b>Say what is selected.</b> The strip carries a count plus a breakdown by type, because a bare
+number hides that one row may stand for a whole folder.<br>
+5. <b>Act on the selection.</b> All / None / Invert operate on the visible set, not the document.
+One primary action per window sits at the right of the strip.<br>
+6. <b>Right-click parity.</b> Every context-menu command is reachable another way; a menu is a
+shortcut, never the only route.</p>
+
+<h2>Empty and no-results</h2>
+<div class="frame"><div class="empty"><b>No layers match</b>
+Try a shorter search, or clear the filters above.</div></div>
+<p class="meta">Every list states its empty case and its no-results case, and the no-results case
+offers the way out (clear filters). A blank framed box is unfinished work.</p>
+</body></html>

@@ -1,0 +1,41 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    The LOADER. The only assembly AutoCAD loads from the pyACAD.bundle.
+    Must stay tiny and reference ONLY the AutoCAD API + framework assemblies;
+    everything else resolves at runtime via AssemblyResolver.
+  -->
+
+  <PropertyGroup>
+    <AssemblyName>PyAcad</AssemblyName>
+    <RootNamespace>PyAcad</RootNamespace>
+    <OutputType>Library</OutputType>
+    <OutputPath>$(PyAcadBinRoot)</OutputPath>
+    <ReferencesAcadApi>true</ReferencesAcadApi>
+    <!-- LoaderLog's failure dialog is a WinForms MessageBox -->
+    <UseWindowsForms>true</UseWindowsForms>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Compile-time only: Private=false + ExcludeAssets keep the runtime and its
+         dependencies out of the loader folder; at runtime AssemblyResolver finds
+         PyAcad.Runtime.dll in the pyACAD runtime dir. -->
+    <ProjectReference Include="..\PyAcad.Runtime\PyAcad.Runtime.csproj">
+      <Private>false</Private>
+      <ExcludeAssets>runtime;native;contentFiles;build;buildTransitive</ExcludeAssets>
+    </ProjectReference>
+  </ItemGroup>
+
+  <PropertyGroup>
+    <DefineConstants>$(DefineConstants);PYACAD_LOADER</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\MachineFolderTrust.cs" Link="MachineFolderTrust.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="PyAcad.Tests" />
+  </ItemGroup>
+
+</Project>

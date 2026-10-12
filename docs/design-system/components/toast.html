@@ -1,0 +1,46 @@
+<!-- @dsCard group="Components" -->
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Toast</title>
+<style>
+  body { margin:0; padding:24px; font-family:'Segoe UI Variable Text','Segoe UI',sans-serif;
+         background:#fff; color:#1a1a1a; font-size:13px; line-height:1.5; }
+  h1 { font-size:14px; font-weight:600; margin:0 0 2px; }
+  h2 { font-size:12px; font-weight:600; margin:22px 0 6px; }
+  .lead { font-size:12px; color:#6b6b6b; margin:0 0 18px; max-width:64ch; }
+  .meta { font-family:Consolas,monospace; font-size:11.5px; color:#6b6b6b; margin:6px 0 14px; }
+  .toast { max-width:340px; background:#fff; border-radius:4px;
+           padding:10px 14px; font-size:12.5px; margin:0 0 8px; }
+  .toast .d { color:#6b6b6b; font-size:11.5px; margin-top:2px; }
+  .ok { border:1.5px solid #0f7b0f; border-left-width:3px; }
+  .err { border:1.5px solid #c50f1f; border-left-width:3px; }
+  .warn { border:1.5px solid #9d5d00; border-left-width:3px; }
+  .info { border:1.5px solid #0078d4; border-left-width:3px; }
+</style></head><body>
+<h1>Toast</h1>
+<p class="lead">The result of a finished action, when the result is one line. A toast is not a
+dialog: it never asks a question, never carries an action, and never holds anything the user must
+read to continue. Anything longer than a line belongs in the output window.</p>
+
+<div class="toast ok">Renamed 412 items.</div>
+<div class="toast warn">Deleted 3,180 items, 12 failed.<div class="d">'North View' is no longer there</div></div>
+<div class="toast err">Could not open the settings file.<div class="d">%APPDATA%\pyACAD\settings\grouper.json</div></div>
+<div class="toast info">Shift+Click action not defined for this tool.</div>
+<p class="meta">neutral paper surface &#183; 1.5px semantic border all round, thickening to a 3px
+rail on the left &#183; optional muted detail line</p>
+
+<h2>Rules</h2>
+<p class="lead">
+1. <b>The semantic colour rings the whole card.</b> A toast is the one surface that floats free of
+any chrome, with nothing around it to read the level against, so the colour carries the border as
+well as the rail. This is the deliberate exception to keeping semantic colour off borders.<br>
+2. <b>One line, plus an optional detail line.</b> The detail carries the specific: a path, the
+first error, the file that was written.<br>
+3. <b>Success is silent about the obvious.</b> Toast a result the user cannot otherwise see. Do not
+toast "Closed" or "Cancelled": closing a dialog is its own feedback.<br>
+4. <b>Never print a one-line status instead.</b> A bare print opens the whole output window to show
+one sentence, which reads as a bug.<br>
+5. <b>Duration by weight:</b> success 4s, warning 5s, error 7s. Hover holds it open, clicking
+dismisses it. At most three stack; the oldest drops.<br>
+6. <b>Toasts never outlive their runtime.</b> A reload closes them all, or a topmost window is left
+orphaned over the host.</p>
+</body></html>

@@ -1,0 +1,39 @@
+<!-- @dsCard group="Components" -->
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Window</title>
+<style>
+  body { margin:0; padding:24px; font-family:'Segoe UI Variable Text','Segoe UI',sans-serif;
+         background:#fff; color:#1a1a1a; font-size:13px; line-height:1.5; }
+  h1 { font-size:14px; font-weight:600; margin:0 0 2px; }
+  .lead { font-size:12px; color:#6b6b6b; margin:0 0 20px; max-width:60ch; }
+  .bar { display:flex; align-items:center; height:40px; max-width:520px; background:#fff;
+         border:1px solid #e0e0e0; border-radius:8px 8px 0 0; padding:0 4px 0 16px;
+         box-sizing:border-box; }
+  .bar .t { font-size:13px; font-weight:600; }
+  .bar .grow { flex:1; }
+  .cap { width:46px; height:40px; display:inline-flex; align-items:center; justify-content:center;
+         font-size:10px; color:#1a1a1a; }
+  .cap:hover { background:#f0f0f0; }
+  .cap.close:hover { background:#c42b1c; color:#fff; }
+  .meta { font-family:Consolas,monospace; font-size:11.5px; color:#6b6b6b; margin:8px 0 0; }
+</style></head><body>
+<h1>Window</h1>
+<p class="lead"><b>Use the real Windows titlebar.</b> Every pyACAD window is a plain WPF window
+with system chrome; the drawing below is what Windows already gives us, shown here so the rules
+about title text and behavior have somewhere to live. Do not hand-draw a titlebar: a custom bar
+that imitates the OS is invisible work at best, and drifts from the OS at worst. Identity comes
+from the work, not the chrome. No accent dot, no gradient text, no pill buttons.</p>
+<div class="bar">
+  <span class="t">Block Counter</span>
+  <span class="grow"></span>
+  <span class="cap">&#8211;</span><span class="cap">&#9633;</span><span class="cap close">&#10005;</span>
+</div>
+<p class="meta">title = tool name only ("pyACAD" lives in the ribbon, not every window) &#183;
+system-drawn corners and caption buttons, dark titlebar in dark theme via FluentChrome.Apply</p>
+<p class="lead" style="margin-top:16px"><b>Modality and ownership.</b> A dialog sets its owner to
+the AutoCAD main window handle. Without an owner it is not modal to the host, so it sinks behind
+AutoCAD and looks like a crash. It also stays out of the taskbar and opens centred on the owner.
+<br><br><b>Keyboard contract.</b> Esc closes (the cancel button carries IsCancel), Enter commits
+the primary action (IsDefault) except where the primary action is destructive: a confirm that
+deletes must default to the safe choice, so Enter cannot destroy anything.</p>
+</body></html>

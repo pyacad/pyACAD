@@ -1,0 +1,78 @@
+<!-- @dsCard group="Components" -->
+<!doctype html>
+<html><head><meta charset="utf-8"><title>States</title>
+<style>
+  body { margin:0; padding:24px; font-family:'Segoe UI Variable Text','Segoe UI',sans-serif;
+         background:#fff; color:#1a1a1a; font-size:13px; line-height:1.5; }
+  h1 { font-size:14px; font-weight:600; margin:0 0 2px; }
+  h2 { font-size:12px; font-weight:600; margin:22px 0 6px; }
+  .lead { font-size:12px; color:#6b6b6b; margin:0 0 18px; max-width:64ch; }
+  .meta { font-family:Consolas,monospace; font-size:11.5px; color:#6b6b6b; margin:6px 0 0; }
+  .row { display:flex; gap:8px; align-items:center; margin:0 0 6px; flex-wrap:wrap; }
+  button { font:inherit; height:32px; padding:0 16px; border-radius:4px; cursor:default; }
+  .primary { background:#005fb8; color:#fff; border:1px solid #005fb8; }
+  .primary.press { background:#004a92; }
+  .primary.off { background:#f7f7f7; color:#9a9a9a; border-color:#e0e0e0; }
+  .secondary { background:#fff; color:#1a1a1a; border:1px solid #c9c9c9; }
+  .secondary.press { background:#eaeaea; }
+  .secondary.off { background:#f7f7f7; color:#9a9a9a; border-color:#e0e0e0; }
+  .quiet { background:transparent; color:#1a1a1a; border:1px solid transparent; }
+  .quiet.off { color:#9a9a9a; }
+  .danger { background:#c50f1f; color:#fff; border:1px solid #c50f1f; }
+  .danger.off { background:#f7f7f7; color:#9a9a9a; border-color:#e0e0e0; }
+  .ring { outline:2px solid #005fb8; outline-offset:1px; }
+  .why { font-size:11.5px; color:#6b6b6b; }
+  .frame { border:1px solid #a6a6a6; border-radius:4px; max-width:460px; padding:26px;
+           text-align:center; color:#6b6b6b; font-size:12.5px; }
+  .frame b { display:block; color:#1a1a1a; font-size:13px; font-weight:600; margin-bottom:4px; }
+  .skel { height:12px; border-radius:2px; background:#f0f0f0; margin:0 auto 8px; }
+</style></head><body>
+<h1>States</h1>
+<p class="lead">Every control has four states and every surface has three. Most unfinished-looking
+software is missing the unglamorous ones: disabled, busy, and empty. A control that changes only
+on hover is not in a state, it is hiding.</p>
+
+<h2>Control states</h2>
+<div class="row">
+  <button class="primary">Rename</button>
+  <button class="primary press">Rename</button>
+  <button class="primary ring">Rename</button>
+  <button class="primary off">Rename</button>
+</div>
+<p class="meta">rest &#183; pressed (darken the fill) &#183; focused (2px accent ring, offset 1)
+&#183; disabled</p>
+<div class="row">
+  <button class="secondary">Cancel</button><button class="secondary press">Cancel</button>
+  <button class="secondary off">Cancel</button>
+  <button class="quiet">Sort A-Z</button><button class="quiet off">Sort A-Z</button>
+  <button class="danger">Delete 412</button><button class="danger off">Delete</button>
+</div>
+<p class="meta">disabled: surface fill, muted text, muted border, no hover response, no hand cursor</p>
+<p class="lead"><b>A disabled control always says why</b>, in a caption beside or beneath it:
+"3 names would collide", "Select what to move first". Disabled with no explanation is a dead end.
+Never fake disabled with opacity: the control stays clickable and the text falls below contrast.</p>
+
+<h2>Surface states</h2>
+<div class="row">
+  <div class="frame"><b>No shortcuts yet</b>Bundles that declare a chord appear here.</div>
+</div>
+<p class="meta">empty: what would be here, and what puts something here</p>
+<div class="row">
+  <div class="frame"><div class="skel" style="width:60%"></div>
+    <div class="skel" style="width:80%"></div><div class="skel" style="width:45%"></div></div>
+</div>
+<p class="meta">busy: quiet placeholders at the shape of the content, no spinner theatre</p>
+<div class="row">
+  <div class="frame"><b>Preview did not load</b>Check the log for details.</div>
+</div>
+<p class="meta">error: plain sentence, no apology, and the action that depended on it goes disabled</p>
+
+<h2>Rules</h2>
+<p class="lead">
+1. Disabled is a real visual state, not reduced opacity, and it carries a reason.<br>
+2. Pressed exists for every button weight; a control that does not move under the pointer feels dead.<br>
+3. Focus is always visible, on every focusable thing, including list rows and custom controls.<br>
+4. Every list, panel, and preview declares its empty state and its failure state before it ships.<br>
+5. Busy states appear for anything that can take more than about a second, and pair with
+<a href="progress.html">progress and cancel</a> when the work is a batch.</p>
+</body></html>

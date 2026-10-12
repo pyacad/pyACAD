@@ -1,0 +1,78 @@
+<!-- @dsCard group="Components" -->
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Controls</title>
+<style>
+  body { margin:0; padding:24px; font-family:'Segoe UI Variable Text','Segoe UI',sans-serif;
+         background:#fff; color:#1a1a1a; font-size:13px; line-height:1.5; }
+  h1 { font-size:14px; font-weight:600; margin:0 0 2px; }
+  h2 { font-size:12px; font-weight:600; margin:22px 0 6px; }
+  .lead { font-size:12px; color:#6b6b6b; margin:0 0 16px; max-width:64ch; }
+  .meta { font-family:Consolas,monospace; font-size:11.5px; color:#6b6b6b; margin:6px 0 16px; }
+  .row { display:flex; gap:10px; align-items:center; }
+  .seg { display:inline-flex; border:1px solid #c9c9c9; border-radius:4px; overflow:hidden; }
+  .seg span { height:30px; padding:0 14px; display:flex; align-items:center; font-size:12.5px; }
+  .seg .on { background:#005fb8; color:#fff; }
+  .field { height:32px; border:1px solid #c9c9c9; border-radius:4px; display:flex; align-items:center;
+           padding:0 8px; min-width:150px; font-size:13px; }
+  .field .unit { margin-left:auto; color:#6b6b6b; font-size:12px; }
+  .field.bad { border-color:#c50f1f; }
+  .search { min-width:220px; color:#9a9a9a; }
+  .drop { height:32px; border:1px solid #c9c9c9; border-radius:4px; display:inline-flex;
+          align-items:center; padding:0 10px; min-width:200px; font-size:13px; }
+  .drop .chev { margin-left:auto; color:#6b6b6b; font-size:10px; }
+  .menu { border:1px solid #e0e0e0; border-radius:4px; width:220px; margin-top:4px;
+          box-shadow:0 4px 12px rgba(0,0,0,.10); }
+  .menu div { height:32px; display:flex; align-items:center; padding:0 10px; font-size:12.5px;
+              border-left:3px solid transparent; }
+  .menu .on { background:#f0f0f0; border-left-color:#005fb8; }
+  .toggle { width:40px; height:20px; border-radius:10px; background:#005fb8; position:relative; }
+  .toggle i { position:absolute; top:2px; left:22px; width:16px; height:16px; border-radius:8px;
+              background:#fff; }
+  .toggle.off { background:#fff; border:1px solid #c9c9c9; }
+  .toggle.off i { left:2px; background:#6b6b6b; }
+  .chk { width:16px; height:16px; border:1px solid #c9c9c9; border-radius:3px; }
+  .chk.on { background:#005fb8; border-color:#005fb8; }
+  .err { color:#c50f1f; font-size:12px; }
+</style></head><body>
+<h1>Controls</h1>
+<p class="lead">The shared widget vocabulary. Every one of these lives in
+<code>DesignSystem.cs</code>. If a dialog hand-rolls one, that is drift: two dialogs will disagree
+within a release, and the keyboard support will exist in only one of them.</p>
+
+<h2>Segmented control</h2>
+<div class="row"><div class="seg"><span class="on">Replace</span><span>Add</span><span>Number</span><span>Case</span></div></div>
+<p class="meta">30px, one border, accent fill on the selected segment &#183; for 2 to 4 exclusive
+modes that change the panel below &#183; arrow keys move between segments</p>
+
+<h2>Input field</h2>
+<div class="row"><div class="field">2.0<span class="unit">m</span></div>
+  <div class="field search">Search layers and blocks</div></div>
+<div class="row" style="margin-top:8px"><div class="field bad">0</div>
+  <span class="err">Enter a distance greater than 0.</span></div>
+<p class="meta">32px shell, radius 4, borderless TextBox inside (WPF cannot round its own)
+&#183; optional unit suffix, muted &#183; invalid: red border plus a left-aligned 12px message that
+clears on the next keystroke, never on Save alone</p>
+
+<h2>Dropdown</h2>
+<div class="row"><div class="drop">Root-cause element<span class="chev">&#9662;</span></div></div>
+<div class="menu"><div class="on">Root-cause element</div><div>Proximity cluster</div><div>Nearest level</div></div>
+<p class="meta">selected item carries the neutral wash and the 3px accent rail, matching list
+selection &#183; opens on click or Enter, arrows and Home/End move, Esc restores the previous
+value &#183; the popup is the one place a shadow is allowed</p>
+
+<h2>Toggle and checkbox</h2>
+<div class="row"><div class="toggle"><i></i></div><span>Keep existing groups</span>
+  <div class="chk on" style="margin-left:20px"></div><span>Include animations</span>
+  <div class="chk" style="margin-left:12px"></div><span>Empty folders</span></div>
+<p class="meta">toggle 40x20 for a setting that takes effect immediately &#183; 16px checkbox for
+a thing being selected &#183; the whole row is the hit target and is focusable; Space activates</p>
+
+<h2>Rules</h2>
+<p class="lead">
+1. Anything a user can operate must be reachable and operable from the keyboard. A control that
+only answers the mouse is unfinished, and one that traps Tab is a defect.<br>
+2. The hit target is at least 28px in its smallest dimension, and includes the label.<br>
+3. A custom control adopts the same selection language as the list: neutral wash plus a 3px accent
+rail, never a coloured fill for "chosen".<br>
+4. Validation is live. An error appears as the user types and clears the same way.</p>
+</body></html>

@@ -1,0 +1,42 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- Single target, chosen by AcadVersion like the loader and runtime it references:
+       net48 for 2021-2024, net8.0-windows for 2025 and newer. -->
+
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <!-- Per release, like the obj tree: net48 and net8 test binaries never mix. -->
+    <OutputPath>bin\$(Configuration)\$(AcadVersion)\</OutputPath>
+    <!-- Fluent dialog construction tests touch WPF Window types on STA threads -->
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <!-- net48 + NuGet needs redirects (e.g. System.Runtime.CompilerServices.Unsafe 4->6);
+         inside AutoCAD the loader's AssemblyResolver serves that role instead. -->
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+    <GenerateBindingRedirectsOutputType>true</GenerateBindingRedirectsOutputType>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
+    <PackageReference Include="xunit" Version="2.9.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" PrivateAssets="all" />
+    <PackageReference Include="IronPython" Version="3.4.2" />
+    <PackageReference Include="IronPython.StdLib" Version="3.4.2" />
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+    <!-- Pin: IronPython's transitive Unsafe (4.x) collides with the 6.0.0.0 the
+         test host chain requests; pinning the highest version unifies the bin. -->
+    <PackageReference Include="System.Runtime.CompilerServices.Unsafe" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+    <!-- The AI provider tests build a fake HttpMessageHandler -->
+    <Reference Include="System.Net.Http" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\PyAcad.Runtime\PyAcad.Runtime.csproj" />
+    <ProjectReference Include="..\PyAcad\PyAcad.csproj" />
+    <ProjectReference Include="..\PyAcad.Cli\PyAcad.Cli.csproj" />
+  </ItemGroup>
+
+</Project>

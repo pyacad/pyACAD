@@ -1,0 +1,132 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using PyAcad.Runtime.Bundles;
+using PyAcad.Runtime.Engine;
+
+namespace PyAcad.Runtime.Events
+{
+    /// <summary>
+    /// Runs hooks\&lt;event&gt;.py scripts on hub events. Synchronous on the UI thread
+    /// (the API is not thread-safe); the hub already debounced the chatty events.
+    /// A hook failing 3 times in a row is disabled until the next Reload.
+    /// While a pyACAD command holds RunGate, every event except before-command and
+    /// after-command skips its hooks rather than re-entering the shared engine.
+    /// </summary>
+    public static class HookRunner
+    {
+        public const int SoftBudgetMs = 500;
+
+        private static readonly HookHealth Health = new HookHealth();
+
+        /// <summary>Stops a hook from running itself (see HookLoopGuard). AcadEvents arms it.</summary>
+        internal static readonly HookLoopGuard Loop = new HookLoopGuard();
+        private static List<HookModel> _hooks = new List<HookModel>();
+        private static bool _subscribed;
+
+        public static void Configure(IReadOnlyList<ExtensionModel> extensions)
+        {
+            _hooks = extensions.SelectMany(e => e.Hooks).ToList();
+            Health.Reset();
+            if (!_subscribed)
+            {
+                AcadEvents.Raised += OnEvent;
+                _subscribed = true;
+            }
+            if (_hooks.Count > 0)
+                Log.Info($"Hooks configured: {_hooks.Count} ({string.Join(", ", _hooks.Select(h => h.Id))}).");
+        }
+
+        private static void OnEvent(AcadEventArgs args)
+        {
+            // A running script pumps the message loop (UiPump), and a pump dispatches
+            // the debounce timers and queued API events behind them - which would run
+            // a hook's Python on top of the command's, sharing one engine. Refuse that.
+            // before-command/after-command are exempt: ScriptExecutor raises those
+            // deliberately, around the very run that holds the gate.
+            var duringCommand = args.Event == AcadEvent.BeforeCommand
+                             || args.Event == AcadEvent.AfterCommand;
+
+            if (args.FromHook) return;
+            if (Loop.Running)
+            {
+                Log.Info($"Event '{args.Name}' raised by a running hook: its hooks are skipped.");
+                return;
+            }
+
+            foreach (var hook in _hooks)
+            {
+                if (!string.Equals(hook.EventName, args.Name, StringComparison.OrdinalIgnoreCase)) continue;
+                if (Health.IsDisabled(hook.Id)) continue;
+                if (!duringCommand && Execution.RunGate.IsHeld)
+                {
+                    Log.Info($"Hook {hook.Id} skipped: '{Execution.RunGate.CurrentTitle}' is running.");
+                    continue;
+                }
+                Run(hook, args);
+            }
+        }
+
+        private static void Run(HookModel hook, AcadEventArgs args)
+        {
+            if (!Loop.TryEnter()) return;
+            try { RunGuarded(hook, args); }
+            finally { Loop.Exit(); }
+        }
+
+        private static void RunGuarded(HookModel hook, AcadEventArgs args)
+        {
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            var source = "hook " + hook.Id;
+            // A hook is not a command, so it never sets a command context; without this its
+            // log lines would be labelled with whichever button the user last clicked.
+            Execution.PyAcadHost.Instance.LogSource = source;
+            try
+            {
+                var writer = new Output.LogWriter(source);
+                var request = new ScriptRequest
+                {
+                    ScriptPath = hook.ScriptPath,
+                    Output = writer,
+                    ErrorOutput = writer,
+                };
+                foreach (var path in hook.SearchPaths) request.SearchPaths.Add(path);
+                request.Globals["__file__"] = hook.ScriptPath;
+                request.Globals["__event__"] = new Dictionary<string, object>
+                {
+                    ["name"] = args.Name,
+                    ["command"] = args.CommandKey,
+                };
+                request.Globals["__pyacad__"] = Execution.PyAcadHost.Instance;
+                // True when the hook fires during pyacad run (its dialogs throw there too).
+                request.Globals["__runner__"] = Execution.Runner.RunnerContext.IsActive;
+
+                var result = EngineManager.GetEngine(hook.EngineId).Execute(request);
+                if (result.Succeeded) Health.RecordSuccess(hook.Id);
+                else Fail(hook, result.ErrorText);
+            }
+            catch (Exception ex)
+            {
+                Fail(hook, ex.Message);
+            }
+            finally
+            {
+                // Cleared rather than left set: between hooks nothing pyACAD-owned is
+                // running, and a stale label is what caused this bug in the first place.
+                Execution.PyAcadHost.Instance.LogSource = null;
+                watch.Stop();
+                if (watch.ElapsedMilliseconds > SoftBudgetMs)
+                    Log.Info($"Hook {hook.Id} took {watch.ElapsedMilliseconds}ms " +
+                             $"(soft budget {SoftBudgetMs}ms) - keep hooks fast.");
+            }
+        }
+
+        private static void Fail(HookModel hook, string error)
+        {
+            Log.Error($"Hook {hook.Id} failed:\n{error}");
+            if (Health.RecordFailure(hook.Id))
+                Forms.Toast.Show("warning", $"Hook {hook.Id} disabled after 3 failures",
+                                 "Fix the script, then Reload pyACAD to re-enable it.");
+        }
+    }
+}

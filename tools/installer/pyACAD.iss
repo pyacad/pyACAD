@@ -1,0 +1,372 @@
+; pyACAD installer (Inno Setup 6).
+;
+; Per-user only: PrivilegesRequired=lowest, so there is no UAC prompt and nothing is
+; written under Program Files. Two destinations:
+;   {userappdata}\Autodesk\ApplicationPlugins\pyACAD.bundle   the loader + manifest
+;   {userappdata}\pyACAD                                      runtime per year, extensions, cli
+;
+; config.json and the logs also live in {userappdata}\pyACAD and are never written or
+; removed here. The uninstaller mops up the runtime trees and the shipped extension, and
+; leaves everything else.
+;
+; Built by tools\package.ps1, which stages the payload and passes AppVersion and StageDir:
+;   ISCC.exe /DAppVersion=0.4.0 /DStageDir=<repo>\dist\stage /DOutputDir=<repo>\dist ^
+;            /DOutputBaseFilename=pyACAD-0.4.0-setup tools\installer\pyACAD.iss
+
+#ifndef AppVersion
+  #define AppVersion "0.0.0"
+#endif
+#ifndef StageDir
+  #define StageDir SourcePath + "..\..\dist\stage"
+#endif
+#ifndef OutputDir
+  #define OutputDir SourcePath + "..\..\dist"
+#endif
+#ifndef OutputBaseFilename
+  #define OutputBaseFilename "pyACAD-" + AppVersion + "-setup"
+#endif
+
+#define RepoDir SourcePath + "..\.."
+#define BundleDir "{userappdata}\Autodesk\ApplicationPlugins\pyACAD.bundle"
+
+[Setup]
+; AppId is the product's UpgradeCode: it must never change, or an update would install
+; alongside the previous version instead of replacing it.
+AppId={{A1C4E7B2-3D58-4F9A-8B6C-5E2D7A9F1C43}
+AppName=pyACAD
+AppVersion={#AppVersion}
+AppVerName=pyACAD {#AppVersion}
+AppPublisher=pyACAD
+AppPublisherURL=https://pyacad.com
+AppSupportURL=https://docs.pyacad.com
+AppUpdatesURL=https://pyacad.com
+UninstallDisplayName=pyACAD {#AppVersion}
+VersionInfoVersion={#AppVersion}
+VersionInfoCompany=pyACAD
+VersionInfoDescription=pyACAD setup
+VersionInfoProductName=pyACAD
+
+; Per-user install: no elevation, no Program Files, no machine-wide state.
+PrivilegesRequired=lowest
+PrivilegesRequiredOverridesAllowed=
+ArchitecturesAllowed=x64compatible
+DefaultDirName={userappdata}\pyACAD
+DisableDirPage=yes
+DisableProgramGroupPage=yes
+DisableReadyPage=no
+; The welcome page carries the "close AutoCAD first" note, so keep it.
+DisableWelcomePage=no
+UsePreviousAppDir=no
+; Out of the way of config.json and the logs, which share this folder.
+UninstallFilesDir={app}\uninstall
+
+SetupIconFile={#RepoDir}\assets\logo\pyacad.ico
+LicenseFile={#RepoDir}\LICENSE
+WizardStyle=modern
+Compression=lzma2/max
+SolidCompression=yes
+OutputDir={#OutputDir}
+OutputBaseFilename={#OutputBaseFilename}
+
+[Languages]
+Name: "english"; MessagesFile: "compiler:Default.isl"
+
+[Messages]
+WelcomeLabel2=This will install pyACAD {#AppVersion} for the current user only. No administrator rights are needed and nothing is written to the AutoCAD program folder.%n%nClose AutoCAD before you continue.
+
+[InstallDelete]
+; Before copying, the previous version's shipped extension and runtimes go, so a bundle
+; folder that was renamed between releases cannot survive beside its replacement and
+; put every tool on it on the ribbon twice. PrepareToInstall has already backed up any
+; work of the user's in that extension, and moved what it could to My pyACAD.extension
+; (see [Code]). Only what this installer owns is listed:
+; config.json, secrets.json, the logs, the AI.extension the assistant writes and any
+; other extension the user added are untouched. The loader bundle is not wiped either:
+; the loader DLL and manifest are simply overwritten by [Files].
+Type: filesandordirs; Name: "{app}\extensions\pyACAD.extension"
+Type: filesandordirs; Name: "{app}\2021\runtime"
+Type: filesandordirs; Name: "{app}\2022\runtime"
+Type: filesandordirs; Name: "{app}\2023\runtime"
+Type: filesandordirs; Name: "{app}\2024\runtime"
+Type: filesandordirs; Name: "{app}\2025\runtime"
+Type: filesandordirs; Name: "{app}\2026\runtime"
+Type: filesandordirs; Name: "{app}\cli"
+
+[Files]
+; The Autodesk bundle: PackageContents.xml plus Contents\<year>\PyAcad.dll for every
+; AutoCAD release this build supports.
+Source: "{#StageDir}\bundle\*"; DestDir: "{#BundleDir}"; Flags: ignoreversion recursesubdirs createallsubdirs
+; The runtime (one folder per year, pyacadlib inside it), the shipped extension and
+; cli\pyacad.exe.
+Source: "{#StageDir}\appdata\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+; The upgrade guard, unpacked to {tmp} only: this release's command line and every
+; release's shipped-files manifest in one file. PrepareToInstall runs it before
+; [InstallDelete] replaces pyACAD.extension.
+Source: "{#StageDir}\appdata\cli\pyacad.exe"; Flags: dontcopy
+Source: "{#StageDir}\manifests.txt"; Flags: dontcopy
+
+[Run]
+Filename: "https://tools.pyacad.com"; Description: "Open the tools guide at tools.pyacad.com"; Flags: postinstall shellexec nowait skipifsilent unchecked
+
+[Code]
+const
+  BundleRelPath = '\Autodesk\ApplicationPlugins\pyACAD.bundle';
+
+function BundlePath(): String;
+begin
+  Result := ExpandConstant('{userappdata}') + BundleRelPath;
+end;
+
+function GetCurrentProcessId(): Cardinal;
+  external 'GetCurrentProcessId@kernel32.dll stdcall';
+function ProcessIdToSessionId(ProcessId: Cardinal; var SessionId: Cardinal): Boolean;
+  external 'ProcessIdToSessionId@kernel32.dll stdcall';
+
+{ AutoCAD memory-maps the loader DLL, so neither install nor uninstall can replace
+  or delete it while the host is running. There is no AppMutex to wait on because the
+  host is not ours, so the process list is the only signal. Only this Windows session
+  counts: the install is per user, and on a shared or remote-desktop machine another
+  user's AutoCAD holds their own copy, not this one. }
+function IsAutoCADRunning(): Boolean;
+var
+  Locator, Services, Processes: Variant;
+  Query: String;
+  Session: Cardinal;
+begin
+  Result := False;
+  try
+    Query := 'SELECT Name FROM Win32_Process WHERE Name = "acad.exe"';
+    if ProcessIdToSessionId(GetCurrentProcessId(), Session) then
+      Query := Query + ' AND SessionId = ' + IntToStr(Session);
+    Locator := CreateOleObject('WbemScripting.SWbemLocator');
+    Services := Locator.ConnectServer('localhost', 'root\CIMV2');
+    Processes := Services.ExecQuery(Query);
+    Result := Processes.Count > 0;
+  except
+    { If WMI is unavailable, do not block the user over it. }
+    Result := False;
+  end;
+end;
+
+function CheckAutoCADClosed(): Boolean;
+begin
+  Result := True;
+  if IsAutoCADRunning() then
+  begin
+    { Suppressible: an update started on close runs /SUPPRESSMSGBOXES, and must stop
+      quietly here rather than pop an error at someone who just closed a window. }
+    SuppressibleMsgBox('AutoCAD is running.' + #13#10#13#10 +
+           'Close every AutoCAD window and try again.', mbError, MB_OK, IDOK);
+    Result := False;
+  end;
+end;
+
+function ProcessRunning(Pid: Integer): Boolean;
+var
+  Locator, Services, Processes: Variant;
+begin
+  Result := False;
+  try
+    Locator := CreateOleObject('WbemScripting.SWbemLocator');
+    Services := Locator.ConnectServer('localhost', 'root\CIMV2');
+    Processes := Services.ExecQuery('SELECT ProcessId FROM Win32_Process WHERE ProcessId = ' + IntToStr(Pid));
+    Result := Processes.Count > 0;
+  except
+    Result := False;
+  end;
+end;
+
+{ An update pyACAD downloaded starts itself as AutoCAD closes, passing
+  /WAITPID=<that AutoCAD>: its loader DLL cannot be replaced while that process
+  holds it, so wait, up to five minutes, for the process to be gone. }
+procedure WaitForLauncher();
+var
+  Pid, Waited: Integer;
+begin
+  Pid := StrToIntDef(ExpandConstant('{param:WAITPID|0}'), 0);
+  if Pid <= 0 then Exit;
+  Log('Waiting for AutoCAD (process ' + IntToStr(Pid) + ') to exit');
+  Waited := 0;
+  while ProcessRunning(Pid) and (Waited < 300000) do
+  begin
+    Sleep(500);
+    Waited := Waited + 500;
+  end;
+end;
+
+function InitializeSetup(): Boolean;
+begin
+  WaitForLauncher();
+  Result := CheckAutoCADClosed();
+end;
+
+{ Before a single file is deleted: what the user added to or edited in
+  pyACAD.extension is backed up to the backups folder, and the buttons and panels they
+  added move to My pyACAD.extension, where they stay on the ribbon because tabs and
+  panels merge by name (pyacad protect-extension, from this release's command line).
+  When even that cannot be done, stop here, before anything changes, rather than
+  lose their work. }
+function PrepareToInstall(var NeedsRestart: Boolean): String;
+var
+  Ext, Params: String;
+  ResultCode: Integer;
+begin
+  Result := '';
+  Ext := ExpandConstant('{app}\extensions\pyACAD.extension');
+  if not DirExists(Ext) then Exit;
+  ExtractTemporaryFile('pyacad.exe');
+  ExtractTemporaryFile('manifests.txt');
+  Params := 'protect-extension' +
+    ' --extension "' + Ext + '"' +
+    ' --manifests "' + ExpandConstant('{tmp}\manifests.txt') + '"' +
+    ' --backup-root "' + ExpandConstant('{app}\backups') + '"' +
+    ' --user-extension "' + ExpandConstant('{app}\extensions\My pyACAD.extension') + '"' +
+    ' --version {#AppVersion}' +
+    ' --report "' + ExpandConstant('{app}\last-upgrade.json') + '"';
+  if not Exec(ExpandConstant('{tmp}\pyacad.exe'), Params, '', SW_HIDE, ewWaitUntilTerminated, ResultCode) then
+    ResultCode := -1;
+  Log('protect-extension exited with ' + IntToStr(ResultCode));
+  if ResultCode <> 0 then
+    Result := 'pyACAD could not back up what you added to pyACAD.extension, so nothing has been ' +
+              'changed. Copy ' + Ext + ' somewhere safe, then run setup again.';
+end;
+
+procedure CurPageChanged(CurPageID: Integer);
+begin
+  if (CurPageID = wpFinished) and FileExists(ExpandConstant('{app}\last-upgrade.json')) then
+    WizardForm.FinishedLabel.Caption := WizardForm.FinishedLabel.Caption + #13#10#13#10 +
+      'Your own work in pyACAD.extension was kept: buttons and panels you had added are now in ' +
+      'My pyACAD.extension, and a copy of everything is in ' + ExpandConstant('{app}\backups') + '.';
+end;
+
+{ Uninstall deletes pyACAD.extension too, so first do what an upgrade does: back up
+  what the user added to or edited there, and copy the buttons and panels they added to
+  My pyACAD.extension, which uninstall leaves alone. Runs before any file is removed,
+  with the command line this release installed and the extension's own manifest. }
+function ProtectBeforeUninstall(): Boolean;
+var
+  Ext, Cli, Manifest, Report, Params: String;
+  ResultCode: Integer;
+begin
+  Result := True;
+  Ext := ExpandConstant('{app}\extensions\pyACAD.extension');
+  Cli := ExpandConstant('{app}\cli\pyacad.exe');
+  Manifest := Ext + '\.pyacad-manifest';
+  Report := ExpandConstant('{app}\last-uninstall.json');
+  if not DirExists(Ext) then Exit;
+  if not (FileExists(Cli) and FileExists(Manifest)) then
+  begin
+    Log('No command line or manifest to protect pyACAD.extension with; skipped.');
+    Exit;
+  end;
+  DeleteFile(Report);
+  Params := 'protect-extension' +
+    ' --extension "' + Ext + '"' +
+    ' --manifests "' + Manifest + '"' +
+    ' --backup-root "' + ExpandConstant('{app}ackups') + '"' +
+    ' --user-extension "' + ExpandConstant('{app}\extensions\My pyACAD.extension') + '"' +
+    ' --version uninstall' +
+    ' --report "' + Report + '"';
+  if not Exec(Cli, Params, '', SW_HIDE, ewWaitUntilTerminated, ResultCode) then
+    ResultCode := -1;
+  Log('protect-extension (uninstall) exited with ' + IntToStr(ResultCode));
+  if ResultCode <> 0 then
+    Result := SuppressibleMsgBox('pyACAD could not back up what you added to pyACAD.extension.' + #13#10#13#10 +
+      'Uninstall anyway and delete it? Choose No, copy ' + Ext + ' somewhere safe, then uninstall again.',
+      mbError, MB_YESNO or MB_DEFBUTTON2, IDNO) = IDYES
+  else if FileExists(Report) then
+    SuppressibleMsgBox('Your own work in pyACAD.extension was kept: buttons and panels you had added are ' +
+      'now in My pyACAD.extension, and a copy of everything is in ' + ExpandConstant('{app}ackups') + '.',
+      mbInformation, MB_OK, IDOK);
+  DeleteFile(Report);
+end;
+
+function InitializeUninstall(): Boolean;
+begin
+  Result := CheckAutoCADClosed();
+  if Result then
+    Result := ProtectBeforeUninstall();
+end;
+
+function LooksLikeYear(const Name: String): Boolean;
+var
+  I: Integer;
+begin
+  Result := Length(Name) = 4;
+  if not Result then Exit;
+  for I := 1 to 4 do
+    if (Name[I] < '0') or (Name[I] > '9') then
+    begin
+      Result := False;
+      Exit;
+    end;
+end;
+
+{ Uninstall mop-up. The files listed in [Files] are already gone by now; what is left is
+  what the runtime generated: a rewritten manifest and any .pyc or __pycache__ folders
+  under the runtime. }
+procedure CleanBundle();
+var
+  ContentsDir, ChildDir: String;
+  FindRec: TFindRec;
+begin
+  ContentsDir := BundlePath() + '\Contents';
+  if FindFirst(ContentsDir + '\*', FindRec) then
+  begin
+    try
+      repeat
+        if ((FindRec.Attributes and FILE_ATTRIBUTE_DIRECTORY) <> 0) and
+           (FindRec.Name <> '.') and (FindRec.Name <> '..') then
+        begin
+          ChildDir := ContentsDir + '\' + FindRec.Name;
+          RemoveDir(ChildDir);
+        end;
+      until not FindNext(FindRec);
+    finally
+      FindClose(FindRec);
+    end;
+  end;
+  DeleteFile(BundlePath() + '\PackageContents.xml');
+  RemoveDir(ContentsDir);
+  RemoveDir(BundlePath());
+end;
+
+{ Only the folders this installer owns: <year>\runtime, extensions\pyACAD.extension and
+  cli. config.json, the logs and any other extension the user added stay. }
+procedure CleanAppData();
+var
+  Base, ChildDir: String;
+  FindRec: TFindRec;
+begin
+  Base := ExpandConstant('{app}');
+  if FindFirst(Base + '\*', FindRec) then
+  begin
+    try
+      repeat
+        if ((FindRec.Attributes and FILE_ATTRIBUTE_DIRECTORY) <> 0) and
+           LooksLikeYear(FindRec.Name) then
+        begin
+          ChildDir := Base + '\' + FindRec.Name;
+          DelTree(ChildDir + '\runtime', True, True, True);
+          RemoveDir(ChildDir);
+        end;
+      until not FindNext(FindRec);
+    finally
+      FindClose(FindRec);
+    end;
+  end;
+  DelTree(Base + '\extensions\pyACAD.extension', True, True, True);
+  { All three only succeed while empty, which is exactly the intent. }
+  RemoveDir(Base + '\extensions');
+  RemoveDir(Base + '\cli');
+  RemoveDir(Base);
+end;
+
+procedure CurUninstallStepChanged(CurStep: TUninstallStep);
+begin
+  if CurStep = usPostUninstall then
+  begin
+    CleanBundle();
+    CleanAppData();
+  end;
+end;

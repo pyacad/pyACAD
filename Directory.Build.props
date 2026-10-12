@@ -1,0 +1,84 @@
+<Project>
+
+  <!--
+    pyACAD multi-version build machinery.
+    Select the target AutoCAD release with:  dotnet build -p:AcadVersion=2024
+    (defaults to 2026, allowed 2021..2026). AutoCAD 2021-2024 load .NET Framework 4.8
+    add-ins; AutoCAD 2025 and newer load .NET 8 add-ins. Reference assemblies come from
+    the AutoCAD.NET NuGet package; nothing is read from an install or the registry.
+  -->
+
+  <PropertyGroup>
+    <AcadVersion Condition="'$(AcadVersion)' == ''">2026</AcadVersion>
+    <!-- One obj tree per release, so a 2024 (net48) and a 2026 (net8) build never share
+         restore output or intermediate files. -->
+    <BaseIntermediateOutputPath>obj\$(AcadVersion)\</BaseIntermediateOutputPath>
+    <!-- ...and neither compiles the other's generated sources. -->
+    <DefaultItemExcludes>$(DefaultItemExcludes);obj\**</DefaultItemExcludes>
+    <LangVersion>latest</LangVersion>
+    <Platforms>x64</Platforms>
+    <PlatformTarget>x64</PlatformTarget>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
+    <GenerateDocumentationFile>false</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="$([System.Int32]::Parse('$(AcadVersion)')) &lt;= 2024">
+    <TargetFramework>net48</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup Condition="$([System.Int32]::Parse('$(AcadVersion)')) &gt; 2024">
+    <TargetFramework>net8.0-windows</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!-- One version number for everything, read from pyacadlib\pyacad\__init__.py
+         (the file tools\package.ps1 names the installer from). Stamped as the
+         assembly, file and informational version of every project. -->
+    <PyAcadInitText>$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)pyacadlib/pyacad/__init__.py'))</PyAcadInitText>
+    <PyAcadProductVersion>$([System.Text.RegularExpressions.Regex]::Replace($(PyAcadInitText), '(?s).*__version__\s*=\s*.([0-9][0-9.]*).*', '%241'))</PyAcadProductVersion>
+    <Version>$(PyAcadProductVersion)</Version>
+    <AssemblyVersion>$(PyAcadProductVersion).0</AssemblyVersion>
+    <FileVersion>$(PyAcadProductVersion).0</FileVersion>
+    <InformationalVersion>$(PyAcadProductVersion)</InformationalVersion>
+    <!-- No "+commit" suffix on the product version: the hash would be from a private
+         working repo and mean nothing to whoever reads the file properties. -->
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <!--
+      AutoCAD.NET package per release. 2025 and 2026 use 25.0.1 and 25.1.0, the last
+      packages of those releases that target net8.0: 25.0.2 and 25.1.1 moved to net10.0,
+      which a net8.0-windows add-in cannot reference (NU1202).
+    -->
+    <AcadNetVersion Condition="'$(AcadVersion)' == '2021'">24.0.0</AcadNetVersion>
+    <AcadNetVersion Condition="'$(AcadVersion)' == '2022'">24.1.51000</AcadNetVersion>
+    <AcadNetVersion Condition="'$(AcadVersion)' == '2023'">24.2.0</AcadNetVersion>
+    <AcadNetVersion Condition="'$(AcadVersion)' == '2024'">24.3.0</AcadNetVersion>
+    <AcadNetVersion Condition="'$(AcadVersion)' == '2025'">25.0.1</AcadNetVersion>
+    <AcadNetVersion Condition="'$(AcadVersion)' == '2026'">25.1.0</AcadNetVersion>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <PyAcadBinRoot>$(MSBuildThisFileDirectory)bin\$(AcadVersion)\</PyAcadBinRoot>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <AssemblyMetadata Include="PyAcad.AcadVersion" Value="$(AcadVersion)" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(TargetFramework)' == 'net48'">
+    <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.3" PrivateAssets="all" />
+  </ItemGroup>
+
+  <!-- Projects opt in with <ReferencesAcadApi>true</ReferencesAcadApi>. Compile-time
+       only: AutoCAD supplies acdbmgd, acmgd, accoremgd and AdWindows at runtime. -->
+  <ItemGroup Condition="'$(ReferencesAcadApi)' == 'true'">
+    <PackageReference Include="AutoCAD.NET" Version="$(AcadNetVersion)" ExcludeAssets="runtime" />
+  </ItemGroup>
+
+  <Target Name="EnsureAcadVersion" BeforeTargets="CollectPackageReferences;ResolveAssemblyReferences">
+    <Error Condition="'$(AcadNetVersion)' == ''"
+           Text="AcadVersion must be one of 2021, 2022, 2023, 2024, 2025, 2026 (got '$(AcadVersion)')." />
+  </Target>
+
+</Project>

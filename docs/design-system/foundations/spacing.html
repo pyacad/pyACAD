@@ -1,0 +1,44 @@
+<!-- @dsCard group="Foundations" -->
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Layout</title>
+<style>
+  body { margin:0; padding:24px; font-family:'Segoe UI Variable Text','Segoe UI',sans-serif;
+         background:#fff; color:#1a1a1a; font-size:13px; line-height:1.5; }
+  h1 { font-size:14px; font-weight:600; margin:0 0 2px; }
+  .lead { font-size:12px; color:#6b6b6b; margin:0 0 20px; max-width:60ch; }
+  .t { width:100%; border-collapse:collapse; max-width:520px; }
+  .t td { padding:7px 0; border-bottom:1px solid #eee; }
+  .t td:last-child { text-align:right; font-family:Consolas,monospace; font-size:11.5px; color:#6b6b6b; }
+  .demo { margin-top:20px; max-width:520px; border:1px solid #e0e0e0; border-radius:4px; }
+  .demo .r { height:32px; display:flex; align-items:center; padding:0 12px;
+             border-bottom:1px solid #eee; }
+  .demo .r:last-child { border-bottom:none; }
+  .demo .r.sel { background:#f0f0f0; box-shadow:inset 3px 0 0 #005fb8; }
+  .demo .n { margin-left:auto; font-variant-numeric:tabular-nums; color:#6b6b6b; }
+</style></head><body>
+<h1>Layout</h1>
+<p class="lead">Whitespace and single hairlines do the structuring; boxes only where containment
+earns its border (lists, inputs). <b>Page padding has two values, chosen by what the window is
+for:</b> 24px for prose and settings windows (alerts, confirms, ask-string), where the text needs
+room to read; 16px for data-dense windows (the layer dialogs, the output window, the console),
+where every pixel of padding is a row the user cannot see. Anything else is drift. One corner
+radius: 4px. No elevation stack: surfaces sit flat
+and are separated by hairlines, never by shadow. The single exception is a popup that floats over
+the window it belongs to (dropdown menu, context menu), which carries one soft shadow so its edge
+reads against the surface beneath. Nothing that is part of the page may cast one.</p>
+<table class="t">
+  <tr><td>Page padding</td><td>24</td></tr>
+  <tr><td>Section gap (vertical, no divider needed)</td><td>24</td></tr>
+  <tr><td>Control gap</td><td>8</td></tr>
+  <tr><td>List row height</td><td>32</td></tr>
+  <tr><td>Control height (buttons, inputs)</td><td>32</td></tr>
+  <tr><td>Corner radius, all controls</td><td>4</td></tr>
+</table>
+<div class="demo">
+  <div class="r sel">ELA VS MECH<span class="n">226</span></div>
+  <div class="r">ELA VS STR<span class="n">184</span></div>
+  <div class="r">ELA VS ARCH<span class="n">860</span></div>
+</div>
+<p class="lead" style="margin:8px 0 0">A contained list: 32px rows, hairline separators, neutral
+selection with the 3px accent rail, numbers right-aligned in tabular figures. No pills.</p>
+</body></html>

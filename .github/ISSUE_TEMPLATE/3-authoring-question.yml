@@ -1,0 +1,41 @@
+name: Bundle authoring question
+description: Help writing your own pyACAD bundle, hook, or dock pane.
+title: "[Authoring] "
+labels: ["question", "area:authoring"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Check the troubleshooting page at https://docs.pyacad.com first. It lists every reason a bundle fails to load, with the log line that proves it.
+  - type: dropdown
+    id: topic
+    attributes:
+      label: Topic
+      options:
+        - Bundle does not appear on the ribbon
+        - Script runs but does the wrong thing
+        - pyacad Python API
+        - Hooks (AutoCAD events)
+        - Dock panes (pane.xaml)
+        - Icons, shortcuts, or keytips
+        - Something else
+    validations:
+      required: true
+  - type: dropdown
+    id: acad-version
+    attributes:
+      label: AutoCAD version
+      options:
+        - "2026"
+        - "2025"
+        - "2024"
+        - "2023"
+        - "2022"
+        - "2021"
+  - type: textarea
+    id: question
+    attributes:
+      label: Your question
+      description: Include the bundle folder layout, bundle.yaml, and the log lines if the bundle does not load.
+    validations:
+      required: true

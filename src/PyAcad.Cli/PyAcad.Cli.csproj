@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    The pyacad command line: env / attach / detach / extensions / run. Standalone on
+    purpose (no Runtime reference) so the exe has zero deploy footprint beyond itself.
+    Version-independent -> its own bin\cli\<framework>\ output, not bin\<year>\, built
+    for both frameworks AutoCAD add-ins use whatever AcadVersion is selected.
+  -->
+
+  <PropertyGroup>
+    <TargetFramework></TargetFramework>
+    <TargetFrameworks>net48;net8.0-windows</TargetFrameworks>
+    <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
+    <!-- NOT "pyacad": assembly names are case-insensitive to the CLR, and that would
+         collide with the loader assembly "PyAcad" wherever both are referenced (the
+         test project). make-release ships the exe renamed to pyacad.exe instead. -->
+    <AssemblyName>PyAcad.Cli</AssemblyName>
+    <RootNamespace>PyAcad.Cli</RootNamespace>
+    <OutputType>Exe</OutputType>
+    <OutputPath>$(MSBuildThisFileDirectory)..\..\bin\cli\</OutputPath>
+    <!-- ShippedFiles.cs is shared with the runtime; this picks the CLI's namespace -->
+    <DefineConstants>$(DefineConstants);PYACAD_CLI</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Tells users' own work in pyACAD.extension from what a release shipped -->
+    <Compile Include="..\Shared\ShippedFiles.cs" Link="Upgrade\ShippedFiles.cs" />
+    <!-- The request and response files pyacad run trades with the runner -->
+    <Compile Include="..\Shared\RunContract.cs" Link="Run\RunContract.cs" />
+    <!-- Registry lookup of AutoCAD installs, shared with the runtime -->
+    <Compile Include="..\Shared\AcadInstall.cs" Link="AcadInstall.cs" />
+    <Compile Include="..\Shared\JsonShapes.cs" Link="Shared\JsonShapes.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- config.json and the run contract -->
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+  </ItemGroup>
+
+</Project>

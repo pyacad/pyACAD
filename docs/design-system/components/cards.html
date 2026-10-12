@@ -1,0 +1,42 @@
+<!-- @dsCard group="Components" -->
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Surfaces</title>
+<style>
+  body { margin:0; padding:24px; font-family:'Segoe UI Variable Text','Segoe UI',sans-serif;
+         background:#fff; color:#1a1a1a; font-size:13px; line-height:1.5; }
+  h1 { font-size:14px; font-weight:600; margin:0 0 2px; }
+  .lead { font-size:12px; color:#6b6b6b; margin:0 0 20px; max-width:60ch; }
+  .win { max-width:520px; border:1px solid #c9c9c9; border-radius:8px; overflow:hidden;
+         position:relative; }
+  .sec { padding:14px 20px; }
+  .frame { border:1px solid #a6a6a6; border-radius:2px; padding:14px; margin-top:8px; }
+  .gtitle { position:relative; top:-23px; left:12px; background:#fff; padding:0 5px;
+            font-size:12px; font-weight:500; display:inline-block; margin-bottom:-18px; }
+  .footer { background:#f7f7f7; border-top:1px solid #c9c9c9; padding:12px 20px;
+            display:flex; justify-content:flex-end; gap:8px; position:relative; }
+  .footer button { font:inherit; height:32px; padding:0 16px; border-radius:4px; }
+  .p { background:#005fb8; color:#fff; border:1px solid #005fb8; }
+  .s { background:#fff; border:1px solid #c9c9c9; }
+  .grip { position:absolute; right:3px; bottom:3px; width:11px; height:11px; }
+  .grip i { position:absolute; width:2.5px; height:2.5px; border-radius:50%; background:#6b6b6b; }
+  .meta { font-family:Consolas,monospace; font-size:11.5px; color:#6b6b6b; margin:8px 0 0; }
+</style></head><body>
+<h1>Surfaces</h1>
+<p class="lead">A window is one paper surface, but sections are BOLDLY delineated: a group frame
+(1px #A6A6A6, radius 2) with the title straddling the top border, GroupBox-style. Users must see
+where a section starts without hunting for a faint hairline. The footer is the single shaded band
+and carries a classic diagonal-dot resize grip in its corner because the window is resizable and
+the corner should say so.</p>
+<div class="win">
+  <div class="sec"><div class="frame"><span class="gtitle">Preview</span>
+    Content sits inside a clearly framed group, never floating between faint lines.
+  </div></div>
+  <div class="footer"><button class="s">Cancel</button><button class="p">Apply grouping</button>
+    <span class="grip"><i style="right:0;bottom:0"></i><i style="right:0;bottom:4px"></i>
+    <i style="right:4px;bottom:0"></i><i style="right:0;bottom:8px"></i>
+    <i style="right:4px;bottom:4px"></i><i style="right:8px;bottom:0"></i></span>
+  </div>
+</div>
+<p class="meta">scrollbars inside frames are quiet: 10px reserved width, borderless rounded thumb
+at ~35% gray, no arrow buttons &#183; solid surfaces everywhere; the OS draws window corners</p>
+</body></html>

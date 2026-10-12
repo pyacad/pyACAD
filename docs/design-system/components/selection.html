@@ -1,0 +1,43 @@
+<!-- @dsCard group="Components" -->
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Selection</title>
+<style>
+  body { margin:0; padding:24px; font-family:'Segoe UI Variable Text','Segoe UI',sans-serif;
+         background:#fff; color:#1a1a1a; font-size:13px; line-height:1.5; }
+  h1 { font-size:14px; font-weight:600; margin:0 0 2px; }
+  .lead { font-size:12px; color:#6b6b6b; margin:0 0 20px; max-width:60ch; }
+  .meta { font-family:Consolas,monospace; font-size:11.5px; color:#6b6b6b; margin:6px 0 18px; }
+  .list { max-width:420px; border:1px solid #e0e0e0; border-radius:4px; }
+  .r { height:32px; display:flex; align-items:center; gap:10px; padding:0 12px;
+       border-bottom:1px solid #eee; }
+  .r:last-child { border-bottom:none; }
+  .r.sel { background:#f0f0f0; box-shadow:inset 3px 0 0 #005fb8; }
+  .cb { width:16px; height:16px; border-radius:3px; border:1px solid #8a8a8a; box-sizing:border-box; flex:none; }
+  .cb.on { background:#005fb8; border-color:#005fb8; color:#fff; font-size:11px;
+           text-align:center; line-height:15px; }
+  .n { margin-left:auto; font-variant-numeric:tabular-nums; color:#6b6b6b; }
+  .seg { display:inline-flex; border:1px solid #c9c9c9; border-radius:4px; overflow:hidden; }
+  .seg span { padding:6px 16px; }
+  .seg .on { background:#005fb8; color:#fff; }
+  .cap { font-size:12px; color:#6b6b6b; margin-top:6px; }
+  .tog { display:inline-flex; gap:10px; align-items:center; }
+  .sw { width:40px; height:20px; border-radius:10px; background:#005fb8; position:relative; }
+  .sw i { position:absolute; top:3px; left:23px; width:14px; height:14px; border-radius:7px; background:#fff; }
+</style></head><body>
+<h1>Selection</h1>
+<p class="lead">Windows-native affordances users already know: checkboxes, a segmented control for
+either-or, a toggle for on-off. Selection is a neutral wash plus a 3px accent rail, and the whole
+row is the target.</p>
+<div class="list">
+  <div class="r sel"><span class="cb on">&#10003;</span>ELA VS MECH<span class="n">226</span></div>
+  <div class="r"><span class="cb"></span>ELA VS STR<span class="n">184</span></div>
+  <div class="r"><span class="cb"></span>ELA VS ARCH<span class="n">860</span></div>
+</div>
+<p class="meta">check rows: 16px Win11 checkbox, neutral selection wash, accent rail</p>
+<div class="seg"><span class="on">Smart</span><span>Custom rules</span></div>
+<div class="cap">Smart finds the duplicate entities and groups them for you.</div>
+<p class="meta">segmented: two-option either-or; the default IS the recommendation, the caption
+explains it; no badge, no marketing tile</p>
+<div class="tog"><span class="sw"><i></i></span><span>Keep existing groups</span></div>
+<p class="meta">toggle: standard 40x20; caption underneath states the consequence</p>
+</body></html>

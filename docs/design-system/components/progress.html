@@ -1,0 +1,53 @@
+<!-- @dsCard group="Components" -->
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Bulk work</title>
+<style>
+  body { margin:0; padding:24px; font-family:'Segoe UI Variable Text','Segoe UI',sans-serif;
+         background:#fff; color:#1a1a1a; font-size:13px; line-height:1.5; }
+  h1 { font-size:14px; font-weight:600; margin:0 0 2px; }
+  h2 { font-size:12px; font-weight:600; margin:22px 0 6px; }
+  .lead { font-size:12px; color:#6b6b6b; margin:0 0 18px; max-width:64ch; }
+  .meta { font-family:Consolas,monospace; font-size:11.5px; color:#6b6b6b; margin:8px 0 0; }
+  .frame { border:1px solid #a6a6a6; border-radius:4px; max-width:460px; padding:24px;
+           display:grid; justify-items:center; gap:10px; }
+  .label { font-size:13px; font-variant-numeric:tabular-nums; }
+  .bar { width:260px; height:4px; background:#e0e0e0; border-radius:2px; overflow:hidden; }
+  .bar > i { display:block; height:100%; width:38%; background:#005fb8; }
+  button { font:inherit; height:32px; padding:0 16px; border-radius:4px; cursor:default;
+           background:#fff; color:#1a1a1a; border:1px solid #c9c9c9; }
+  .after { border:1px solid #e0e0e0; border-left:3px solid #9d5d00; border-radius:4px;
+           padding:10px 12px; max-width:460px; font-size:12.5px; background:#f7f7f7; }
+</style></head><body>
+<h1>Bulk work: progress and cancel</h1>
+<p class="lead">Anything that edits thousands of things needs three properties: the user can see it
+moving, the user can stop it, and stopping leaves the document in a state they can describe. A
+frozen window with no way out is the worst failure mode in the toolkit.</p>
+
+<div class="frame">
+  <div class="label">Renaming 4,200 of 11,038</div>
+  <div class="bar"><i></i></div>
+  <button>Cancel</button>
+</div>
+<p class="meta">counted progress, never an indeterminate spinner when the total is known &#183;
+Cancel is a real control, not a hint</p>
+
+<h2>Rules</h2>
+<p class="lead">
+1. <b>One undo, not thousands.</b> A batch is wrapped in a single document transaction so one
+Ctrl+Z reverses the whole operation. Ten thousand separate edits will also exhaust the host's undo
+stack, which silently makes the work irreversible.<br>
+2. <b>Count in the label.</b> "Renaming 4,200 of 11,038" tells the user whether to wait or stop.
+Percentages alone do not.<br>
+3. <b>Cancel stops between chunks</b>, then reports what actually finished. Never claim the work
+was undone if it was not.<br>
+4. <b>The API owns the thread.</b> The AutoCAD API is main-thread only, so batches run in chunks
+with the dispatcher pumped between them. Do not promise background work that cannot exist.<br>
+5. <b>Failures do not abort the run.</b> Collect per-item errors, finish the rest, and report the
+count plus the first message.<br>
+6. <b>Show progress only when it earns its place</b>: below a few hundred items the work finishes
+before the bar renders, and a flash of chrome reads as jank.</p>
+
+<h2>After a partial run</h2>
+<div class="after">Deleted 3,180 of 4,200. 1,020 were left when you cancelled.</div>
+<p class="meta">state the split plainly; a warning toast, not a success toast</p>
+</body></html>

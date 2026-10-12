@@ -1,0 +1,45 @@
+<!-- @dsCard group="Components" -->
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Inputs</title>
+<style>
+  body { margin:0; padding:24px; font-family:'Segoe UI Variable Text','Segoe UI',sans-serif;
+         background:#fff; color:#1a1a1a; font-size:13px; line-height:1.5; }
+  h1 { font-size:14px; font-weight:600; margin:0 0 2px; }
+  .lead { font-size:12px; color:#6b6b6b; margin:0 0 20px; max-width:60ch; }
+  .meta { font-family:Consolas,monospace; font-size:11.5px; color:#6b6b6b; margin:6px 0 18px; }
+  .dd { display:flex; align-items:center; justify-content:space-between; width:280px; height:32px;
+        border:1px solid #c9c9c9; border-radius:4px; padding:0 10px; box-sizing:border-box; }
+  .dd .c { color:#6b6b6b; font-size:10px; }
+  .menu { width:280px; border:1px solid #e0e0e0; border-radius:4px; background:#fff; margin-top:4px;
+          box-shadow:0 4px 12px rgba(0,0,0,.08); }
+  .mi { height:32px; display:flex; align-items:center; padding:0 12px; }
+  .mi.sel { background:#f0f0f0; box-shadow:inset 3px 0 0 #005fb8; }
+  .mi:hover:not(.sel) { background:#f7f7f7; }
+  .num { display:flex; gap:10px; align-items:center; }
+  .field { display:flex; align-items:center; width:96px; height:32px; border:1px solid #c9c9c9;
+           border-radius:4px; box-sizing:border-box; }
+  .field input { border:none; outline:none; width:100%; font:inherit; text-align:right; padding:0 6px; }
+  .field span { color:#6b6b6b; padding-right:8px; font-size:12px; }
+  .field.err { border-color:#c50f1f; }
+  .errline { color:#c50f1f; font-size:12px; margin-top:4px; }
+  .focus { outline:2px solid #005fb8; outline-offset:1px; }
+</style></head><body>
+<h1>Inputs</h1>
+<p class="lead">Standard shells: 32px, radius 4, 1px border. The dropdown menu is a plain solid
+popup reusing list-selection rules. Units live inside the field; errors are a red border plus one
+plain sentence.</p>
+<div class="dd"><span>Root-cause element (auto side)</span><span class="c">&#9660;</span></div>
+<div class="menu">
+  <div class="mi sel">Root-cause element (auto side)</div>
+  <div class="mi">Proximity cluster</div>
+  <div class="mi">Nearest level</div>
+</div>
+<p class="meta">dropdown + menu: selection rail carries over from lists</p>
+<div class="num"><span>Cluster distance</span><span class="field"><input value="2.0"><span>m</span></span></div>
+<p class="meta">number field: value right-aligned, unit inside</p>
+<div class="num"><span>Cluster distance</span><span class="field err"><input value="-5"><span>m</span></span></div>
+<div class="errline">Enter a distance greater than 0.</div>
+<p class="meta">error: border + sentence; the tool never silently substitutes a value</p>
+<div class="num" style="margin-top:14px"><span class="field focus"><input value="2.0"><span>m</span></span></div>
+<p class="meta">keyboard focus: 2px accent ring, visible on every control</p>
+</body></html>
