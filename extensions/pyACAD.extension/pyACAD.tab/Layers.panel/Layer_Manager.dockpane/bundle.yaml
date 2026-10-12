@@ -1,0 +1,3 @@
+title: Layer Manager
+tooltip: A docked list of the drawing's layers with a filter box. Pick layers to isolate, freeze, turn off, lock, make current, merge or delete them without opening the Layer Properties Manager.
+keytip: LM

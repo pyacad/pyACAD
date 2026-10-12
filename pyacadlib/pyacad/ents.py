@@ -2,8 +2,8 @@
 
 Handles are hex strings such as '2F3A'. get() returns a plain dict, so a script
 never holds an AutoCAD object past its transaction. The AutoCAD API is imported
-inside each function; resolve_space(), normalize_handle() and check_props() are
-pure.
+inside each function; resolve_space(), normalize_handle(), check_props() and
+length_by_layer() are pure.
 """
 
 _COMMON_PROPS = ('layer', 'color', 'linetype', 'lineweight', 'visible')
@@ -14,6 +14,8 @@ _TYPE_PROPS = {
 }
 LINEWEIGHTS = (-3, -2, -1, 0, 5, 9, 13, 15, 18, 20, 25, 30, 35, 40, 50, 53, 60, 70,
                80, 90, 100, 106, 120, 140, 158, 200, 211)
+# What a run-length takeoff measures: POLYLINE is both the old 2D and the 3D polyline.
+LENGTH_TYPES = ('LINE', 'ARC', 'LWPOLYLINE', 'POLYLINE', 'SPLINE')
 
 
 def resolve_space(text):
@@ -61,6 +63,22 @@ def check_props(type_name, props):
         raise ValueError('height must be above zero.')
     if 'attributes' in props and not isinstance(props['attributes'], dict):
         raise ValueError('attributes is a dict of tag to text.')
+
+
+def length_by_layer(snapshots):
+    """[{'layer', 'count', 'length'}] totals per layer of dicts carrying at least
+    'layer' and 'length' (as lengths() gives), sorted by layer ignoring case;
+    a dict whose length is None is left out."""
+    totals = {}
+    for snap in snapshots:
+        length = snap.get('length')
+        if length is None:
+            continue
+        layer = str(snap.get('layer', ''))
+        count, total = totals.get(layer, (0, 0.0))
+        totals[layer] = (count + 1, total + float(length))
+    return [{'layer': layer, 'count': totals[layer][0], 'length': totals[layer][1]}
+            for layer in sorted(totals, key=lambda name: (name.lower(), name))]
 
 
 def iter(space=None):
@@ -128,6 +146,59 @@ def type_of(handle):
     """The entity's DXF type name, such as 'LINE' or 'INSERT'."""
     from pyacad import doc
     return str(_id(doc.database(), handle).ObjectClass.DxfName)
+
+
+def length_of(handle):
+    """The length along a curve (line, arc, circle, polyline of any kind,
+    spline, ellipse) in drawing units; ValueError for anything without one."""
+    from pyacad import doc
+    with doc.transaction() as tr:
+        entity = _open(tr, handle)
+        length = _curve_length(entity)
+        if length is None:
+            raise ValueError('%s (%s) has no length.'
+                             % (handle, entity.ObjectId.ObjectClass.DxfName))
+        return length
+
+
+def lengths(handles, types=LENGTH_TYPES, progress=None, cancelled=None):
+    """[{'handle', 'type', 'layer', 'length'}] for each of the handles whose DXF
+    type is in types (lines, arcs, polylines and splines by default), read in
+    one transaction. Other entities and handles that no longer exist are left
+    out; a curve AutoCAD cannot measure gets length None."""
+    from pyacad import doc
+    wanted = tuple(str(t).upper() for t in types)   # not set(): this module defines set()
+    db = doc.database()
+    names = doc.as_names(handles)
+    result = []
+    with doc.transaction() as tr:
+        for index, handle in enumerate(names):
+            if doc.step(index, len(names), progress, cancelled):
+                break
+            try:
+                oid = _id(db, handle)
+            except ValueError:
+                continue
+            type_name = str(oid.ObjectClass.DxfName)
+            if type_name not in wanted:
+                continue
+            entity = _open_id(tr, oid)
+            result.append({'handle': _handle(oid), 'type': type_name,
+                           'layer': str(entity.Layer), 'length': _curve_length(entity)})
+    return result
+
+
+def _curve_length(entity):
+    """Length from start to end parameter, or None for a non-curve or a curve
+    AutoCAD cannot measure (an xline, a degenerate spline)."""
+    from pyacad import _api
+    if not isinstance(entity, _api.DatabaseServices.Curve):
+        return None
+    try:
+        return abs(float(entity.GetDistanceAtParameter(entity.EndParam))
+                   - float(entity.GetDistanceAtParameter(entity.StartParam)))
+    except Exception:
+        return None
 
 
 def _id(db, handle):

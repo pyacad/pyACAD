@@ -4,18 +4,41 @@ Pattern arguments take '*' and '?' wildcards, case-insensitively, or a list of
 patterns; matches() is the pure test for one name. Freeze-style functions
 return how many layers changed and skip the current layer where AutoCAD would
 refuse. The AutoCAD API is imported inside each function.
+
+Pure helpers for layer standards and pickers: parse_mapping() reads an
+old,new[,color][,linetype] CSV, plan_mapping() turns it into rename / merge /
+create steps for a drawing's layer names, describe_action() words one step,
+filter_names() is a filter box, snapshot_choices() lists saved snapshot slots.
 """
 
 import re as _re
 
 _PROTECTED = ('0', 'defpoints')
 
+# Characters AutoCAD refuses in a layer name (the vertical bar marks xref layers).
+_BAD_NAME_CHARS = '<>/\\":;?*|,=`'
+
+_ACI_NAMES = {'red': 1, 'yellow': 2, 'green': 3, 'cyan': 4, 'blue': 5,
+              'magenta': 6, 'white': 7, 'black': 7}
+
+# A first CSV row reads as a header when its first two cells, letters only and
+# lowercased, are one of these.
+_OLD_HEADS = ('old', 'oldlayer', 'oldname', 'from', 'source', 'sourcelayer',
+              'existing', 'existinglayer', 'layer', 'current', 'currentlayer')
+_NEW_HEADS = ('new', 'newlayer', 'newname', 'to', 'target', 'targetlayer',
+              'standard', 'standardlayer')
+
+
+def _pattern(pattern):
+    """pattern ('*' any run, '?' one character) as a compiled whole-name regex."""
+    regex = ''.join('.*' if c == '*' else '.' if c == '?' else _re.escape(c)
+                    for c in str(pattern))
+    return _re.compile('^' + regex + '$', _re.IGNORECASE | _re.DOTALL)
+
 
 def matches(name, pattern):
     """True when name fits pattern ('*' any run, '?' one character), any case."""
-    regex = ''.join('.*' if c == '*' else '.' if c == '?' else _re.escape(c)
-                    for c in str(pattern))
-    return _re.match('^' + regex + '$', str(name), _re.IGNORECASE | _re.DOTALL) is not None
+    return _pattern(pattern).match(str(name)) is not None
 
 
 def matches_any(name, patterns):
@@ -23,6 +46,229 @@ def matches_any(name, patterns):
     if isinstance(patterns, str):
         patterns = [patterns]
     return any(matches(name, p) for p in patterns)
+
+
+def filter_names(names, text):
+    """The names that fit a filter box's text, in their order, as a new list.
+
+    Blank text keeps every name. Each comma-separated term is a wildcard
+    pattern when it holds '*' or '?' (so 'A-*' means "starts with A-"), else a
+    case-insensitive substring; a name stays when any term fits it.
+    """
+    terms = [t.strip() for t in str(text or '').split(',')]
+    terms = [t for t in terms if t]
+    if not terms:
+        return list(names)
+    tests = []
+    for term in terms:
+        if '*' in term or '?' in term:
+            tests.append(_pattern(term).match)
+        else:
+            tests.append(lambda name, part=term.lower(): part in name.lower())
+    return [name for name in names if any(test(name) for test in tests)]
+
+
+def parse_mapping(csv_text):
+    """The rows of a layer-standard CSV as (old, new, color, linetype) tuples.
+
+    Columns are old,new[,color][,linetype]; any after the fourth (a notes
+    column) are ignored. old may use '*' and '?' wildcards. color is a color
+    number from 1 to 255 or red, yellow, green, cyan, blue, magenta or white;
+    color and linetype read None when missing or blank. Cells split on commas,
+    semicolons or tabs, whichever the first row uses, and may be "quoted" with
+    "" standing for a quote. Blank lines, a header row (old,new or from,to and
+    the like) and a byte order mark are skipped. A row without an old or a new
+    name, or with a color that is not one, raises ValueError naming its line.
+    """
+    text = '' if csv_text is None else csv_text
+    if text[:1] == u'\ufeff':
+        text = text[1:]
+    delimiter = None
+    first = True
+    rows = []
+    for number, line in enumerate(text.splitlines(), 1):
+        if not line.strip():
+            continue
+        if delimiter is None:
+            delimiter = _guess_delimiter(line)
+        cells = _split_cells(line, delimiter)
+        cells += [''] * (4 - len(cells))
+        if not any(cells):
+            continue
+        if first:
+            first = False
+            if _is_header(cells):
+                continue
+        old, new, color, linetype = cells[:4]
+        if not old:
+            raise ValueError('Line %d has no old layer name.' % number)
+        if not new:
+            raise ValueError('Line %d: %s has no new layer name.' % (number, old))
+        rows.append((old, new, _parse_color(color, number), linetype or None))
+    return rows
+
+
+def plan_mapping(existing_names, mapping):
+    """What applying a parse_mapping() standard to a drawing does, step by step.
+
+    Each existing layer, in the order given, meets the first row whose old
+    pattern fits it and becomes ('rename', old, new) when no layer is called new
+    yet, or ('merge', old, target) when one is (target in the drawing's own
+    spelling), counting what the earlier steps renamed and merged away. Layer 0,
+    Defpoints, xref layers and an invalid new name give ('skip', old, reason);
+    a layer already named new gives nothing. Then every new name still missing
+    from the drawing becomes ('create', new, color, linetype) once, taking the
+    first color and linetype its rows give (None when none do).
+    """
+    present = dict((name.lower(), name) for name in existing_names)
+    compiled = [(_pattern(row[0]), row) for row in mapping]
+    reported = set()
+    plan = []
+    for name in existing_names:
+        row = next((r for p, r in compiled if p.match(name)), None)
+        if row is None or row[1] == name:
+            continue
+        new = row[1]
+        if name.lower() in _PROTECTED:
+            plan.append(('skip', name, 'layer 0 and Defpoints cannot be renamed or merged'))
+        elif '|' in name:
+            plan.append(('skip', name, 'belongs to an xref, so it cannot be renamed'))
+        elif not _is_valid_name(new):
+            plan.append(('skip', name, '%s is not a valid layer name' % new))
+            reported.add(new.lower())
+        elif new.lower() == name.lower() or new.lower() not in present:
+            plan.append(('rename', name, new))
+            present.pop(name.lower(), None)
+            present[new.lower()] = new
+        else:
+            plan.append(('merge', name, present[new.lower()]))
+            present.pop(name.lower(), None)
+
+    missing = []
+    wanted = {}
+    for _, new, color, linetype in mapping:
+        key = new.lower()
+        if key in present:
+            continue
+        if not _is_valid_name(new):
+            if key not in reported:
+                plan.append(('skip', new, '%s is not a valid layer name' % new))
+                reported.add(key)
+            continue
+        if key not in wanted:
+            missing.append(key)
+            wanted[key] = [new, color, linetype]
+        else:
+            if wanted[key][1] is None:
+                wanted[key][1] = color
+            if not wanted[key][2]:
+                wanted[key][2] = linetype
+    plan.extend(('create',) + tuple(wanted[key]) for key in missing)
+    return plan
+
+
+def describe_action(action):
+    """One plan_mapping() step in words: 'Rename A to B', 'Merge A into B',
+    'Create B (color 3, DASHED)', 'Skip A: reason'."""
+    kind = action[0]
+    if kind == 'rename':
+        return 'Rename %s to %s' % (action[1], action[2])
+    if kind == 'merge':
+        return 'Merge %s into %s' % (action[1], action[2])
+    if kind == 'create':
+        extras = []
+        if action[2] is not None:
+            extras.append('color %d' % action[2])
+        if action[3]:
+            extras.append(str(action[3]))
+        return 'Create %s' % action[1] + (' (%s)' % ', '.join(extras) if extras else '')
+    if kind == 'skip':
+        return 'Skip %s: %s' % (action[1], action[2])
+    return ' '.join(str(part) for part in action)
+
+
+def snapshot_choices(slots):
+    """(label, name) per saved snapshot slot, newest first, then by name.
+
+    slots maps a slot name to {'saved': 'YYYY-MM-DD HH:MM', 'layers':
+    snapshot()}; the label reads 'Name  (saved 2026-10-12 14:05, 3 layers)'.
+    Slots without a time, or that are not a dict at all, come last.
+    """
+    entries = []
+    for name, slot in (slots or {}).items():
+        slot = slot if isinstance(slot, dict) else {}
+        saved = str(slot.get('saved') or '')
+        count = len(slot.get('layers') or {})
+        label = '%s  (%s%d layer%s)' % (name, 'saved %s, ' % saved if saved else '',
+                                         count, '' if count == 1 else 's')
+        entries.append((saved, name, label))
+    entries.sort(key=lambda entry: entry[1].lower())
+    entries.sort(key=lambda entry: entry[0], reverse=True)
+    return [(label, name) for _, name, label in entries]
+
+
+def _is_valid_name(name):
+    return 0 < len(name) <= 255 and not any(c in _BAD_NAME_CHARS for c in name)
+
+
+def _guess_delimiter(line):
+    """Comma, semicolon or tab: whichever the line uses most outside quotes."""
+    counts = {}
+    quoted = False
+    for ch in line:
+        if ch == '"':
+            quoted = not quoted
+        elif not quoted and ch in ',;\t':
+            counts[ch] = counts.get(ch, 0) + 1
+    return max(',;\t', key=lambda d: counts.get(d, 0))
+
+
+def _split_cells(line, delimiter):
+    """One CSV line as stripped cells; quotes group, "" inside them is a quote."""
+    cells, cell, quoted, i = [], [], False, 0
+    while i < len(line):
+        ch = line[i]
+        if quoted:
+            if ch == '"' and line[i + 1:i + 2] == '"':
+                cell.append('"')
+                i += 1
+            elif ch == '"':
+                quoted = False
+            else:
+                cell.append(ch)
+        elif ch == '"':
+            quoted = True
+        elif ch == delimiter:
+            cells.append(''.join(cell))
+            cell = []
+        else:
+            cell.append(ch)
+        i += 1
+    cells.append(''.join(cell))
+    return [c.strip() for c in cells]
+
+
+def _is_header(cells):
+    def letters(cell):
+        return _re.sub('[^a-z]', '', cell.lower())
+    return letters(cells[0]) in _OLD_HEADS and letters(cells[1]) in _NEW_HEADS
+
+
+def _parse_color(cell, number):
+    if not cell:
+        return None
+    key = cell.lower()
+    if key in _ACI_NAMES:
+        return _ACI_NAMES[key]
+    try:
+        value = float(key)
+        whole = int(value)
+    except (ValueError, OverflowError):
+        whole = value = None
+    if whole is None or whole != value or not 1 <= whole <= 255:
+        raise ValueError('Line %d: color %s is not a color number from 1 to 255.'
+                         % (number, cell))
+    return whole
 
 
 def names():

@@ -1,0 +1,4 @@
+title: Block Schedule
+tooltip: Counts block references by name, or by name and layer, in the selection or the whole drawing. Places the schedule as a table in the drawing or saves it to Excel.
+context: doc
+keytip: DS

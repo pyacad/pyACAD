@@ -442,6 +442,27 @@ DOCKPANE_ON = {
     (TAB, 'AI_(beta).panel/Ask_AI.dockpane'): ic_ask_ai_on,
 }
 
+def _load_panel_icons():
+    """Merge the per-panel drawing modules in tools/icons into ICONS/DOCKPANE_ON."""
+    import importlib
+    import sys
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import icons as panel_icons
+    for name in panel_icons.MODULES:
+        try:
+            mod = importlib.import_module('icons.' + name)
+        except ImportError:
+            continue
+        for bundle, fn in getattr(mod, 'ICONS', {}).items():
+            if bundle in ICONS:
+                raise SystemExit('duplicate icon registration: ' + bundle)
+            ICONS[bundle] = fn
+        for bundle, fn in getattr(mod, 'DOCKPANE_ON', {}).items():
+            DOCKPANE_ON[(TAB, bundle)] = fn
+
+
+_load_panel_icons()
+
 GROUPS = [(TAB, ICONS), (SMOKE_TAB, SMOKE_ICONS)]
 
 

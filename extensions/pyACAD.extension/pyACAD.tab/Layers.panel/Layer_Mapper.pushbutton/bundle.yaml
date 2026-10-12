@@ -1,0 +1,4 @@
+title: Layer Mapper
+tooltip: Applies a layer standard from a CSV with the columns old,new and optionally color and linetype. Matching layers are renamed, or merged when the new name already exists, and you tick what to apply before anything changes.
+context: doc
+keytip: LP

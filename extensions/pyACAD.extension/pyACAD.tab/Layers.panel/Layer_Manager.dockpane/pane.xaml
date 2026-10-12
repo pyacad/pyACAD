@@ -1,0 +1,62 @@
+<Grid xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      x:Name="Root">
+  <!-- Plain WPF: script.py fills the list, wires every handler and applies the
+       host's light or dark colours. Rows are string lists, so the columns bind
+       by index: [0] name, [1] current mark, [2] on, [3] frozen, [4] locked, [5] color. -->
+  <Grid Margin="8">
+    <Grid.RowDefinitions>
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="*" />
+      <RowDefinition Height="Auto" />
+      <RowDefinition Height="Auto" />
+    </Grid.RowDefinitions>
+
+    <DockPanel Grid.Row="0" Margin="0,0,0,6" LastChildFill="True">
+      <TextBlock DockPanel.Dock="Left" Text="Filter" VerticalAlignment="Center" Margin="0,0,6,0" />
+      <Button x:Name="Refresh" DockPanel.Dock="Right" Content="Refresh" Padding="8,2"
+              Margin="6,0,0,0" ToolTip="Read the layers of the active drawing again" />
+      <TextBox x:Name="Filter" VerticalContentAlignment="Center" Padding="2"
+               ToolTip="Part of a name, or a pattern such as A-* ; separate several with commas" />
+    </DockPanel>
+
+    <ListView x:Name="LayerList" Grid.Row="1" SelectionMode="Extended" MinHeight="120"
+              ToolTip="Ctrl or Shift + click picks several layers; double-click makes one current">
+      <ListView.View>
+        <GridView>
+          <GridViewColumn Header="" Width="22" DisplayMemberBinding="{Binding [1]}" />
+          <GridViewColumn Header="Name" Width="160" DisplayMemberBinding="{Binding [0]}" />
+          <GridViewColumn Header="On" Width="40" DisplayMemberBinding="{Binding [2]}" />
+          <GridViewColumn Header="Frozen" Width="52" DisplayMemberBinding="{Binding [3]}" />
+          <GridViewColumn Header="Locked" Width="52" DisplayMemberBinding="{Binding [4]}" />
+          <GridViewColumn Header="Color" Width="46" DisplayMemberBinding="{Binding [5]}" />
+        </GridView>
+      </ListView.View>
+    </ListView>
+
+    <WrapPanel Grid.Row="2" Margin="0,8,0,0">
+      <WrapPanel.Resources>
+        <Style TargetType="Button">
+          <Setter Property="Margin" Value="0,0,6,6" />
+          <Setter Property="Padding" Value="8,3" />
+        </Style>
+      </WrapPanel.Resources>
+      <Button x:Name="Isolate" Content="Isolate"
+              ToolTip="Freeze every layer except the selected ones" />
+      <Button x:Name="FreezeThaw" Content="Freeze/Thaw"
+              ToolTip="Freeze the selected layers, or thaw them when all are frozen" />
+      <Button x:Name="OnOff" Content="On/Off"
+              ToolTip="Turn the selected layers off, or on when all are off" />
+      <Button x:Name="LockUnlock" Content="Lock/Unlock"
+              ToolTip="Lock the selected layers, or unlock them when all are locked" />
+      <Button x:Name="SetCurrent" Content="Set current"
+              ToolTip="Make the selected layer the current one" />
+      <Button x:Name="Merge" Content="Merge into..."
+              ToolTip="Move everything on the selected layers onto another layer, then delete them" />
+      <Button x:Name="Delete" Content="Delete"
+              ToolTip="Delete the selected layers; ones still in use are kept" />
+    </WrapPanel>
+
+    <TextBlock x:Name="Status" Grid.Row="3" Margin="0,2,0,0" TextWrapping="Wrap" Opacity="0.75" />
+  </Grid>
+</Grid>

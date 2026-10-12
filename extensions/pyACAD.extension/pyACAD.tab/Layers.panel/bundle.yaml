@@ -1,0 +1,4 @@
+layout:
+  - Layer_Manager
+  - Layer_Mapper
+  - Layer_Snapshot

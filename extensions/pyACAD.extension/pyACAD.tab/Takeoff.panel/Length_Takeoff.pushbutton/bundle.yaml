@@ -1,0 +1,4 @@
+title: Length Takeoff
+tooltip: Totals the length of lines, arcs, polylines and splines per layer, in the selection or else all of model space, in the drawing units. Duct and pipe runs at a glance, with an Excel export.
+context: doc
+keytip: TL

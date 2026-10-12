@@ -1,9 +1,9 @@
 """Plotting a layout to PDF, plot devices and their paper sizes.
 
 to_pdf() plots in the foreground (BACKGROUNDPLOT is 0 for the duration) and
-returns when the file is written. output_name() and scale_type() are pure.
-Everything here is in AcCoreMgd and AcDbMgd, so it also runs in Core Console.
-The AutoCAD API is imported inside each function.
+returns when the file is written. output_name(), batch_names() and scale_type()
+are pure. Everything here is in AcCoreMgd and AcDbMgd, so it also runs in Core
+Console. The AutoCAD API is imported inside each function.
 """
 
 import os as _os  # loads ntpath first; importing ntpath alone is circular under IronPython
@@ -13,12 +13,46 @@ _BAD_CHARS = '<>:"/\\|?*'
 _RATIOS = ('1:1', '1:2', '1:4', '1:5', '1:8', '1:10', '1:16', '1:20', '1:30', '1:40',
            '1:50', '1:100', '2:1', '4:1', '8:1', '10:1', '100:1', '1000:1')
 
+DEFAULT_PATTERN = '{drawing} - {layout}.pdf'
+
 
 def output_name(pattern, drawing, layout):
     """pattern with {drawing} (the file name without folder or extension) and
     {layout} filled in; characters Windows forbids in a file name become '_'."""
     stem = _ntpath.splitext(_ntpath.basename(str(drawing)))[0]
     return str(pattern).replace('{drawing}', _clean(stem)).replace('{layout}', _clean(layout))
+
+
+def batch_names(drawing_name, layout_names, folder, pattern=None):
+    """(layout, path) for each layout, in order: output_name() of pattern
+    (DEFAULT_PATTERN when None) in folder, with '.pdf' added when the name has
+    no such extension. Two layouts never get the same path, in any case: a
+    repeat gains ' (2)', ' (3)' ... before the extension, never a name another
+    layout in the batch plots to on its own."""
+    pattern = pattern or DEFAULT_PATTERN
+    base = str(folder or '')
+    layouts = [str(name) for name in layout_names]
+    natural = []
+    for layout in layouts:
+        name = output_name(pattern, drawing_name, layout)
+        if not name.lower().endswith('.pdf'):
+            name += '.pdf'
+        natural.append(_ntpath.join(base, name) if base else name)
+    reserved = set(path.lower() for path in natural)
+    taken = set()
+    pairs = []
+    for layout, path in zip(layouts, natural):
+        if path.lower() in taken:
+            stem, ext = _ntpath.splitext(path)
+            count = 2
+            while True:
+                path = '%s (%d)%s' % (stem, count, ext)
+                if path.lower() not in taken and path.lower() not in reserved:
+                    break
+                count += 1
+        taken.add(path.lower())
+        pairs.append((layout, path))
+    return pairs
 
 
 def scale_type(scale):

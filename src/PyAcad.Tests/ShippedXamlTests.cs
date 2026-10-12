@@ -41,6 +41,12 @@ namespace PyAcad.Tests
                 @"pyACAD.tab\AI_(beta).panel\Ask_AI.dockpane\pane.xaml",   // script.py adds the C# pane into Host
                 new[] { "Host" }
             },
+            new object[]
+            {
+                @"pyACAD.tab\Layers.panel\Layer_Manager.dockpane\pane.xaml",
+                new[] { "Root", "Filter", "Refresh", "LayerList", "Isolate", "FreezeThaw", "OnOff",
+                        "LockUnlock", "SetCurrent", "Merge", "Delete", "Status" }
+            },
         };
 
         [Theory]

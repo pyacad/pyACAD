@@ -1,0 +1,4 @@
+title: Blocks to Excel
+tooltip: Exports every block reference in the drawing, or just the selected ones, to an Excel workbook. One row per block with its handle, layer, position, rotation and scale, and one column per attribute tag.
+context: doc
+keytip: DB

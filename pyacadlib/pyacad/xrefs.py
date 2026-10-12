@@ -1,10 +1,13 @@
 """External references: list, reload, unload, detach, bind and repath.
 
 Path helpers (apply_replace, make_relative, make_absolute, status_name) are
-pure and use Windows path rules on every platform. Reload, unload, detach and
-bind run outside any open transaction, as AutoCAD requires; call them from a
-command or inside pyacad.doc.lock(). The AutoCAD API is imported inside each
-function.
+pure and use Windows path rules on every platform, and so are the helpers the
+Xrefs panel is built on: describe and status_label (picker labels),
+plan_repath and format_plan (a repath worked out and previewed before
+anything changes), headline, summarize and check_loaded (what an action did).
+Reload, unload, detach and bind run outside any open transaction, as AutoCAD
+requires; call them from a command or inside pyacad.doc.lock(). The AutoCAD
+API is imported inside each function.
 """
 
 import os as _os  # loads ntpath first; importing ntpath alone is circular under IronPython
@@ -60,6 +63,168 @@ def make_absolute(path, host_dir):
         return path
     return _ntpath.normpath(_ntpath.join(str(host_dir), path))
 
+
+# --- Pure helpers for the Xrefs panel ----------------------------------------
+# list() shadows the builtin inside this module, so nothing below calls list().
+
+_MODES = ('relative', 'absolute', 'replace', 'folder')
+_NESTED = 'nested, follows its parent'
+
+
+def status_label(status):
+    """A list() status as people read it: 'not-found' is 'not found', and a
+    missing one is 'unknown'."""
+    if not status:
+        return 'unknown'
+    return str(status).replace('-', ' ')
+
+
+def describe(xref_rows):
+    """One picker label per list() row, in order:
+    'Site  [loaded]  ..\\Xref\\site.dwg'. Overlays and nested xrefs say so
+    inside the brackets; a row with no saved path shows '(no path)'."""
+    labels = []
+    for row in xref_rows:
+        flags = [status_label(row.get('status'))]
+        if row.get('is_overlay'):
+            flags.append('overlay')
+        if row.get('nested'):
+            flags.append('nested')
+        labels.append('%s  [%s]  %s' % (row.get('name', ''), ', '.join(flags),
+                                        row.get('path') or '(no path)'))
+    return labels
+
+
+def plan_repath(xref_rows, mode, find=None, replace=None, folder=None, exists=None,
+                host_dir=None):
+    """What a repath would do: one (old_path, new_path, note) per row, in order.
+
+    mode is 'relative' or 'absolute' (both need host_dir, the drawing's
+    folder), 'replace' (find, ignoring case, becomes replace) or 'folder'
+    (each xref points at <folder>\\<its file name>, but only where
+    exists(that path) is true; exists defaults to os.path.isfile, so pass one
+    to stay off the disk). note is '' for a row that changes; otherwise it
+    says why not, and new_path is old_path. Nested xrefs never change: they
+    follow the xref that holds them.
+    """
+    mode = str(mode or '').lower()
+    if mode not in _MODES:
+        raise ValueError('mode is one of %s, not %r.' % (', '.join(_MODES), mode))
+    if mode in ('relative', 'absolute') and not host_dir:
+        raise ValueError('Save the drawing first; paths are relative to its folder.')
+    if mode == 'replace' and not find:
+        raise ValueError('find must not be empty.')
+    if mode == 'folder':
+        if not folder:
+            raise ValueError('folder must not be empty.')
+        if exists is None:
+            exists = _os.path.isfile
+    plan = []
+    for row in xref_rows:
+        old = str(row.get('path') or '')
+        if row.get('nested'):
+            plan.append((old, old, _NESTED))
+        elif not old:
+            plan.append((old, old, 'no path'))
+        else:
+            new, note = _plan_one(old, mode, find, replace, folder, exists, host_dir)
+            plan.append((old, old if note else new, note))
+    return plan
+
+
+def _plan_one(old, mode, find, replace, folder, exists, host_dir):
+    """(new_path, note) for one top-level xref path; pure but for exists."""
+    if mode == 'relative':
+        if not _ntpath.isabs(old):
+            return old, 'already relative'
+        new = make_relative(old, host_dir)
+        return (old, 'on another drive or share') if new == old else (new, '')
+    if mode == 'absolute':
+        new = make_absolute(old, host_dir)
+        return (old, 'already absolute') if new == old else (new, '')
+    if mode == 'replace':
+        new = apply_replace(old, find, '' if replace is None else replace)
+        return (old, 'no match') if new == old else (new, '')
+    new = _ntpath.join(str(folder), _ntpath.basename(old))
+    if _ntpath.normcase(new) == _ntpath.normcase(old):
+        return old, 'already points there'
+    if not exists(new):
+        return old, 'not found in the folder'
+    return new, ''
+
+
+def format_plan(xref_rows, plan, limit=None):
+    """plan_repath()'s result as preview text: each change as its name with
+    from and to lines, then every row left alone with its note. limit caps
+    each of the two lists; the rest become '...and N more'."""
+    changes, kept = [], []
+    for row, (old, new, note) in zip(xref_rows, plan):
+        name = str(row.get('name', ''))
+        if note:
+            kept.append('  %s: %s' % (name, note))
+        else:
+            changes.append('%s\n  from  %s\n  to    %s' % (name, old, new))
+    if changes:
+        lines = ['Changes to %s:' % _count(len(changes), 'xref path'), '']
+        for block in _cut(changes, limit, ''):
+            lines += [block, '']
+    else:
+        lines = ['No xref path changes.', '']
+    if kept:
+        lines += ['Left as they are:'] + _cut(kept, limit, '  ')
+    return '\n'.join(lines).rstrip('\n')
+
+
+def headline(results, verb='Updated'):
+    """One line for a toast: 'Reloaded 3 xrefs', or 'Reloaded 2 of 3 xrefs'
+    when some failed. results are (name, error) pairs; a falsy error is a
+    success."""
+    results = [result for result in results]
+    if not results:
+        return 'No xrefs to update'
+    done = len([name for name, error in results if not error])
+    if done == len(results):
+        return '%s %s' % (verb, _count(done, 'xref'))
+    return '%s %d of %s' % (verb, done, _count(len(results), 'xref'))
+
+
+def summarize(results, verb='Updated', limit=None):
+    """The headline as a sentence, then every failure as 'name: error' under
+    'Not done:'; limit caps the failure list. Text for an alert."""
+    results = [result for result in results]
+    text = headline(results, verb) + '.'
+    failed = ['  %s: %s' % (name, error) for name, error in results if error]
+    if failed:
+        text += '\n\nNot done:\n' + '\n'.join(_cut(failed, limit, '  '))
+    return text
+
+
+def check_loaded(results, xref_rows):
+    """results with each success whose xref did not end up loaded turned into
+    a failure such as 'not found at ..\\b.dwg': AutoCAD takes a reload or a
+    repath it cannot resolve without complaint. Pass the list() rows read
+    after the action; names no longer among them (detached, bound) and
+    earlier errors stay as they were."""
+    rows = dict((str(row.get('name')), row) for row in xref_rows)
+    checked = []
+    for name, error in results:
+        row = rows.get(str(name))
+        if not error and row is not None and row.get('status') != 'loaded':
+            label = status_label(row.get('status'))
+            error = '%s at %s' % (label, row['path']) if row.get('path') else label
+        checked.append((name, error))
+    return checked
+
+
+def _count(number, noun):
+    return '%d %s' % (number, noun if number == 1 else noun + 's')
+
+
+def _cut(lines, limit, indent):
+    """lines, or the first limit of them and an '...and N more' line."""
+    if limit is None or len(lines) <= limit:
+        return lines
+    return lines[:limit] + ['%s...and %d more' % (indent, len(lines) - limit)]
 
 def list():
     """[{name, path, found_at, status, is_overlay, nested}] for every xref."""
@@ -118,9 +283,10 @@ def bind(names, insert=False):
     return ids.Count
 
 
-def repath(name, new_path):
-    """Points one xref at a new path and reloads it."""
-    _repath({str(name): str(new_path)})
+def repath(name, new_path, reload=True):
+    """Points one xref at a new path and reloads it. reload=False only sets
+    the path, which keeps an unloaded xref unloaded until its next reload."""
+    _repath({str(name): str(new_path)}, reload_after=reload)
 
 
 def find_replace(find, replace):
@@ -164,7 +330,7 @@ def _rebase(convert):
     return len(changes)
 
 
-def _repath(changes):
+def _repath(changes, reload_after=True):
     from pyacad import _api, doc, ents
     if not changes:
         return
@@ -174,7 +340,8 @@ def _repath(changes):
             oid = _xref_id(tr, name)
             ents._open_id(tr, oid, write=True).PathName = changes[name]
             ids.Add(oid)
-    doc.database().ReloadXrefs(ids)
+    if reload_after:
+        doc.database().ReloadXrefs(ids)
 
 
 def _ids(names):

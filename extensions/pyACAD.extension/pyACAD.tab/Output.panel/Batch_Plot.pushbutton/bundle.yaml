@@ -1,0 +1,4 @@
+title: Batch Plot
+tooltip: Plots the layouts you pick to PDF, one file per layout, in a folder you choose. Remembers the folder, the file naming and the page setup for next time.
+context: doc
+keytip: OP

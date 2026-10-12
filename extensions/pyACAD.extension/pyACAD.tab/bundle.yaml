@@ -1,3 +1,9 @@
 layout:
   - pyACAD
+  - Data
+  - Layers
+  - Xrefs
+  - Cleanup
+  - Output
+  - Takeoff
   - AI_(beta)

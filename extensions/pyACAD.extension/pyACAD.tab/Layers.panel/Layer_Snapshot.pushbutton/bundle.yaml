@@ -1,0 +1,4 @@
+title: Layer Snapshot
+tooltip: Saves which layers are on, frozen and locked under a name kept with this drawing, and puts a saved state back later. Shift+Click lists the saved states.
+context: doc
+keytip: LS

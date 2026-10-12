@@ -27,10 +27,10 @@ namespace PyAcad.Tests
         [Fact]
         public void ThePanels_ReadInLayoutOrder()
         {
-            // The tab's layout list orders the panels: setup first, then the AI panel.
+            // The tab's layout list orders the panels: setup first, the MEP tool panels, then AI.
             // Name order would put AI first, so this only holds while the list does.
             var tab = Assert.Single(ParseShipped().Tabs);
-            Assert.Equal(new[] { "pyACAD", "AI (beta)" },
+            Assert.Equal(new[] { "pyACAD", "Data", "Layers", "Xrefs", "Cleanup", "Output", "Takeoff", "AI (beta)" },
                 tab.Panels.Select(p => p.Title).ToArray());
         }
 
@@ -158,7 +158,7 @@ namespace PyAcad.Tests
                                 : new[] { ((PushButtonModel)i).Directory })
                 .ToList();
 
-            Assert.Equal(7, bundles.Count);
+            Assert.Equal(22, bundles.Count);
 
             var expected = new[]
             {
