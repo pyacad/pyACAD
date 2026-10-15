@@ -147,6 +147,9 @@ namespace PyAcad.Runtime.Bundles
         public string Shortcut { get; set; }
         /// <summary>bundle.yaml command: override; null derives the command from the title.</summary>
         public string CommandName { get; set; }
+        /// <summary>bundle.yaml alias: short names typed in place of the command (one, or
+        /// several split on commas or spaces); raw, sanitised when commands are named.</summary>
+        public List<string> Aliases { get; } = new List<string>();
         /// <summary>Explicit Alt-keytip from bundle.yaml "keytip:"; null = auto-assign.</summary>
         public string KeyTipOverride { get; set; }
         /// <summary>Stable identity: bundle path relative to the extension folder, forward slashes.</summary>

@@ -2,3 +2,4 @@ title: Excel to Blocks
 tooltip: Reads a workbook made by Blocks to Excel and writes the attribute values and layers you edited back to the blocks, matched by handle. Rows whose block is gone are skipped and listed.
 context: doc
 keytip: DE
+alias: EXB

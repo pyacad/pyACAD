@@ -2,3 +2,4 @@ title: Font and Proxy Report
 tooltip: Lists the proxy objects in the drawing and the fonts its text styles name that AutoCAD cannot find. Export the list to Excel, or point the styles with a missing font at a replacement such as simplex.shx.
 context: doc
 keytip: CF
+alias: FPR

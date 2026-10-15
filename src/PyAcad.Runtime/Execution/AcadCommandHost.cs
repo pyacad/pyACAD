@@ -1,5 +1,8 @@
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Runtime.CompilerServices;
+using Autodesk.AutoCAD.ApplicationServices.Core;
 using Autodesk.AutoCAD.Internal;
 using Autodesk.AutoCAD.Runtime;
 
@@ -41,5 +44,35 @@ namespace PyAcad.Runtime.Execution
 
         [MethodImpl(MethodImplOptions.NoInlining)]
         public bool IsNameInUse(string name) => Utils.IsCommandNameInUse(name) != CommandTypeFlags.NoneCmd;
+
+        /// <summary>The acad.pgp AutoCAD loaded: the first one on the support path
+        /// (ACADPREFIX), which is where AutoCAD itself looks.</summary>
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public ISet<string> ReadPgpNames()
+        {
+            var support = Convert.ToString(Application.GetSystemVariable("ACADPREFIX")) ?? "";
+            foreach (var dir in support.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries))
+            {
+                string path;
+                try { path = Path.Combine(dir.Trim(), "acad.pgp"); }
+                catch (ArgumentException) { continue; }
+                if (!File.Exists(path)) continue;
+                Log.Info("Aliases checked against " + path);
+                return PgpFile.Names(File.ReadAllText(path));
+            }
+            Log.Info("No acad.pgp on the support path; aliases checked against commands only.");
+            return new HashSet<string>();
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public bool IsLispCommand(string name)
+        {
+            var doc = Application.DocumentManager.MdiActiveDocument;
+            return doc != null && doc.GetLispSymbol("C:" + name) != null;
+        }
+
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public void RunLisp(string name) =>
+            Application.DocumentManager.MdiActiveDocument?.SendStringToExecute("(C:" + name + ")\n", true, false, true);
     }
 }

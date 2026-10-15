@@ -48,7 +48,8 @@ namespace PyAcad.Runtime.Ribbon
         {
             var binding = Input.ShortcutManager.BindingFor(model);
             item.Text = ButtonCaption.Text(model, small, on, binding != null);
-            item.ToolTip = ButtonCaption.Tooltip(model, on, binding?.ToString());
+            item.ToolTip = ButtonCaption.Tooltip(model, on, binding?.ToString(),
+                Execution.CommandRegistry.NameFor(model), Execution.CommandRegistry.AliasesFor(model));
         }
 
         private readonly List<RibbonTab> _createdTabs = new List<RibbonTab>();

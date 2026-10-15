@@ -394,6 +394,17 @@ namespace PyAcad.Tests
         }
 
         [Fact]
+        public void Aliases_ComeFromBundleYaml_SplitAndUppercased()
+        {
+            MakeButton("MyExt", "T", "P", "A", yaml: "alias: bx, b2x\n");
+            MakeButton("MyExt", "T", "P", "B");
+            var buttons = ParseSingle().Tabs[0].Panels[0].Buttons;
+
+            Assert.Equal(new[] { "BX", "B2X" }, buttons.Single(b => b.Title == "A").Aliases);
+            Assert.Empty(buttons.Single(b => b.Title == "B").Aliases);
+        }
+
+        [Fact]
         public void Slideout_FolderContents_LandBelowThePanelBreak()
         {
             MakeButton("MyExt", "T", "P", "01_Main");

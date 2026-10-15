@@ -172,7 +172,7 @@ namespace PyAcad.Runtime
             steps.Run("Ribbon markers", () => Ribbon.RibbonMarkers.Configure(userConfig));
             // Before the ribbon: a button sends its command, so the command must exist
             // by the time the first click can land.
-            steps.Run("Commands", RegisterCommands);
+            steps.Run("Commands", () => RegisterCommands(userConfig));
             steps.Run("Ribbon", () =>
             {
                 RibbonProvider.Build(_extensions);
@@ -199,11 +199,11 @@ namespace PyAcad.Runtime
         /// their only way in besides a chord). Problems are the author's to see, so they
         /// toast like skipped bundles do.
         /// </summary>
-        private static void RegisterCommands()
+        private static void RegisterCommands(PyAcadConfig userConfig)
         {
             var buttons = _extensions.SelectMany(e => e.Tabs).SelectMany(t => t.Panels)
                 .SelectMany(p => p.Buttons).ToList();
-            var table = Execution.CommandNames.Assign(buttons);
+            var table = Execution.CommandNames.Assign(buttons, userConfig?.Aliases);
             var problems = Execution.CommandRegistry.Register(table, assignment =>
             {
                 if (assignment.IsConfig) Execution.ScriptExecutor.RunConfig(assignment.Model);

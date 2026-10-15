@@ -98,9 +98,89 @@ namespace PyAcad.Tests
             Assert.Null(result.Find("nothing"));
         }
 
-        private static PushButtonModel Button(string title, string key, string command = null, bool hasConfig = false)
+        [Theory]
+        [InlineData("bx", new[] { "BX" })]
+        [InlineData("BX, B2X", new[] { "BX", "B2X" })]
+        [InlineData(" bx  b2x;b3 ", new[] { "BX", "B2X", "B3" })]
+        [InlineData("b.x, !!", new[] { "BX" })]
+        [InlineData("", new string[0])]
+        [InlineData(null, new string[0])]
+        public void SplitAliases_splits_and_sanitises(string raw, string[] expected)
         {
-            return new PushButtonModel
+            Assert.Equal(expected, CommandNames.SplitAliases(raw));
+        }
+
+        [Fact]
+        public void Aliases_come_after_every_full_name_and_never_take_one()
+        {
+            var a = Button("Alpha", key: "t/p/A.pushbutton", aliases: "PYBETA, AX");
+            var b = Button("Beta", key: "t/p/B.pushbutton");
+            var table = CommandNames.Assign(new[] { a, b });
+
+            Assert.Equal("PYBETA", table.NameFor(b));
+            Assert.Same(b, table.Find("PYBETA").Model);
+            Assert.Equal("PYALPHA", table.NameFor(a));
+            Assert.Equal(new[] { "AX" }, table.AliasesFor(a).Select(x => x.Name));
+            Assert.Same(a, table.Find("ax").Model);
+            Assert.Contains("PYBETA", Assert.Single(table.Problems));
+        }
+
+        [Fact]
+        public void An_alias_two_tools_claim_goes_to_the_first()
+        {
+            var a = Button("Alpha", key: "t/p/A.pushbutton", aliases: "XX");
+            var b = Button("Beta", key: "t/p/B.pushbutton", aliases: "XX");
+            var table = CommandNames.Assign(new[] { a, b });
+
+            Assert.Same(a, table.Find("XX").Model);
+            Assert.Empty(table.AliasesFor(b));
+            Assert.Contains("bundle.yaml", Assert.Single(table.Problems));
+        }
+
+        [Fact]
+        public void An_alias_equal_to_the_tools_own_command_is_dropped_quietly()
+        {
+            var a = Button("Alpha", key: "t/p/A.pushbutton", aliases: "pyalpha");
+            var table = CommandNames.Assign(new[] { a });
+
+            Assert.Empty(table.Problems);
+            Assert.Empty(table.AliasesFor(a));
+        }
+
+        [Fact]
+        public void Config_aliases_replace_or_remove_the_bundles()
+        {
+            var a = Button("Alpha", key: "t/p/A.pushbutton", aliases: "AX");
+            var b = Button("Beta", key: "t/p/B.pushbutton", aliases: "BX");
+            var c = Button("Gamma", key: "t/p/C.pushbutton", aliases: "GX");
+            var overrides = new Dictionary<string, string>
+            {
+                ["t/p/A.pushbutton"] = "a1 a2",
+                ["t/p/B.pushbutton"] = null,
+            };
+            var table = CommandNames.Assign(new[] { a, b, c }, overrides);
+
+            Assert.Equal(new[] { "A1", "A2" }, table.AliasesFor(a).Select(x => x.Name));
+            Assert.All(table.AliasesFor(a), x => Assert.True(x.FromUser));
+            Assert.Null(table.Find("AX"));
+            Assert.Empty(table.AliasesFor(b));
+            Assert.False(Assert.Single(table.AliasesFor(c)).FromUser);
+        }
+
+        [Fact]
+        public void A_users_alias_clash_points_at_config_json()
+        {
+            var a = Button("Alpha", key: "t/p/A.pushbutton");
+            var b = Button("Beta", key: "t/p/B.pushbutton");
+            var table = CommandNames.Assign(new[] { a, b }, new Dictionary<string, string> { ["t/p/B.pushbutton"] = "PYALPHA" });
+
+            Assert.Contains("config.json", Assert.Single(table.Problems));
+        }
+
+        private static PushButtonModel Button(string title, string key, string command = null, bool hasConfig = false,
+            string aliases = null)
+        {
+            var model = new PushButtonModel
             {
                 Title = title,
                 BundleKey = key,
@@ -108,6 +188,8 @@ namespace PyAcad.Tests
                 ConfigScriptPath = hasConfig ? @"C:\x\config.py" : null,
                 CommandName = command,
             };
+            model.Aliases.AddRange(CommandNames.SplitAliases(aliases));
+            return model;
         }
     }
 }

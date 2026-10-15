@@ -38,6 +38,11 @@ namespace PyAcad.Runtime.Config
         public Dictionary<string, string> ShortcutBindings { get; } =
             new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
+        /// <summary>"aliases": bundle key -> the user's own aliases for that tool ("BX" or
+        /// "BX, B2X"), replacing the bundle's alias:; null or "" drops them.</summary>
+        public Dictionary<string, string> Aliases { get; } =
+            new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
         /// <summary>"panes.assignments": dockpane bundle key -> 1-based slot.</summary>
         public Dictionary<string, int> PaneAssignments { get; } =
             new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
@@ -350,6 +355,32 @@ namespace PyAcad.Runtime.Config
         }
 
         /// <summary>
+        /// Rewrites ONLY the "aliases" section, preserving every other key. Entries whose
+        /// key is not in <paramref name="editedKeys"/> are kept: they belong to tools the
+        /// editor did not show (an extension not loaded right now). Same failure contract
+        /// as SaveShortcutBindings.
+        /// </summary>
+        public static void SaveAliases(string path, IReadOnlyDictionary<string, string> aliases,
+            IEnumerable<string> editedKeys)
+        {
+            var root = ReadRootForUpdate(path);
+            var edited = new HashSet<string>(editedKeys ?? new string[0], StringComparer.OrdinalIgnoreCase);
+
+            var map = new Dictionary<string, object>();
+            if (root.TryGetValue("aliases", out var existing) && existing is Dictionary<string, object> section)
+                foreach (var pair in section)
+                    if (!edited.Contains(Bundles.BundleKeys.Normalize(pair.Key)))
+                        map[pair.Key] = pair.Value;
+            foreach (var pair in aliases)
+                map[pair.Key] = pair.Value;
+
+            if (map.Count == 0) root.Remove("aliases");
+            else root["aliases"] = map;
+
+            WriteRoot(path, root);
+        }
+
+        /// <summary>
         /// Rewrites ONLY the "panes" section, preserving every other key. Same failure
         /// contract as SaveShortcutBindings: IO errors and an unparsable file propagate.
         /// </summary>
@@ -428,6 +459,12 @@ namespace PyAcad.Runtime.Config
                         foreach (var pair in bindings)
                             config.ShortcutBindings[Bundles.BundleKeys.Normalize(pair.Key)] = pair.Value as string; // null stays null = disabled
                     }
+                }
+                if (data != null && data.TryGetValue("aliases", out var al)
+                    && al is Dictionary<string, object> aliases)
+                {
+                    foreach (var pair in aliases)
+                        config.Aliases[Bundles.BundleKeys.Normalize(pair.Key)] = pair.Value as string; // null stays null = none
                 }
                 if (data != null && data.TryGetValue("panes", out var panes)
                     && panes is Dictionary<string, object> paneSection)

@@ -29,6 +29,21 @@ namespace PyAcad.Tests
         }
 
         [Fact]
+        public void Aliases_Section_ParsesStrings_AndNulls()
+        {
+            var c = PyAcadConfig.Load(WriteConfig(@"{
+                ""aliases"": {
+                    ""pyACAD.tab/data.panel/BlocksToExcel.pushbutton"": ""BE, B2E"",
+                    ""pyACAD.tab/data.panel/ExcelToBlocks.pushbutton"": null
+                }
+            }"));
+
+            Assert.Equal("BE, B2E", c.Aliases["pyACAD.tab/data.panel/BlocksToExcel.pushbutton"]);
+            Assert.True(c.Aliases.ContainsKey("pyACAD.tab/data.panel/ExcelToBlocks.pushbutton"));
+            Assert.Null(c.Aliases["pyACAD.tab/data.panel/ExcelToBlocks.pushbutton"]);
+        }
+
+        [Fact]
         public void MissingFile_YieldsDefaults()
         {
             var c = PyAcadConfig.Load(Path.Combine(_dir, "nope.json"));
@@ -190,6 +205,36 @@ namespace PyAcad.Tests
             Assert.Equal("Ctrl+Alt+N", c.ShortcutBindings["new/key"]);
             Assert.False(c.ShortcutBindings.ContainsKey("old/key"));
             Assert.Contains("\"runtime2026\"", File.ReadAllText(path)); // unknown key survives verbatim
+        }
+
+        [Fact]
+        public void SaveAliases_ReplacesEditedKeys_AndKeepsTheRest()
+        {
+            var path = WriteConfig(@"{
+                ""theme"": ""dark"",
+                ""shortcuts"": { ""bindings"": { ""a/key"": ""Ctrl+Alt+A"" } },
+                ""aliases"": { ""shown/one"": ""OLD"", ""shown/two"": ""TWO"", ""not/loaded"": ""KEEP"" }
+            }");
+
+            var aliases = new Dictionary<string, string> { ["shown/one"] = "NEW", ["shown/three"] = null };
+            PyAcadConfig.SaveAliases(path, aliases, new[] { "shown/one", "shown/two", "shown/three" });
+
+            var c = PyAcadConfig.Load(path);
+            Assert.Equal("NEW", c.Aliases["shown/one"]);
+            Assert.False(c.Aliases.ContainsKey("shown/two"));      // back at the author's: entry gone
+            Assert.True(c.Aliases.ContainsKey("shown/three"));
+            Assert.Null(c.Aliases["shown/three"]);                 // null survives: "no aliases at all"
+            Assert.Equal("KEEP", c.Aliases["not/loaded"]);         // a tool the editor did not show
+            Assert.Equal("Ctrl+Alt+A", c.ShortcutBindings["a/key"]);
+            Assert.Equal("dark", c.Theme);
+        }
+
+        [Fact]
+        public void SaveAliases_WithNothingLeft_RemovesTheSection()
+        {
+            var path = WriteConfig(@"{ ""theme"": ""dark"", ""aliases"": { ""shown/one"": ""OLD"" } }");
+            PyAcadConfig.SaveAliases(path, new Dictionary<string, string>(), new[] { "shown/one" });
+            Assert.DoesNotContain("aliases", File.ReadAllText(path));
         }
 
         [Fact]

@@ -300,6 +300,9 @@ namespace PyAcad.Runtime.Bundles
             button.SearchPaths.Add(buttonDir);
             if (ext.LibDirectory != null) button.SearchPaths.Add(ext.LibDirectory);
 
+            if (yaml.TryGetValue("alias", out var alias))
+                button.Aliases.AddRange(Execution.CommandNames.SplitAliases(alias));
+
             if (yaml.TryGetValue("context", out var context))
             {
                 try

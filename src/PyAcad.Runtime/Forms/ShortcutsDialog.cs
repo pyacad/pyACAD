@@ -27,7 +27,11 @@ namespace PyAcad.Runtime.Forms
             public TextBlock Badge;
             public Button Reset;
             public TextBlock ConflictCaption;
+            public TextBox AliasBox;
+            public TextBlock AliasCaption;
         }
+
+        private const double AliasWidth = 90;
 
         private sealed class Parts
         {
@@ -49,7 +53,8 @@ namespace PyAcad.Runtime.Forms
         public static bool ShowAndSave()
         {
             var config = PyAcadConfig.Load(RuntimeHost.UserConfigPath);
-            var model = ShortcutsModel.Build(RuntimeHost.Extensions, config);
+            var model = ShortcutsModel.Build(RuntimeHost.Extensions, config,
+                Execution.CommandRegistry.OutsideOwnerCheck());
             var window = Build(model);
             window.ShowDialog();
 
@@ -59,6 +64,7 @@ namespace PyAcad.Runtime.Forms
             try
             {
                 PyAcadConfig.SaveShortcutBindings(RuntimeHost.UserConfigPath, model.ToBindings());
+                PyAcadConfig.SaveAliases(RuntimeHost.UserConfigPath, model.ToAliases(), model.BundleKeys);
                 return true;
             }
             catch (Exception ex)
@@ -79,10 +85,10 @@ namespace PyAcad.Runtime.Forms
 
             var window = new Window
             {
-                Title = "Keyboard Shortcuts",
-                Width = 560,
+                Title = "Shortcuts and Aliases",
+                Width = 660,
                 Height = 640,
-                MinWidth = 480,
+                MinWidth = 560,
                 MinHeight = 420,
                 WindowStartupLocation = WindowStartupLocation.CenterScreen,
                 FontFamily = new FontFamily("Segoe UI Variable Text, Segoe UI"),
@@ -141,14 +147,24 @@ namespace PyAcad.Runtime.Forms
         public static int ConflictCaptionCountOf(Window window) => PartsOf(window).RowUis
             .Count(r => r.ConflictCaption.Visibility == Visibility.Visible);
 
+        public static int AliasBoxCountOf(Window window) => PartsOf(window).RowUis.Count(r => r.AliasBox != null);
+
+        public static int AliasCaptionCountOf(Window window) => PartsOf(window).RowUis
+            .Count(r => r.AliasCaption.Visibility == Visibility.Visible);
+
+        /// <summary>Types into a row's alias field, as a user would.</summary>
+        public static void TypeAliasForTest(Window window, string bundleKey, string text) =>
+            PartsOf(window).RowUis.First(r => r.Row.BundleKey == bundleKey).AliasBox.Text = text;
+
         // ---- construction ------------------------------------------------------
 
         private static FrameworkElement Header(Tokens t)
         {
             var stack = new StackPanel { Margin = new Thickness(16, 14, 16, 10) };
-            stack.Children.Add(DesignSystem.Text("Keyboard Shortcuts", 16, t.Ink, FontWeights.SemiBold));
+            stack.Children.Add(DesignSystem.Text("Shortcuts and Aliases", 16, t.Ink, FontWeights.SemiBold));
             var caption = DesignSystem.Text(
-                "Click a field and press the keys. Backspace clears a shortcut, Esc leaves it as it was.",
+                "Click a shortcut field and press the keys. Backspace clears a shortcut, Esc leaves it as it was. " +
+                "An alias is a short name you type, like BX; separate several with commas.",
                 12, t.Muted);
             caption.Margin = new Thickness(0, 4, 0, 0);
             caption.TextWrapping = TextWrapping.Wrap;
@@ -186,7 +202,9 @@ namespace PyAcad.Runtime.Forms
                 query.Length == 0
                 || (r.Title ?? "").IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0
                 || (r.PanelTitle ?? "").IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0
-                || (r.Current ?? "").IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0)
+                || (r.Current ?? "").IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0
+                || (r.CurrentAliases ?? "").IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0
+                || (r.CommandName ?? "").IndexOf(query, StringComparison.OrdinalIgnoreCase) >= 0)
                 .ToList();
 
             if (visible.Count == 0)
@@ -209,6 +227,7 @@ namespace PyAcad.Runtime.Forms
                 return list;
             }
 
+            var first = true;
             foreach (var group in visible.GroupBy(r => r.PanelTitle))
             {
                 var header = new Border
@@ -217,14 +236,37 @@ namespace PyAcad.Runtime.Forms
                     BorderThickness = new Thickness(0, 0, 0, 1),
                     Margin = new Thickness(0, 14, 0, 4),
                     Padding = new Thickness(0, 0, 0, 4),
-                    Child = DesignSystem.Text(group.Key, 12, t.Muted, FontWeights.Medium),
+                    Child = PanelHeader(t, group.Key, columnLabels: first),
                 };
+                first = false;
                 list.Children.Add(header);
 
                 foreach (var row in group)
                     list.Children.Add(BuildRow(parts, row));
             }
             return list;
+        }
+
+        /// <summary>The panel name, and over the first panel only, the two column labels,
+        /// right-anchored like the fields in every row below.</summary>
+        private static FrameworkElement PanelHeader(Tokens t, string panel, bool columnLabels)
+        {
+            var grid = new Grid();
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(150) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(8 + AliasWidth) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(30) });
+            grid.Children.Add(DesignSystem.Text(panel, 12, t.Muted, FontWeights.Medium));
+            if (!columnLabels) return grid;
+
+            var shortcut = DesignSystem.Text("Shortcut", 12, t.Muted);
+            Grid.SetColumn(shortcut, 1);
+            grid.Children.Add(shortcut);
+            var alias = DesignSystem.Text("Alias", 12, t.Muted);
+            alias.Margin = new Thickness(8, 0, 0, 0);
+            Grid.SetColumn(alias, 2);
+            grid.Children.Add(alias);
+            return grid;
         }
 
         private static FrameworkElement BuildRow(Parts parts, ShortcutsModel.Row row)
@@ -235,6 +277,7 @@ namespace PyAcad.Runtime.Forms
 
             var grid = new Grid { Margin = new Thickness(0, 3, 0, 3) };
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
+            grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
             grid.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(30) });
@@ -255,23 +298,50 @@ namespace PyAcad.Runtime.Forms
             Grid.SetColumn(ui.Recorder, 2);
             grid.Children.Add(ui.Recorder);
 
+            // Committed on every keystroke, so Save lights up without leaving the field;
+            // the text is tidied to its canonical form ("BX, B2X") only on the way out.
+            ui.AliasBox = new TextBox
+            {
+                Height = 24,   // plus the field border: level with the 26px recorder
+                Text = row.CurrentAliases ?? "",
+                CharacterCasing = CharacterCasing.Upper,
+                ToolTip = "Runs " + row.CommandName,
+            };
+            var aliasField = DesignSystem.InputField(t, ui.AliasBox);
+            aliasField.Width = AliasWidth;
+            aliasField.Margin = new Thickness(8, 0, 0, 0);
+            Grid.SetColumn(aliasField, 3);
+            grid.Children.Add(aliasField);
+            ui.AliasBox.TextChanged += (s, e) =>
+            {
+                parts.Model.TrySetAliases(row.BundleKey, ui.AliasBox.Text);
+                RefreshChrome(parts);
+            };
+            ui.AliasBox.LostKeyboardFocus += (s, e) => ui.AliasBox.Text = row.CurrentAliases ?? "";
+
             ui.Reset = ResetButton(t, () =>
             {
                 parts.Model.ResetToDefault(row.BundleKey);
                 ui.Recorder.ChordText = row.Current;
+                ui.AliasBox.Text = row.CurrentAliases ?? "";
                 RefreshChrome(parts);
             });
-            Grid.SetColumn(ui.Reset, 3);
+            Grid.SetColumn(ui.Reset, 4);
             grid.Children.Add(ui.Reset);
 
             // Error copy reads at the start of the row, at the 12px caption size:
             // 11px right-aligned put the explanation furthest from the name it
             // belongs to.
+            var captions = new StackPanel();
             ui.ConflictCaption = DesignSystem.Text("", 12, t.Error);
             ui.ConflictCaption.Margin = new Thickness(0, 1, 0, 2);
-            Grid.SetRow(ui.ConflictCaption, 1);
-            Grid.SetColumnSpan(ui.ConflictCaption, 4);
-            grid.Children.Add(ui.ConflictCaption);
+            captions.Children.Add(ui.ConflictCaption);
+            ui.AliasCaption = DesignSystem.Text("", 12, t.Muted);
+            ui.AliasCaption.Margin = new Thickness(0, 1, 0, 2);
+            captions.Children.Add(ui.AliasCaption);
+            Grid.SetRow(captions, 1);
+            Grid.SetColumnSpan(captions, 5);
+            grid.Children.Add(captions);
 
             ui.Recorder.ChordChanged += chord =>
             {
@@ -326,7 +396,10 @@ namespace PyAcad.Runtime.Forms
             {
                 parts.Model.ResetAll();
                 foreach (var ui in parts.RowUis)
+                {
                     ui.Recorder.ChordText = ui.Row.Current;
+                    ui.AliasBox.Text = ui.Row.CurrentAliases ?? "";
+                }
                 RefreshChrome(parts);
             });
             restore.HorizontalAlignment = HorizontalAlignment.Left;
@@ -362,15 +435,25 @@ namespace PyAcad.Runtime.Forms
             foreach (var ui in parts.RowUis)
             {
                 var row = ui.Row;
-                ui.Badge.Text = !row.IsCustom ? "" : row.Current == null ? "disabled" : "custom";
-                ui.Reset.Visibility = row.IsCustom && row.DefaultChord != null
+                ui.Badge.Text = !row.IsAnyCustom ? ""
+                    : row.IsCustom && row.Current == null ? "disabled" : "custom";
+                ui.Reset.Visibility = (row.IsCustom && row.DefaultChord != null) || row.IsAliasCustom
                     ? Visibility.Visible : Visibility.Hidden;
 
                 var conflict = row.ConflictWith != null;
                 ui.ConflictCaption.Text = conflict ? "conflicts with " + row.ConflictWith : "";
                 ui.ConflictCaption.Visibility = conflict ? Visibility.Visible : Visibility.Collapsed;
+
+                // The user's own alias that cannot work blocks Save, in the error colour;
+                // an author's alias that cannot work is a quiet note: it is skipped, and
+                // the full command still runs the tool.
+                var aliasProblem = row.AliasProblem != null;
+                ui.AliasCaption.Text = !aliasProblem ? ""
+                    : row.AliasBlocks ? row.AliasProblem : "Alias not active: " + row.AliasProblem;
+                ui.AliasCaption.Foreground = DesignSystem.Brush(row.AliasBlocks ? parts.T.Error : parts.T.Muted);
+                ui.AliasCaption.Visibility = aliasProblem ? Visibility.Visible : Visibility.Collapsed;
             }
-            parts.Save.IsEnabled = parts.Model.IsDirty && !parts.Model.HasConflicts;
+            parts.Save.IsEnabled = parts.Model.IsDirty && !parts.Model.HasConflicts && !parts.Model.HasAliasProblems;
         }
 
         private static bool AllowBareKeysOf(ShortcutsModel model) => model.AllowBareKeys;

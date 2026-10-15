@@ -119,14 +119,97 @@ namespace PyAcad.Tests
             Assert.Equal("_.PYALPHA\n", CommandSender.Wire("PYALPHA"));
         }
 
-        private static PushButtonModel Button(string title, string key, bool hasConfig = false) =>
-            new PushButtonModel
+        [Fact]
+        public void Wire_form_cancels_a_running_command_first_when_asked()
+        {
+            Assert.Equal("\x03\x03_.PYALPHA\n", CommandSender.Wire("PYALPHA", cancelFirst: true));
+        }
+
+        [Fact]
+        public void An_alias_registers_after_the_full_name_and_the_ribbon_keeps_the_full_name()
+        {
+            var a = Button("Alpha", "a", aliases: "AX");
+            var problems = CommandRegistry.Register(CommandNames.Assign(new[] { a }), _ => { });
+
+            Assert.Empty(problems);
+            Assert.Equal(new[] { "PYALPHA", "AX" }, CommandRegistry.RegisteredNames);
+            Assert.Equal("PYALPHA", CommandRegistry.NameFor(a));
+            Assert.Equal(new[] { "AX" }, CommandRegistry.AliasesFor(a));
+        }
+
+        [Fact]
+        public void A_bundle_alias_that_acad_pgp_or_AutoCAD_already_has_is_left_out_quietly()
+        {
+            _host.Pgp.Add("CO");
+            _host.InUse.Add("LX");
+            var a = Button("Alpha", "a", aliases: "CO LX AX");
+            var problems = CommandRegistry.Register(CommandNames.Assign(new[] { a }), _ => { });
+
+            Assert.Empty(problems);
+            Assert.Equal(new[] { "PYALPHA", "AX" }, CommandRegistry.RegisteredNames);
+            Assert.Equal(new[] { "AX" }, CommandRegistry.AliasesFor(a));
+        }
+
+        [Fact]
+        public void A_users_own_alias_that_acad_pgp_has_is_left_out_and_reported()
+        {
+            _host.Pgp.Add("CO");
+            var a = Button("Alpha", "a");
+            var overrides = new Dictionary<string, string> { ["t/p/a.pushbutton"] = "CO" };
+            var problems = CommandRegistry.Register(CommandNames.Assign(new[] { a }, overrides), _ => { });
+
+            Assert.Contains("acad.pgp", Assert.Single(problems));
+            Assert.Equal(new[] { "PYALPHA" }, CommandRegistry.RegisteredNames);
+        }
+
+        [Fact]
+        public void An_alias_runs_its_tool_until_the_drawings_LISP_defines_the_same_name()
+        {
+            var a = Button("Alpha", "a", aliases: "AX");
+            var ran = new List<string>();
+            CommandRegistry.Register(CommandNames.Assign(new[] { a }), x => ran.Add(x.Name));
+
+            _host.Invoke("AX");
+            _host.Lisp.Add("AX");
+            _host.Invoke("AX");
+            _host.Invoke("PYALPHA");
+
+            Assert.Equal(new[] { "AX", "PYALPHA" }, ran);
+            Assert.Equal(new[] { "AX" }, _host.LispRuns);
+        }
+
+        [Fact]
+        public void Acad_pgp_is_read_only_when_some_bundle_has_an_alias()
+        {
+            CommandRegistry.Register(CommandNames.Assign(new[] { Button("Alpha", "a") }), _ => { });
+            Assert.Equal(0, _host.PgpReads);
+
+            CommandRegistry.Register(CommandNames.Assign(new[] { Button("Beta", "b", aliases: "BX") }), _ => { });
+            Assert.Equal(1, _host.PgpReads);
+        }
+
+        [Fact]
+        public void A_pgp_that_cannot_be_read_still_registers_the_aliases()
+        {
+            _host.PgpThrows = true;
+            var a = Button("Alpha", "a", aliases: "AX");
+            CommandRegistry.Register(CommandNames.Assign(new[] { a }), _ => { });
+
+            Assert.Equal(new[] { "AX" }, CommandRegistry.AliasesFor(a));
+        }
+
+        private static PushButtonModel Button(string title, string key, bool hasConfig = false, string aliases = null)
+        {
+            var model = new PushButtonModel
             {
                 Title = title,
                 BundleKey = "t/p/" + key + ".pushbutton",
                 ScriptPath = @"C:\x\" + key + @"\script.py",
                 ConfigScriptPath = hasConfig ? @"C:\x\" + key + @"\config.py" : null,
             };
+            model.Aliases.AddRange(CommandNames.SplitAliases(aliases));
+            return model;
+        }
 
         private sealed class FakeCommandHost : ICommandHost
         {
@@ -150,6 +233,23 @@ namespace PyAcad.Tests
             }
 
             public bool IsNameInUse(string name) => InUse.Contains(name);
+
+            public readonly HashSet<string> Pgp = new HashSet<string>();
+            public readonly HashSet<string> Lisp = new HashSet<string>();
+            public readonly List<string> LispRuns = new List<string>();
+            public int PgpReads;
+            public bool PgpThrows;
+
+            public ISet<string> ReadPgpNames()
+            {
+                PgpReads++;
+                if (PgpThrows) throw new System.IO.IOException("locked");
+                return new HashSet<string>(Pgp);
+            }
+
+            public bool IsLispCommand(string name) => Lisp.Contains(name);
+
+            public void RunLisp(string name) => LispRuns.Add(name);
 
             public void Invoke(string name) => _callbacks[name]();
         }

@@ -163,5 +163,17 @@ namespace PyAcad.Tests
             Assert.Equal("(Ctrl+H)", ButtonCaption.Tooltip(new PushButtonModel { Title = "X" }, false, "Ctrl+H"));
             Assert.Null(ButtonCaption.Tooltip(new PushButtonModel { Title = "X" }, false, null));
         }
+
+        [Fact]
+        public void Tooltip_Ends_With_What_To_Type()
+        {
+            var t = Toggle();
+            Assert.Equal("Takes them off (Ctrl+H)\n\nCommand: PYHIDETABS (alias HT)",
+                ButtonCaption.Tooltip(t, false, "Ctrl+H", "PYHIDETABS", new[] { "HT" }));
+            Assert.Equal("Command: PYX (aliases X1, X2)",
+                ButtonCaption.Tooltip(new PushButtonModel { Title = "X" }, false, null, "PYX", new[] { "X1", "X2" }));
+            Assert.Equal("Command: PYX", ButtonCaption.Tooltip(new PushButtonModel { Title = "X" }, false, null, "PYX"));
+            Assert.Equal("Takes them off", ButtonCaption.Tooltip(t, false, null, null, new[] { "HT" }));
+        }
     }
 }

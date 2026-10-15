@@ -35,6 +35,21 @@ namespace PyAcad.Tests
         }
 
         [Fact]
+        public void ShippedCommandsAndAliases_AllGetTheirNames()
+        {
+            // Every shipped tool keeps its command, and every shipped alias is unique and
+            // never one of the tools' full names. Clashes with acad.pgp are a runtime check.
+            var buttons = ParseShipped().Tabs.SelectMany(t => t.Panels).SelectMany(p => p.Buttons).ToList();
+            var table = Runtime.Execution.CommandNames.Assign(buttons);
+
+            Assert.Empty(table.Problems);
+            Assert.Equal(14, table.Assignments.Count(a => a.IsAlias));
+            var bx = table.Find("BX");
+            Assert.NotNull(bx);
+            Assert.Equal("PYBLOCKSTOEXCEL", table.NameFor(bx.Model));
+        }
+
+        [Fact]
         public void ShippedExtension_ParsesWithoutProblems()
         {
             // A layout entry that names no folder, a mistyped suffix, a button without a

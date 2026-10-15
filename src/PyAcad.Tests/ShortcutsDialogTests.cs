@@ -43,9 +43,41 @@ namespace PyAcad.Tests
             {
                 var window = ShortcutsDialog.Build(Model());
 
-                Assert.Equal("Keyboard Shortcuts", window.Title);
+                Assert.Equal("Shortcuts and Aliases", window.Title);
                 Assert.Equal(3, ShortcutsDialog.RecorderCountOf(window));
+                Assert.Equal(3, ShortcutsDialog.AliasBoxCountOf(window));
                 Assert.Equal(2, ShortcutsDialog.PanelHeaderCountOf(window));
+            });
+        }
+
+        [Fact]
+        public void Typing_An_Alias_Enables_Save()
+        {
+            OnSta(() =>
+            {
+                var window = ShortcutsDialog.Build(Model());
+                ShortcutsDialog.TypeAliasForTest(window, "t/g/B.pushbutton", "bt");
+
+                Assert.True(ShortcutsDialog.SaveEnabledOf(window));
+                Assert.Equal(0, ShortcutsDialog.AliasCaptionCountOf(window));
+            });
+        }
+
+        [Fact]
+        public void An_Alias_That_Clashes_Disables_Save_And_Says_Why()
+        {
+            OnSta(() =>
+            {
+                var window = ShortcutsDialog.Build(Model());
+                ShortcutsDialog.TypeAliasForTest(window, "t/g/B.pushbutton", "PYALPHA");
+
+                Assert.False(ShortcutsDialog.SaveEnabledOf(window));
+                Assert.Equal(1, ShortcutsDialog.AliasCaptionCountOf(window));
+
+                // and finding a tool by its alias works like finding it by its chord
+                ShortcutsDialog.TypeAliasForTest(window, "t/g/B.pushbutton", "BT");
+                ShortcutsDialog.SearchForTest(window, "bt");
+                Assert.Equal(1, ShortcutsDialog.RecorderCountOf(window));
             });
         }
 

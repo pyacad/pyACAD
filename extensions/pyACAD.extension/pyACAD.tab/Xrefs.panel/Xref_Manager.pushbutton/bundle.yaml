@@ -2,3 +2,4 @@ title: Xref Manager
 tooltip: Reload, unload, detach or bind several xrefs at once. Pick them from a list that shows each one's status and saved path.
 context: doc
 keytip: XM
+alias: XM

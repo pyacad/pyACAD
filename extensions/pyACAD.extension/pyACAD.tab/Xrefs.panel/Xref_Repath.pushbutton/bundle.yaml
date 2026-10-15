@@ -2,3 +2,4 @@ title: Xref Repath
 tooltip: Change every xref's saved path in one go: make them relative or absolute, find and replace text in them, or point them all at one folder. Shows the old and new paths before anything changes.
 context: doc
 keytip: XR
+alias: XRP

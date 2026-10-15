@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using PyAcad.Runtime.Bundles;
 
 namespace PyAcad.Runtime.Ribbon
@@ -26,13 +27,26 @@ namespace PyAcad.Runtime.Ribbon
         }
 
         /// <summary>The tooltip for the state, naming the RESOLVED chord (so a rebound
-        /// tool shows the user's key), or null when there is nothing to say.</summary>
-        public static string Tooltip(PushButtonModel model, bool on, string chord)
+        /// tool shows the user's key), then what to type, as AutoCAD's own tooltips name
+        /// their command; or null when there is nothing to say.</summary>
+        public static string Tooltip(PushButtonModel model, bool on, string chord,
+            string command = null, IReadOnlyList<string> aliases = null)
         {
             var tooltip = on && model.IsToggle && model.TooltipOn != null ? model.TooltipOn : model.Tooltip;
             if (chord != null)
                 tooltip = string.IsNullOrEmpty(tooltip) ? $"({chord})" : $"{tooltip} ({chord})";
+            var typed = TypedLine(command, aliases);
+            if (typed != null)
+                tooltip = string.IsNullOrEmpty(tooltip) ? typed : tooltip + "\n\n" + typed;
             return string.IsNullOrEmpty(tooltip) ? null : tooltip;
+        }
+
+        /// <summary>"Command: PYBLOCKSTOEXCEL (alias BX)", or null with no command.</summary>
+        public static string TypedLine(string command, IReadOnlyList<string> aliases)
+        {
+            if (string.IsNullOrEmpty(command)) return null;
+            if (aliases == null || aliases.Count == 0) return "Command: " + command;
+            return $"Command: {command} ({(aliases.Count == 1 ? "alias" : "aliases")} {string.Join(", ", aliases)})";
         }
     }
 }

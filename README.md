@@ -29,6 +29,9 @@ brings the same idea to AutoCAD.
 - **Live reload.** Edit a script, click the button again. Add a bundle, press Reload.
 - **Hooks and startup scripts.** `hooks\doc-opened.py` and 19 other AutoCAD events run with
   no click; `startup.py` runs at boot and on every Reload.
+- **Commands and aliases.** Every button is also a command you can type, put in a macro or
+  call from AutoLISP, and `alias: BX` adds a short name. An alias never replaces one in
+  your `acad.pgp` or an existing command.
 - **Keyboard shortcuts and keytips** declared per bundle, with an in-app editor for overrides.
 - **Context rules.** `context: selection & modelspace` greys a button out until it can work.
 - **The `pyacad` library.** Forms and pickers, toasts, a rich HTML output window with tables

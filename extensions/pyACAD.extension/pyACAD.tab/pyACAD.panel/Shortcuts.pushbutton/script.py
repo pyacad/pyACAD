@@ -1,4 +1,4 @@
-"""View and rebind pyACAD keyboard shortcuts (writes config.json overrides)."""
+"""View and change pyACAD keyboard shortcuts and aliases (writes config.json overrides)."""
 import clr
 
 clr.AddReference('PyAcad.Runtime')
@@ -8,4 +8,4 @@ from pyacad import toast
 
 if ShortcutsDialog.ShowAndSave():
     __pyacad__.Reload()
-    toast.success('Shortcuts saved and applied.')
+    toast.success('Shortcuts and aliases saved and applied.')

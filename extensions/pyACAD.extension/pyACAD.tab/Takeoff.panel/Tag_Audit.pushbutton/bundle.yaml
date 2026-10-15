@@ -2,3 +2,4 @@ title: Tag Audit
 tooltip: Checks one attribute, TAG by default, across the block references in the selection or the drawing. Lists values used more than once, blank values and blocks without that attribute, and can select them or export the findings to Excel.
 context: doc
 keytip: TT
+alias: TAU

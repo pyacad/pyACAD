@@ -2,3 +2,4 @@ title: Drawing Cleanup
 tooltip: Purges, audits, deletes zero-length and duplicate geometry and zooms to extents in one run, from a checklist that remembers your last choice. Shift+Click resets the checklist to its defaults.
 context: doc
 keytip: CC
+alias: DCU

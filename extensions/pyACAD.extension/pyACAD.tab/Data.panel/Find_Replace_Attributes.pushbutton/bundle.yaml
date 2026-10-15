@@ -2,3 +2,4 @@ title: Find and Replace Attributes
 tooltip: Replaces text in block attribute values across the drawing, the selection or blocks you pick, in every tag or just one, with or without matching case. One Undo takes it all back.
 context: doc
 keytip: DF
+alias: FRA
