@@ -1,0 +1,787 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The bundle.yaml reference - pyACAD authoring</title>
+<meta name="description" content="Every key the runtime reads from bundle.yaml and extension.yaml, which kinds read it, what it falls back to, and the exact rules of the very small parser that reads the file.">
+<link rel="stylesheet" href="_assets/site.css">
+</head>
+<body data-base="">
+<div class="layout">
+<div class="sidebar">
+  <div class="brand"><a href="index.html"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="26" height="26" aria-hidden="true"><polygon points="157.0,327.8 351.8,327.8 363.1,342.4 363.1,403.3 168.3,403.3 157.0,388.7" fill="#78082A"/><polygon points="157.0,327.8 351.8,327.8 351.8,388.7 157.0,388.7" fill="#B80C40"/><polygon points="51.5,482.0 234.1,157.4 278.7,181.7 290.1,196.3 152.1,496.6 62.8,496.6" fill="#78082A"/><polygon points="51.5,482.0 140.8,482.0 278.7,181.7 234.1,157.4" fill="#E51050"/><polygon points="359.9,482.0 205.7,108.7 217.0,123.3 371.2,496.6" fill="#78082A"/><polygon points="205.7,108.7 201.6,55.9 213.0,70.5 217.0,123.3" fill="#78082A"/><polygon points="201.6,55.9 246.3,15.4 257.6,30.0 213.0,70.5" fill="#78082A"/><polygon points="246.3,15.4 343.7,23.5 355.0,38.1 257.6,30.0" fill="#78082A"/><polygon points="343.7,23.5 388.3,51.9 399.7,66.5 355.0,38.1" fill="#78082A"/><polygon points="388.3,51.9 347.7,76.2 359.1,90.8 399.7,66.5" fill="#78082A"/><polygon points="347.7,76.2 295.0,84.3 306.3,99.0 359.1,90.8" fill="#78082A"/><polygon points="295.0,84.3 449.2,482.0 460.5,496.6 306.3,99.0" fill="#78082A"/><polygon points="449.2,482.0 359.9,482.0 371.2,496.6 460.5,496.6" fill="#78082A"/><polygon points="359.9,482.0 205.7,108.7 201.6,55.9 246.3,15.4 343.7,23.5 388.3,51.9 347.7,76.2 295.0,84.3 449.2,482.0" fill="#E51050"/><polygon points="270.6,39.7 311.2,35.7 297.0,51.9" fill="#1F2329"/></svg><span class="brand-name">pyACAD
+    <span class="brand-sub">Tool authoring guide</span></span></a></div>
+  <div class="search-wrap">
+    <svg class="search-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <circle cx="6" cy="6" r="4.2" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M9.2 9.2 12.5 12.5" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round"/></svg>
+    <input id="search" type="search" placeholder="Search the docs" autocomplete="off"
+           spellcheck="false" aria-label="Search the documentation">
+    <span class="search-kbd">/</span>
+    <div id="search-results" class="search-results"></div>
+  </div>
+  <nav class="pages">
+<div class="grp">Start</div>
+<a href="overview.html"><span class="num">01</span>How pyACAD works</a>
+<a href="quickstart.html"><span class="num">02</span>Your first button</a>
+<div class="grp">Bundles</div>
+<a href="anatomy.html"><span class="num">03</span>Anatomy of an extension</a>
+<a href="buttons.html"><span class="num">04</span>Buttons, stacks and pulldowns</a>
+<a href="bundle-yaml.html" class="active"><span class="num">05</span>The bundle.yaml reference</a>
+<a href="icons.html"><span class="num">06</span>Icons</a>
+<a href="shortcuts.html"><span class="num">07</span>Shortcuts and keytips</a>
+<a href="click-actions.html"><span class="num">08</span>Click actions and config.py</a>
+<a href="hooks.html"><span class="num">09</span>Hooks</a>
+<div class="grp">Scripts</div>
+<a href="script-environment.html"><span class="num">10</span>The script environment</a>
+<a href="user-interface.html"><span class="num">11</span>Talking to the user</a>
+<a href="settings.html"><span class="num">12</span>Settings and per-tool state</a>
+<a href="commands.html"><span class="num">13</span>AutoCAD commands and AutoLISP</a>
+<a href="command-line.html"><span class="num">14</span>pyacad.exe and headless runs</a>
+<div class="grp">Reference</div>
+<a href="api-reference.html"><span class="num">15</span>Python API reference</a>
+<div class="grp">Practice</div>
+<a href="cookbook.html"><span class="num">16</span>Cookbook</a>
+<a href="ai-assistant.html"><span class="num">17</span>Writing tools with an AI assistant</a>
+<a href="troubleshooting.html"><span class="num">18</span>Troubleshooting</a>
+<a href="style-guide.html"><span class="num">19</span>Style guide for tools</a>
+</nav>
+  <div class="side-foot">
+    <span>pyACAD 0.1.0</span>
+    <button id="theme-toggle" type="button" aria-label="Toggle colour theme">
+      <span>Dark</span></button>
+  </div>
+</div>
+<main class="main">
+<article>
+  <p class="eyebrow">Bundles</p>
+  <h1>The bundle.yaml reference</h1>
+  <p class="lead">Every key the runtime reads from bundle.yaml and extension.yaml, which kinds read it, what it falls back to, and the exact rules of the very small parser that reads the file.</p>
+  <p>A bundle is a folder. <code>bundle.yaml</code> is the optional file inside it that names the
+button, describes it, picks its command name and engine, binds its keys and gates it. Nothing
+in it is required for a script bundle: one with no <code>bundle.yaml</code> still produces a
+working button and command, because every value has a fallback. Two kinds do need it: a
+<code>*.urlbutton</code> needs <code>url:</code> and a <code>*.linkbutton</code> needs
+<code>plugin:</code>.</p>
+
+<div class="code"><div class="code-head"><span>folders</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-f">Count.pushbutton</span>\
+  <span class="tok-k">script.py</span>       <span class="tok-c"># required: no script.py, no button</span>
+  <span class="tok-k">bundle.yaml</span>     <span class="tok-c"># optional: metadata only</span>
+  <span class="tok-k">icon.png</span>        <span class="tok-c"># optional</span></code></pre></div>
+
+<p>The file is read at discovery: at AutoCAD startup and on every Reload. Change it and click
+<strong>Reload</strong> on the pyACAD panel (or type <code>PYACADRELOAD</code>); there is no
+need to restart AutoCAD. The same reader handles <code>extension.yaml</code> and the
+<code>bundle.yaml</code> inside tabs, panels and containers.</p>
+
+<h2 id="it-is-not-yaml">It is not YAML<a class="anchor" href="#it-is-not-yaml" aria-label="Link to this section">#</a></h2>
+
+<p>This is the single most useful thing to know about the file. pyACAD does not use a YAML
+library. It uses a small reader that walks the file one line at a time and produces a flat
+dictionary of strings. The name and the <code>.yaml</code> extension are a convention
+inherited from pyRevit, not a promise of YAML semantics.</p>
+
+<p>The whole algorithm, in order:</p>
+
+<ol>
+  <li>Split the text on <code>\n</code>. Trim a trailing <code>\r</code>, then trim
+    whitespace from both ends of the line.</li>
+  <li>Skip the line if it is now empty, or if it starts with <code>#</code>.</li>
+  <li>If the last key line had nothing after its colon and this line starts with
+    <code>- </code> (dash, space), the rest of the line is one item of that key's block list.
+    One matching layer of quotes is removed from the item and it is appended. Nothing else on
+    the line is looked at.</li>
+  <li>Otherwise find the <em>first</em> <code>:</code>. If there is none, or it is the first
+    character, skip the line.</li>
+  <li>The key is everything before that colon, trimmed and lowercased.</li>
+  <li>The value is everything after that colon, trimmed.</li>
+  <li>If the value is two characters or longer and starts and ends with the same quote
+    character, <code>&quot;</code> or <code>'</code>, remove exactly one character from each
+    end.</li>
+  <li>Store it. A key seen twice keeps the last value. An empty value opens a block list for
+    the <code>- </code> lines that follow; the next key line closes it.</li>
+</ol>
+
+<p>That is all of it. There is no escape processing, no type coercion and no schema. The block
+list is the one shape of structure the reader knows, and <code>layout:</code> is the only key
+that reads one. A file that does not exist yields no keys; a file that exists but cannot be
+read is logged (<code>Could not read '&lt;path&gt;' - its title, tooltip, context and shortcut
+are ignored.</code>) and also yields none, so the bundle falls back on its defaults.</p>
+
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 700 292" width="700" role="img"
+     aria-label="Four example bundle.yaml lines on the left and the key and value each one produces on the right.">
+  <style>
+    .by-m   { font: 11px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--muted); }
+    .by-mono{ font: 13px Consolas, monospace; fill: var(--ink); }
+    .by-dim { font: 13px Consolas, monospace; fill: var(--muted); }
+    .by-key { font: 13px Consolas, monospace; fill: var(--ink); }
+    .by-sep { font: 13px Consolas, monospace; fill: var(--accent); font-weight: 700; }
+    .by-lbl { font: 10.5px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--muted);
+              text-transform: uppercase; letter-spacing: .07em; }
+    .by-hk  { fill: var(--accent); opacity: .14; }
+    .by-hv  { fill: var(--frame); opacity: .13; }
+    .by-arw { stroke: var(--frame); stroke-width: 1.25; fill: none; }
+    .by-ws  { fill: none; stroke: var(--line); stroke-width: 1; stroke-dasharray: 2 2; }
+  </style>
+  <defs>
+    <marker id="by-a" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path d="M0 0.6 L6.4 3.5 L0 6.4 z" fill="var(--frame)"/>
+    </marker>
+  </defs>
+
+  <text class="by-lbl" x="5"   y="18">The line in the file</text>
+  <text class="by-lbl" x="340" y="18">What the parser stores</text>
+  <line x1="0" y1="28" x2="700" y2="28" stroke="var(--line)" stroke-width="1"/>
+
+  <rect class="by-hk" x="5"  y="42" width="56" height="19" rx="2"/>
+  <rect class="by-hv" x="69" y="42" width="99" height="19" rx="2"/>
+  <text class="by-key" x="8"  y="56">context</text>
+  <text class="by-sep" x="58" y="56">:</text>
+  <text class="by-mono" x="72" y="56">doc  # gate</text>
+  <path class="by-arw" d="M250 51 H 320" marker-end="url(#by-a)"/>
+  <text class="by-dim" x="340" y="56">context</text>
+  <text class="by-mono" x="412" y="56">doc  # gate</text>
+  <text class="by-m"   x="340" y="73">A trailing comment is part of the value.</text>
+
+  <rect class="by-hk" x="5"  y="92" width="56" height="19" rx="2"/>
+  <rect class="by-hv" x="69" y="92" width="92" height="19" rx="2"/>
+  <text class="by-key" x="8"  y="106">tooltip</text>
+  <text class="by-sep" x="58" y="106">:</text>
+  <text class="by-mono" x="72" y="106">Scale is 1:50</text>
+  <path class="by-arw" d="M250 101 H 320" marker-end="url(#by-a)"/>
+  <text class="by-dim" x="340" y="106">tooltip</text>
+  <text class="by-mono" x="412" y="106">Scale is 1:50</text>
+  <text class="by-m"   x="340" y="123">Only the first colon splits; later ones are text.</text>
+
+  <rect class="by-ws" x="5"  y="142" width="28" height="19" rx="2"/>
+  <rect class="by-hk" x="35" y="142" width="49" height="19" rx="2"/>
+  <rect class="by-hv" x="95" y="142" width="70" height="19" rx="2"/>
+  <text class="by-key" x="38" y="156">engine</text>
+  <text class="by-sep" x="84" y="156">:</text>
+  <text class="by-mono" x="98" y="156">'cpython'</text>
+  <path class="by-arw" d="M250 151 H 320" marker-end="url(#by-a)"/>
+  <text class="by-dim" x="340" y="156">engine</text>
+  <text class="by-mono" x="404" y="156">cpython</text>
+  <text class="by-m"   x="340" y="173">Indentation is trimmed away; one quote layer is removed.</text>
+
+  <text class="by-dim" x="8" y="206"># engine: cpython</text>
+  <path class="by-arw" d="M250 201 H 320" marker-end="url(#by-a)"/>
+  <text class="by-m"  x="340" y="205">Nothing. A line starting with # is skipped whole.</text>
+
+  <line x1="0" y1="232" x2="700" y2="232" stroke="var(--line)" stroke-width="1"/>
+  <text class="by-m" x="5" y="252">Highlighted left to right: the key, lowercased; the first
+    colon, which is the only separator;</text>
+  <text class="by-m" x="5" y="270">and the value, trimmed. Everything the parser does happens
+    on one line, in that order.</text>
+</svg>
+</div>
+<figcaption>The parser has almost no concept of structure. It sees lines, a first colon, and
+two strings; the block list under an empty value is the one exception.</figcaption>
+</figure>
+
+<h2 id="inputs-that-surprise-people">Inputs that surprise people<a class="anchor" href="#inputs-that-surprise-people" aria-label="Link to this section">#</a></h2>
+
+<p>Most of these follow from the rules above rather than being special cases, but they are
+worth reading once so you recognise them when a value comes out wrong.</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Line</th><th>Key</th><th>Value</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td><code>context: doc  # gate</code></td><td><code>context</code></td>
+    <td><code>doc  # gate</code></td>
+    <td>Trailing comments are not a thing. Here it breaks the rule (<code>#</code> is not
+        allowed in one), so the button is never greyed; on <code>min_host_version</code> it
+        makes the value "not a year"; on <code>title</code> it shows on the ribbon.</td></tr>
+<tr><td><code>&nbsp;&nbsp;&nbsp;&nbsp;title: Count</code></td><td><code>title</code></td>
+    <td><code>Count</code></td>
+    <td>The line is trimmed first, so indentation means nothing.</td></tr>
+<tr><td><code>TITLE: Count</code></td><td><code>title</code></td><td><code>Count</code></td>
+    <td>Keys are lowercased. Values keep their case.</td></tr>
+<tr><td><code>tooltip: Scale is 1:50</code></td><td><code>tooltip</code></td>
+    <td><code>Scale is 1:50</code></td>
+    <td>The split is on the first colon, so colons in prose are safe.</td></tr>
+<tr><td><code>title: "Count"</code></td><td><code>title</code></td><td><code>Count</code></td>
+    <td>One matching layer of quotes is removed.</td></tr>
+<tr><td><code>title: ""Count""</code></td><td><code>title</code></td>
+    <td><code>"Count"</code></td>
+    <td>Exactly one layer, and there is no escape syntax.</td></tr>
+<tr><td><code>tooltip: "A" or "B"</code></td><td><code>tooltip</code></td>
+    <td><code>A" or "B</code></td>
+    <td>The test is only that the first and last characters match.</td></tr>
+<tr><td><code>title: "Count'</code></td><td><code>title</code></td>
+    <td><code>"Count'</code></td>
+    <td>Mismatched quotes are left alone.</td></tr>
+<tr><td><code>title Count</code></td><td>none</td><td>none</td>
+    <td>No colon, so the line is dropped silently.</td></tr>
+<tr><td><code>: Count</code></td><td>none</td><td>none</td>
+    <td>A colon at the very start means no key.</td></tr>
+<tr><td><code>title: A</code> then <code>title: B</code></td><td><code>title</code></td>
+    <td><code>B</code></td><td>The last one wins.</td></tr>
+<tr><td><code>title:</code></td><td><code>title</code></td><td>empty</td>
+    <td>The key exists with an empty value, which is not the same as being absent; it also
+        opens a block list.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note trap">
+<span class="note-t">An empty value still counts</span>
+<p><code>title:</code> with nothing after it gives you a button with an empty caption, not one
+titled from the folder name, and an empty title derives the command name
+<code>PYTOOL</code>. Fallbacks apply only when a key is <em>missing</em>. To get the default
+back, delete the line.</p>
+</div>
+
+<h2 id="what-the-file-cannot-express">What the file cannot express<a class="anchor" href="#what-the-file-cannot-express" aria-label="Link to this section">#</a></h2>
+
+<p>Because the reader only produces flat string pairs, none of the following work, and none of
+them raise an error: they parse into keys nothing reads.</p>
+
+<ul>
+  <li><strong>Nesting.</strong> An indented block is just more top-level keys.</li>
+  <li><strong>Lists, except one shape.</strong> A key with nothing after its colon followed by
+    <code>- item</code> lines is a block list, and <code>layout:</code> is the only key that
+    reads one. A <code>- item</code> line anywhere else has no colon and is dropped.</li>
+  <li><strong>Multi-line values.</strong> There is no <code>|</code> or <code>&gt;</code>. A
+    tooltip is one line. (A docstring tooltip can be several; see
+    <a href="#how-the-script-is-scanned">below</a>.)</li>
+  <li><strong>Types.</strong> Every value is a string. Numbers are parsed by the keys that want
+    them; there are no booleans or nulls.</li>
+</ul>
+
+<div class="do-dont">
+<div class="do"><div class="dd-t">Do</div>
+<pre><span class="tok-c"># Count objects by layer</span>
+<span class="tok-k">title</span>: Count\nObjects
+<span class="tok-k">tooltip</span>: Counts the selected objects, or all of model space.
+<span class="tok-k">command</span>: PYCOUNTOBJ
+<span class="tok-k">shortcut</span>: Ctrl+Shift+C
+<span class="tok-k">context</span>: doc</pre></div>
+<div class="dont"><div class="dd-t">Don't</div>
+<pre><span class="tok-k">title</span>: Count Objects  <span class="tok-c"># by layer</span>
+<span class="tok-k">tooltip</span>: &gt;
+  Counts the selected objects,
+  or all of model space.
+<span class="tok-k">context</span>: doc  <span class="tok-c"># needs a drawing</span></pre></div>
+</div>
+
+<p>In the second file the title keeps its comment, <code>tooltip</code> is literally
+<code>&gt;</code>, the two prose lines vanish for having no colon, and the context rule fails to
+parse, so the button is never greyed. Nothing warns you except the context rule, in the
+log.</p>
+
+<h2 id="which-file-reads-which-keys">Which file reads which keys<a class="anchor" href="#which-file-reads-which-keys" aria-label="Link to this section">#</a></h2>
+
+<p>Every folder in the tree may carry a <code>bundle.yaml</code>, but each kind reads a
+different subset. Any other key is ignored without a word, with one exception noted below.</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Where</th><th>Keys read</th></tr></thead>
+<tbody>
+<tr><td><code>*.extension\extension.yaml</code></td>
+    <td><code>name</code>, <code>engine</code>, <code>layout</code></td></tr>
+<tr><td><code>*.tab</code>, <code>*.panel</code>, <code>*.stack</code>, <code>*.slideout</code></td>
+    <td><code>layout</code> only</td></tr>
+<tr><td><code>*.pulldown</code>, <code>*.splitbutton</code>, <code>*.splitpushbutton</code></td>
+    <td><code>title</code>, <code>tooltip</code>, <code>keytip</code>, <code>layout</code></td></tr>
+<tr><td><code>*.pushbutton</code>, <code>*.nobutton</code>, <code>*.smartbutton</code></td>
+    <td><code>title</code>, <code>tooltip</code>, <code>command</code>, <code>engine</code>,
+        <code>shortcut</code>, <code>keytip</code>, <code>context</code>,
+        <code>min_host_version</code>, <code>max_host_version</code></td></tr>
+<tr><td><code>*.toggle</code></td>
+    <td>All of the pushbutton keys, plus <code>title_on</code> and <code>tooltip_on</code></td></tr>
+<tr><td><code>*.urlbutton</code></td>
+    <td><code>url</code> (required), <code>title</code>, <code>tooltip</code>, <code>keytip</code></td></tr>
+<tr><td><code>*.linkbutton</code></td>
+    <td><code>plugin</code> (required), <code>title</code>, <code>tooltip</code>, <code>keytip</code></td></tr>
+<tr><td><code>*.dockpane</code></td>
+    <td><code>title</code>, <code>tooltip</code>, <code>engine</code>, <code>keytip</code>,
+        <code>shortcut</code> (read but not bound in the current build)</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The exception: <code>title_on</code> or <code>tooltip_on</code> on anything but a toggle is
+logged (<code>title_on and tooltip_on are for *.toggle bundles only - ignored.</code>). Keys
+some other tools use, such as <code>author</code>, <code>help_url</code>,
+<code>highlight</code>, <code>icon</code> or <code>min_revit_version</code>, are not read by
+pyACAD at all.</p>
+
+<h2 id="the-keys-a-pushbutton-reads">The keys a pushbutton reads<a class="anchor" href="#the-keys-a-pushbutton-reads" aria-label="Link to this section">#</a></h2>
+
+<p>These apply to <code>*.pushbutton</code>, <code>*.nobutton</code>, <code>*.toggle</code> and
+<code>*.smartbutton</code>, wherever they sit: on a panel, in a stack, in a menu, or in a
+slideout.</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Key</th><th>Falls back to</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><code>title</code></td>
+    <td><code>__title__</code> in the script, then the folder name with any legacy
+        <code>NN_</code> prefix removed and underscores turned into spaces</td>
+    <td>The caption. A literal <code>\n</code> breaks it onto a second line on a large button.
+        The command name is derived from it unless <code>command</code> is set.</td></tr>
+<tr><td><code>tooltip</code></td>
+    <td>The script's module docstring, then nothing</td>
+    <td>The hover tooltip. The ribbon appends the resolved shortcut in brackets, then a
+        line naming what to type: <code>Counts objects. (Ctrl+Shift+C)</code> and
+        <code>Command: PYCOUNT (alias CNT)</code>.</td></tr>
+<tr><td><code>command</code></td>
+    <td><code>PY</code> plus the title's letters and digits, uppercased</td>
+    <td>The AutoCAD command name. See <a href="#command-naming-the-autocad-command">below</a>.</td></tr>
+<tr><td><code>alias</code></td><td>none</td>
+    <td>Short extra names to type, like <code>BX</code>. Users can replace or drop them. See
+        <a href="#alias-short-names-to-type">below</a>.</td></tr>
+<tr><td><code>engine</code></td>
+    <td>The extension's <code>engine</code>, then <code>ironpython</code></td>
+    <td><code>ironpython</code> or <code>cpython</code>, matched ignoring case.</td></tr>
+<tr><td><code>shortcut</code></td><td>none</td>
+    <td>The author's default keyboard chord, for example <code>Ctrl+Shift+C</code>. Needs Ctrl
+        or Alt unless the user allows bare keys. Users can rebind or disable it. See
+        <a href="shortcuts.html">Shortcuts and keytips</a>.</td></tr>
+<tr><td><code>keytip</code></td><td>generated from the title</td>
+    <td>The letters shown for Alt navigation of the ribbon, uppercased.</td></tr>
+<tr><td><code>context</code></td><td>none: always enabled</td>
+    <td>Greys the button unless a drawing condition holds. See below.</td></tr>
+<tr><td><code>min_host_version</code></td><td>none: no floor</td>
+    <td>Oldest AutoCAD release the tool supports, as a year. See below.</td></tr>
+<tr><td><code>max_host_version</code></td><td>none: no ceiling</td>
+    <td>Newest AutoCAD release the tool supports, as a year. See below.</td></tr>
+<tr><td><code>title_on</code>, <code>tooltip_on</code></td>
+    <td>none: one caption and tooltip for both states</td>
+    <td><code>*.toggle</code> only: the caption and tooltip while the toggle is on. See
+        <a href="buttons.html#toggle-a-button-with-on-off-state">Buttons</a>.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note warn">
+<span class="note-t">A bad engine id fails at click time, not at load time</span>
+<p>Discovery does not check the engine name. <code>engine: python3</code> builds a
+normal-looking button; running it writes <code>Unknown engine 'python3'.</code> to the output
+window and nothing runs. If a tool does nothing but open a window with that message, check
+this line first.</p>
+</div>
+
+<h2 id="command-naming-the-autocad-command">command: naming the AutoCAD command<a class="anchor" href="#command-naming-the-autocad-command" aria-label="Link to this section">#</a></h2>
+
+<p>Every bundle that reads the pushbutton keys is registered as an AutoCAD command at boot and
+on every Reload. Without <code>command:</code>, the name is <code>PY</code> followed by every
+letter and digit of the resolved title, uppercased, capped at 64 characters:</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Resolved title</th><th>Command</th></tr></thead>
+<tbody>
+<tr><td><code>Blocks to Excel</code></td><td><code>PYBLOCKSTOEXCEL</code></td></tr>
+<tr><td><code>Find and Replace Attributes</code></td><td><code>PYFINDANDREPLACEATTRIBUTES</code></td></tr>
+<tr><td><code>Export\nLayers</code> (a two-line caption)</td><td><code>PYEXPORTLAYERS</code></td></tr>
+<tr><td><code>2D Takeoff (beta)</code></td><td><code>PY2DTAKEOFFBETA</code></td></tr>
+<tr><td>empty, or no letters or digits</td><td><code>PYTOOL</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<p>With <code>command:</code>, the value is uppercased, anything but letters, digits,
+<code>_</code> and <code>-</code> is dropped, and it is used as is. <strong>No <code>PY</code>
+is added</strong>, so <code>command: blkx</code> registers <code>BLKX</code>. A bundle with a
+<code>config.py</code> also gets the same name with <code>CFG</code> appended, which runs the
+config script.</p>
+
+<div class="code"><div class="code-head"><span>Blocks_to_Excel.pushbutton\bundle.yaml</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-k">title</span>: Blocks to Excel
+<span class="tok-k">command</span>: PYB2X</code></pre></div>
+
+<p>Names are handed out in load order and the first claim wins. A bundle loses its command
+when the name is already taken by an earlier bundle, by one of the reserved loader names
+(<code>PYACAD</code>, <code>PYACADRELOAD</code>, <code>PYACADCONSOLE</code>,
+<code>PYACADRUN</code>, <code>PYACADSETTINGS</code>), or by anything AutoCAD already answers to
+(a native command, a LISP-defined one, another add-in's). Each loss is logged and toasted
+(<em>One command was not registered</em>, with the reason), and the losing bundle's button
+still works by running its script directly. Pick a <code>command:</code> that is distinctive
+enough not to collide with the tools of the people you share with.</p>
+
+<h2 id="alias-short-names-to-type">alias: short names to type<a class="anchor" href="#alias-short-names-to-type" aria-label="Link to this section">#</a></h2>
+
+<p>People who draw all day type two or three letters, not <code>PYBLOCKSTOEXCEL</code>.
+<code>alias:</code> gives a tool short extra names. Each one is registered as a second command
+that runs the same tool, so it works typed, in a macro, in a script file and from
+<code>(pyacad "BX")</code>. Several aliases go on one line, split by commas or spaces; each is
+uppercased and cleaned the same way as <code>command:</code>.</p>
+
+<div class="code"><div class="code-head"><span>Blocks_to_Excel.pushbutton\bundle.yaml</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-k">title</span>: Blocks to Excel
+<span class="tok-k">alias</span>: BX, B2X</code></pre></div>
+
+<p>An alias never changes what a keystroke already does:</p>
+
+<ul>
+  <li>One that the user's <code>acad.pgp</code> defines, or that AutoCAD already answers to (a
+    native command, a LISP <code>C:</code> function, another add-in), is left out. The
+    existing meaning keeps working and the full command name still runs the tool.</li>
+  <li>One that a drawing's LISP defines later (an <code>acaddoc.lsp</code> that loads after
+    pyACAD) hands the run to that LISP command.</li>
+  <li>Aliases are named after every full command name, so an alias never takes another
+    tool's command.</li>
+</ul>
+
+<p>A bundle's alias that is left out for one of these reasons only goes to the log, because
+nothing is lost. Users choose their own aliases in <code>config.json</code> under
+<a href="settings.html#appearance-and-the-keyboard"><code>aliases</code></a>, which replaces
+the bundle's list; an alias of their own that cannot be registered is toasted.</p>
+
+<h2 id="context-enabling-and-disabling-a-button">context: enabling and disabling a button<a class="anchor" href="#context-enabling-and-disabling-a-button" aria-label="Link to this section">#</a></h2>
+
+<p>Without a <code>context:</code> key a button is always enabled. With one, the runtime parses
+a small boolean expression once at discovery and re-evaluates it whenever it sees an AutoCAD
+event (a drawing opening or switching, a command ending, the selection changing, a layout
+switch, and so on), greying or enabling the button to match.</p>
+
+<p>Eight condition names, answered from one snapshot of the active drawing:</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Condition</th><th>True when</th></tr></thead>
+<tbody>
+<tr><td><code>doc</code></td><td>A drawing is open and active.</td></tr>
+<tr><td><code>selection</code></td><td>The pickfirst selection is not empty.</td></tr>
+<tr><td><code>modelspace</code></td><td>The Model tab is current (<code>TILEMODE</code> is 1).</td></tr>
+<tr><td><code>paperspace</code></td><td>A layout tab is current, including while working
+    inside a viewport on it.</td></tr>
+<tr><td><code>xrefs</code></td><td>The drawing has at least one attached or overlaid xref.</td></tr>
+<tr><td><code>blocks</code></td><td>The drawing has at least one ordinary block definition
+    (not a layout, anonymous, xref or xref-dependent block). A definition is enough; it need
+    not be inserted.</td></tr>
+<tr><td><code>layouts</code></td><td>The drawing has at least one paper space layout.</td></tr>
+<tr><td><code>multi-doc</code></td><td>More than one drawing is open.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Combine names with <code>&amp;</code> (and), <code>|</code> (or) and <code>!</code> (not).
+<code>!</code> binds tightest, then <code>&amp;</code>, then <code>|</code>. There are no
+parentheses: <code>(</code> is not part of the vocabulary. The word forms <code>and</code>,
+<code>or</code> and <code>not</code>, and the doubled <code>&amp;&amp;</code> and
+<code>||</code>, are not accepted either. Names ignore case.</p>
+
+<div class="code"><div class="code-head"><span>bundle.yaml</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-k">context</span>: doc
+<span class="tok-k">context</span>: selection &amp; modelspace
+<span class="tok-k">context</span>: xrefs | blocks
+<span class="tok-k">context</span>: doc &amp; !multi-doc</code></pre></div>
+
+<p>A name that is not one of the eight is legal syntax but always false, and discovery logs
+it:</p>
+
+<div class="code"><div class="code-head"><span>%APPDATA%\pyACAD\logs\pyACAD.log</span><button class="copy-btn" type="button">Copy</button></div><pre><code>Bundle &#x27;D:\CadTools\...\Count.pushbutton&#x27;: unknown context condition &#x27;selction&#x27;.</code></pre></div>
+
+<p>A rule that does not parse at all, such as a stray operator or a trailing comment, is
+logged too, and the button falls back to always enabled rather than never enabled:</p>
+
+<div class="code"><div class="code-head"><span>%APPDATA%\pyACAD\logs\pyACAD.log</span><button class="copy-btn" type="button">Copy</button></div><pre><code>Bundle &#x27;D:\CadTools\...\Count.pushbutton&#x27;: bad context rule - Unexpected &#x27;&amp;&#x27; in context
+rule &#x27;&amp; selection&#x27;. Button stays always enabled.</code></pre></div>
+
+<div class="note trap">
+<span class="note-t">Greying is a hint, not a lock</span>
+<p><code>context:</code> greys a drawn button and nothing else. The command can still be typed,
+run from a macro or from <code>(pyacad ...)</code>, and a keyboard chord still fires it. A
+script that needs a selection must still check for one. On a <code>*.nobutton</code>, which is
+never drawn, the key has no effect at all.</p>
+</div>
+
+<h2 id="min-host-version-and-max-host-version-gating-on-the-autocad-release">min_host_version and max_host_version: gating on the AutoCAD release<a class="anchor" href="#min-host-version-and-max-host-version-gating-on-the-autocad-release" aria-label="Link to this section">#</a></h2>
+
+<p>Two keys, each a bare year such as <code>2023</code>. Either can be used alone.</p>
+
+<div class="code"><div class="code-head"><span>Batch_Publish.pushbutton\bundle.yaml</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-k">title</span>: Batch Publish
+<span class="tok-k">min_host_version</span>: 2023
+<span class="tok-k">max_host_version</span>: 2026</code></pre></div>
+
+<p>An out-of-range bundle still renders exactly like any other: it is not greyed and not
+hidden. The check happens when it runs, before the script starts, whichever way it was started
+(click, chord, typed command, <code>config.py</code>, <code>PYACAD</code> or
+<code>(pyacad ...)</code>), and shows a warning toast instead of running it:</p>
+
+<div class="code"><div class="code-head"><span>text</span><button class="copy-btn" type="button">Copy</button></div><pre><code>Requires AutoCAD 2023 or newer (this is 2022).
+Requires AutoCAD 2024 or older (this is 2026).</code></pre></div>
+
+<p>A value that is not a whole number is logged and ignored, leaving that side of the range
+open: <code>2024</code> works; <code>2024.1</code>, <code>R24.3</code> and
+<code>2024 # note</code> do not.</p>
+
+<div class="code"><div class="code-head"><span>%APPDATA%\pyACAD\logs\pyACAD.log</span><button class="copy-btn" type="button">Copy</button></div><pre><code>Bundle &#x27;D:\CadTools\...\Batch_Publish.pushbutton&#x27;: min_host_version &#x27;R24.3&#x27; is not a year - ignored.</code></pre></div>
+
+<p>The host year comes from AutoCAD's own version number. If it cannot be determined, the gate
+is off and every bundle runs, because refusing on a host you cannot identify is the worse
+failure. A smartbutton's build-time run and a dock pane's <code>script.py</code> are not
+version checked.</p>
+
+<h2 id="the-keys-a-pulldown-reads">The keys a pulldown reads<a class="anchor" href="#the-keys-a-pulldown-reads" aria-label="Link to this section">#</a></h2>
+
+<p>A <code>*.pulldown</code>, <code>*.splitbutton</code> or <code>*.splitpushbutton</code> may
+carry its own <code>bundle.yaml</code> describing the menu button itself. It reads four keys.</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Key</th><th>Falls back to</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><code>title</code></td><td>The folder name</td><td>The caption; <code>\n</code> breaks it.</td></tr>
+<tr><td><code>tooltip</code></td><td>none</td><td>The hover tooltip.</td></tr>
+<tr><td><code>keytip</code></td><td>generated from the title</td><td>The Alt-navigation letters.</td></tr>
+<tr><td><code>layout</code></td><td>name order</td><td>The order of the menu rows.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p><code>command</code>, <code>shortcut</code>, <code>engine</code> and <code>context</code>
+are not read there, because the menu button runs nothing itself; put them on the pushbuttons
+inside it.</p>
+
+<h2 id="the-keys-a-urlbutton-reads">The keys a urlbutton reads<a class="anchor" href="#the-keys-a-urlbutton-reads" aria-label="Link to this section">#</a></h2>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Key</th><th>Falls back to</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><code>url</code></td><td><strong>required</strong></td>
+    <td>The address opened in the default browser, trimmed. Missing or blank: the bundle is
+        skipped with <code>Urlbutton '&lt;dir&gt;' has no url: in bundle.yaml - skipped.</code></td></tr>
+<tr><td><code>title</code></td><td>The folder name</td><td>The caption.</td></tr>
+<tr><td><code>tooltip</code></td><td>The <code>url</code> itself</td><td>The hover tooltip.</td></tr>
+<tr><td><code>keytip</code></td><td>generated from the title</td><td>The Alt-navigation letters.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="the-keys-a-linkbutton-reads">The keys a linkbutton reads<a class="anchor" href="#the-keys-a-linkbutton-reads" aria-label="Link to this section">#</a></h2>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Key</th><th>Falls back to</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><code>plugin</code></td><td><strong>required</strong></td>
+    <td>The AutoCAD command the button sends, for example <code>LAYWALK</code> or
+        <code>-LAYER</code>. Uppercased and cut down to letters, digits, <code>_</code> and
+        <code>-</code>; sent as <code>_.&lt;NAME&gt;</code>. Missing or blank: skipped with
+        <code>Linkbutton '&lt;dir&gt;' has no plugin: in bundle.yaml - skipped.</code></td></tr>
+<tr><td><code>title</code></td><td>The folder name</td><td>The caption.</td></tr>
+<tr><td><code>tooltip</code></td><td>none</td><td>The hover tooltip.</td></tr>
+<tr><td><code>keytip</code></td><td>generated from the title</td><td>The Alt-navigation letters.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="the-keys-a-dockpane-reads">The keys a dockpane reads<a class="anchor" href="#the-keys-a-dockpane-reads" aria-label="Link to this section">#</a></h2>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Key</th><th>Falls back to</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><code>title</code></td><td>The folder name</td>
+    <td>The ribbon caption and the palette's title.</td></tr>
+<tr><td><code>tooltip</code></td><td>none</td><td>The ribbon toggle's tooltip.</td></tr>
+<tr><td><code>engine</code></td><td>The extension's <code>engine</code>, then
+    <code>ironpython</code></td><td>The engine that runs the pane's <code>script.py</code>.</td></tr>
+<tr><td><code>keytip</code></td><td>generated from the title</td><td>The Alt-navigation letters.</td></tr>
+<tr><td><code>shortcut</code></td><td>none</td>
+    <td>Read, but not bound to anything in the current build.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>A dock pane does not read <code>tooltip</code> from a docstring, has no
+<code>command</code>, and takes no <code>context</code> or host version keys.
+<a href="buttons.html#dockpane-an-autocad-palette">Buttons</a> covers the palette itself.</p>
+
+<h2 id="the-keys-an-extension-reads">The keys an extension reads<a class="anchor" href="#the-keys-an-extension-reads" aria-label="Link to this section">#</a></h2>
+
+<p><code>extension.yaml</code>, directly inside the <code>.extension</code> folder, reads three
+keys.</p>
+
+<div class="code"><div class="code-head"><span>CadTools.extension\extension.yaml</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-k">name</span>: CadTools
+<span class="tok-k">engine</span>: ironpython
+<span class="tok-k">layout</span>:
+  - CadTools
+  - Plotting</code></pre></div>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Key</th><th>Falls back to</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><code>name</code></td><td>The folder name without <code>.extension</code></td>
+    <td>The extension's identity: part of its tab ids, the label on its hooks and
+        <code>startup.py</code> in the log, and the key that spots a second copy loaded from
+        another root (the second is skipped). Not shown on the ribbon.</td></tr>
+<tr><td><code>engine</code></td><td><code>ironpython</code></td>
+    <td>The default engine for every bundle, hook and <code>startup.py</code> in the
+        extension.</td></tr>
+<tr><td><code>layout</code></td><td>name order</td><td>The order of the extension's tabs.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="layout-ordering-the-folders-inside-a-container">layout: ordering the folders inside a container<a class="anchor" href="#layout-ordering-the-folders-inside-a-container" aria-label="Link to this section">#</a></h2>
+
+<p><code>layout:</code> is a block list: the key with nothing after its colon, then one
+<code>- name</code> line per child folder, in the order you want.</p>
+
+<div class="code"><div class="code-head"><span>Drafting.panel\bundle.yaml</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-k">layout</span>:
+  - Count
+  - Rename
+  - Layers.stack
+  - More</code></pre></div>
+
+<ul>
+  <li>Listed children come first, in list order; unlisted ones follow in case-insensitive name
+    order, so nothing is ever hidden by being left off.</li>
+  <li>An entry matches a folder with or without its suffix (<code>Layers</code> or
+    <code>Layers.stack</code>), ignoring case and any legacy <code>NN_</code> prefix on either
+    side.</li>
+  <li>An entry with no matching folder is reported in the after-scan toast and the log, and
+    skipped. A repeated entry counts once.</li>
+  <li>Comment lines (<code>#</code>) inside the list are skipped and do not end it; the next
+    <code>key:</code> line does.</li>
+</ul>
+
+<p>It is read from <code>extension.yaml</code> (tabs) and from the <code>bundle.yaml</code> of a
+tab (panels), panel (items), stack (rows), pulldown or split button (menu rows) and slideout
+(flyout items). <a href="anatomy.html#ordering-panels-and-buttons">Anatomy</a> covers ordering
+in context.</p>
+
+<h2 id="folders-that-read-only-a-layout-list">Folders that read only a layout list<a class="anchor" href="#folders-that-read-only-a-layout-list" aria-label="Link to this section">#</a></h2>
+
+<p>The <code>bundle.yaml</code> inside a <code>*.tab</code>, <code>*.panel</code>,
+<code>*.stack</code> or <code>*.slideout</code> is opened for <code>layout:</code> and nothing
+else. In particular there is no <code>title:</code> for a tab or a panel: their captions are
+always the folder name, with underscores turned into spaces. To rename a panel on the ribbon,
+rename its folder (and its entry in the tab's <code>layout:</code>).</p>
+
+<h2 id="how-title-and-tooltip-actually-resolve">How title and tooltip actually resolve<a class="anchor" href="#how-title-and-tooltip-actually-resolve" aria-label="Link to this section">#</a></h2>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Kind</th><th>Title, first that exists</th><th>Tooltip, first that exists</th></tr></thead>
+<tbody>
+<tr><td>Pushbutton, nobutton, toggle, smartbutton</td>
+    <td><code>title:</code>, <code>__title__</code> in <code>script.py</code>, folder name</td>
+    <td><code>tooltip:</code>, module docstring of <code>script.py</code>, none</td></tr>
+<tr><td>Pulldown, splitbutton, splitpushbutton</td>
+    <td><code>title:</code>, folder name</td><td><code>tooltip:</code>, none</td></tr>
+<tr><td>Urlbutton</td><td><code>title:</code>, folder name</td><td><code>tooltip:</code>, the url</td></tr>
+<tr><td>Linkbutton, dockpane</td><td><code>title:</code>, folder name</td><td><code>tooltip:</code>, none</td></tr>
+<tr><td>Tab, panel</td><td>folder name</td><td>none</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>"Folder name" always means: suffix removed, a leading run of two or more digits and an
+underscore removed, remaining underscores turned into spaces. A toggle that is on shows
+<code>title_on</code> and <code>tooltip_on</code> instead, when set.</p>
+
+<h3 id="breaking-a-long-caption-onto-two-lines">Breaking a long caption onto two lines<a class="anchor" href="#breaking-a-long-caption-onto-two-lines" aria-label="Link to this section">#</a></h3>
+
+<p>A long caption stretches its panel wide. Write a literal backslash-n in the title to break
+it: <code>title: Export\nLayers</code>. Spaces around the <code>\n</code> are absorbed, so
+<code>Export \n Layers</code> is the same. The break applies only where there is a second line
+to use, the caption of a large button (pushbutton, toggle, smartbutton, pulldown, split
+button, url and link buttons, dock pane toggle). Everywhere else (stack and menu rows, logs,
+toasts, the output window title, keytips, <code>__title__</code> and the derived command name)
+sees the flat form <code>Export Layers</code>.</p>
+
+<h2 id="how-the-script-is-scanned">How the script is scanned<a class="anchor" href="#how-the-script-is-scanned" aria-label="Link to this section">#</a></h2>
+
+<p>For the pushbutton family, pyACAD reads <code>script.py</code> as text at discovery, without
+running it, to find two things. Both are found with simple pattern matching, so they have to
+be written plainly.</p>
+
+<h3 id="title">__title__<a class="anchor" href="#title" aria-label="Link to this section">#</a></h3>
+
+<p>A line that starts, in the first column, with <code>__title__ = </code> followed by a
+single- or double-quoted string on that same line. The string between the quotes is the title.
+Indented assignments, triple-quoted strings, string concatenation and anything computed are
+not seen.</p>
+
+<div class="code"><div class="code-head"><span>script.py</span><button class="copy-btn" type="button">Copy</button></div><pre><code>__title__ = <span class="tok-s">&#x27;Count Objects&#x27;</span>      <span class="tok-c"># seen: the title is &quot;Count Objects&quot;</span></code></pre></div>
+
+<h3 id="the-docstring">The docstring<a class="anchor" href="#the-docstring" aria-label="Link to this section">#</a></h3>
+
+<p>The first statement of the file, after any blank and comment lines, must open with
+<code>"""</code> or <code>'''</code>. The text up to the matching closing quotes, trimmed, is
+the tooltip, and it may run over several lines. A docstring with a prefix such as
+<code>r"""</code>, or one that comes after an import, is not seen.</p>
+
+<div class="code"><div class="code-head"><span>script.py</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-c"># -*- coding: utf-8 -*-</span>
+<span class="tok-s">&quot;&quot;&quot;Counts the selected objects, or every object in model space.
+
+Pass a layer pattern from AutoLISP to count only those layers.&quot;&quot;&quot;</span>
+<span class="tok-k">from</span> pyacad <span class="tok-k">import</span> sel</code></pre></div>
+
+<p>The scan never fails a bundle: a script that cannot be read or scanned simply contributes
+no title and no tooltip.</p>
+
+<h2 id="a-complete-example">A complete example<a class="anchor" href="#a-complete-example" aria-label="Link to this section">#</a></h2>
+
+<div class="code"><div class="code-head"><span>Isolate_Layer.toggle\bundle.yaml</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-c"># Freeze everything but the current layer; click again to restore.</span>
+<span class="tok-k">title</span>: Isolate\nLayer
+<span class="tok-k">title_on</span>: Restore\nLayers
+<span class="tok-k">tooltip</span>: Freezes every layer except the current one, remembering what was on.
+<span class="tok-k">tooltip_on</span>: Puts back the layer states saved when you isolated.
+<span class="tok-k">command</span>: PYISOLATECURRENT
+<span class="tok-k">engine</span>: ironpython
+<span class="tok-k">shortcut</span>: Ctrl+Alt+I
+<span class="tok-k">keytip</span>: IL
+<span class="tok-k">context</span>: doc &amp; modelspace
+<span class="tok-k">min_host_version</span>: 2022</code></pre></div>
+
+<p>That toggle registers <code>PYISOLATECURRENT</code>, greys itself unless a drawing is open
+with the Model tab current, refuses to run on AutoCAD 2021, binds <kbd>Ctrl</kbd>+<kbd>Alt</kbd>+<kbd>I</kbd>
+(which users can rebind), answers to <kbd>Alt</kbd>, <kbd>P</kbd><kbd>Y</kbd>,
+<kbd>I</kbd><kbd>L</kbd> on the ribbon, and swaps caption and tooltip while on.</p>
+
+<div class="cards">
+  <a href="buttons.html"><span class="c-t">Buttons, stacks and pulldowns</span>
+    <span class="c-d">What each kind does with these keys.</span></a>
+  <a href="shortcuts.html"><span class="c-t">Shortcuts and keytips</span>
+    <span class="c-d">Chord syntax, overrides in config.json, and Alt navigation.</span></a>
+  <a href="commands.html"><span class="c-t">Commands, macros and AutoLISP</span>
+    <span class="c-d">What the command name buys you.</span></a>
+</div>
+  <div class="pagenav">
+<a href="buttons.html"><span class="dir">Previous</span><span class="ttl">Buttons, stacks and pulldowns</span></a>
+<a class="next" href="icons.html"><span class="dir">Next</span><span class="ttl">Icons</span></a>
+</div>
+</article>
+<aside class="toc"><div class="toc-head">On this page</div>
+<a href="#it-is-not-yaml">It is not YAML</a>
+<a href="#inputs-that-surprise-people">Inputs that surprise people</a>
+<a href="#what-the-file-cannot-express">What the file cannot express</a>
+<a href="#which-file-reads-which-keys">Which file reads which keys</a>
+<a href="#the-keys-a-pushbutton-reads">The keys a pushbutton reads</a>
+<a href="#command-naming-the-autocad-command">command: naming the AutoCAD command</a>
+<a href="#alias-short-names-to-type">alias: short names to type</a>
+<a href="#context-enabling-and-disabling-a-button">context: enabling and disabling a button</a>
+<a href="#min-host-version-and-max-host-version-gating-on-the-autocad-release">min_host_version and max_host_version: gating on the AutoCAD release</a>
+<a href="#the-keys-a-pulldown-reads">The keys a pulldown reads</a>
+<a href="#the-keys-a-urlbutton-reads">The keys a urlbutton reads</a>
+<a href="#the-keys-a-linkbutton-reads">The keys a linkbutton reads</a>
+<a href="#the-keys-a-dockpane-reads">The keys a dockpane reads</a>
+<a href="#the-keys-an-extension-reads">The keys an extension reads</a>
+<a href="#layout-ordering-the-folders-inside-a-container">layout: ordering the folders inside a container</a>
+<a href="#folders-that-read-only-a-layout-list">Folders that read only a layout list</a>
+<a href="#how-title-and-tooltip-actually-resolve">How title and tooltip actually resolve</a>
+<a href="#breaking-a-long-caption-onto-two-lines" class="h3">Breaking a long caption onto two lines</a>
+<a href="#how-the-script-is-scanned">How the script is scanned</a>
+<a href="#title" class="h3">__title__</a>
+<a href="#the-docstring" class="h3">The docstring</a>
+<a href="#a-complete-example">A complete example</a>
+</aside>
+</main>
+</div>
+<script src="_assets/search-index.js"></script>
+<script src="_assets/site.js"></script>
+</body>
+</html>

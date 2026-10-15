@@ -1,0 +1,377 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Console - pyACAD tools</title>
+<meta name="description" content="An interactive Python console inside AutoCAD, with the same pyacad library every tool uses.">
+<link rel="stylesheet" href="_assets/site.css">
+<link rel="stylesheet" href="_assets/tools.css">
+</head>
+<body data-base="">
+<div class="layout">
+<div class="sidebar">
+  <div class="brand"><a href="index.html"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="26" height="26" aria-hidden="true"><polygon points="157.0,327.8 351.8,327.8 363.1,342.4 363.1,403.3 168.3,403.3 157.0,388.7" fill="#78082A"/><polygon points="157.0,327.8 351.8,327.8 351.8,388.7 157.0,388.7" fill="#B80C40"/><polygon points="51.5,482.0 234.1,157.4 278.7,181.7 290.1,196.3 152.1,496.6 62.8,496.6" fill="#78082A"/><polygon points="51.5,482.0 140.8,482.0 278.7,181.7 234.1,157.4" fill="#E51050"/><polygon points="359.9,482.0 205.7,108.7 217.0,123.3 371.2,496.6" fill="#78082A"/><polygon points="205.7,108.7 201.6,55.9 213.0,70.5 217.0,123.3" fill="#78082A"/><polygon points="201.6,55.9 246.3,15.4 257.6,30.0 213.0,70.5" fill="#78082A"/><polygon points="246.3,15.4 343.7,23.5 355.0,38.1 257.6,30.0" fill="#78082A"/><polygon points="343.7,23.5 388.3,51.9 399.7,66.5 355.0,38.1" fill="#78082A"/><polygon points="388.3,51.9 347.7,76.2 359.1,90.8 399.7,66.5" fill="#78082A"/><polygon points="347.7,76.2 295.0,84.3 306.3,99.0 359.1,90.8" fill="#78082A"/><polygon points="295.0,84.3 449.2,482.0 460.5,496.6 306.3,99.0" fill="#78082A"/><polygon points="449.2,482.0 359.9,482.0 371.2,496.6 460.5,496.6" fill="#78082A"/><polygon points="359.9,482.0 205.7,108.7 201.6,55.9 246.3,15.4 343.7,23.5 388.3,51.9 347.7,76.2 295.0,84.3 449.2,482.0" fill="#E51050"/><polygon points="270.6,39.7 311.2,35.7 297.0,51.9" fill="#1F2329"/></svg><span class="brand-name">pyACAD
+    <span class="brand-sub">Tools guide</span></span></a></div>
+  <div class="search-wrap">
+    <svg class="search-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <circle cx="6" cy="6" r="4.2" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M9.2 9.2 12.5 12.5" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round"/></svg>
+    <input id="search" type="search" placeholder="Search the tools" autocomplete="off"
+           spellcheck="false" aria-label="Search the tools guide">
+    <span class="search-kbd">/</span>
+    <div id="search-results" class="search-results"></div>
+  </div>
+  <nav class="pages">
+<div class="grp">pyACAD</div>
+<a href="settings.html"><img class="nav-icon" src="_assets/icons/settings.png" alt="">Settings</a>
+<a href="shortcuts.html"><img class="nav-icon" src="_assets/icons/shortcuts.png" alt="">Shortcuts</a>
+<a href="console.html" class="active"><img class="nav-icon" src="_assets/icons/console.png" alt="">Console</a>
+<a href="reload.html"><img class="nav-icon" src="_assets/icons/reload.png" alt="">Reload</a>
+<div class="grp">Data</div>
+<a href="blocks-to-excel.html"><img class="nav-icon" src="_assets/icons/blocks-to-excel.png" alt="">Blocks to Excel</a>
+<a href="excel-to-blocks.html"><img class="nav-icon" src="_assets/icons/excel-to-blocks.png" alt="">Excel to Blocks</a>
+<a href="block-schedule.html"><img class="nav-icon" src="_assets/icons/block-schedule.png" alt="">Block Schedule</a>
+<a href="find-replace-attributes.html"><img class="nav-icon" src="_assets/icons/find-replace-attributes.png" alt="">Find and Replace Attributes</a>
+<div class="grp">Layers</div>
+<a href="layer-manager.html"><img class="nav-icon" src="_assets/icons/layer-manager.png" alt="">Layer Manager</a>
+<a href="layer-mapper.html"><img class="nav-icon" src="_assets/icons/layer-mapper.png" alt="">Layer Mapper</a>
+<a href="layer-snapshot.html"><img class="nav-icon" src="_assets/icons/layer-snapshot.png" alt="">Layer Snapshot</a>
+<div class="grp">Xrefs</div>
+<a href="xref-manager.html"><img class="nav-icon" src="_assets/icons/xref-manager.png" alt="">Xref Manager</a>
+<a href="xref-repath.html"><img class="nav-icon" src="_assets/icons/xref-repath.png" alt="">Xref Repath</a>
+<div class="grp">Cleanup</div>
+<a href="drawing-cleanup.html"><img class="nav-icon" src="_assets/icons/drawing-cleanup.png" alt="">Drawing Cleanup</a>
+<a href="font-proxy-report.html"><img class="nav-icon" src="_assets/icons/font-proxy-report.png" alt="">Font and Proxy Report</a>
+<div class="grp">Output</div>
+<a href="batch-plot.html"><img class="nav-icon" src="_assets/icons/batch-plot.png" alt="">Batch Plot</a>
+<a href="layout-manager.html"><img class="nav-icon" src="_assets/icons/layout-manager.png" alt="">Layout Manager</a>
+<div class="grp">Takeoff</div>
+<a href="length-takeoff.html"><img class="nav-icon" src="_assets/icons/length-takeoff.png" alt="">Length Takeoff</a>
+<a href="tag-audit.html"><img class="nav-icon" src="_assets/icons/tag-audit.png" alt="">Tag Audit</a>
+<div class="grp">AI (beta)</div>
+<a href="ask-ai.html"><img class="nav-icon" src="_assets/icons/ask-ai.png" alt="">Ask AI</a>
+<a href="ai-settings.html"><img class="nav-icon" src="_assets/icons/ai-settings.png" alt="">AI Settings</a>
+<a href="open-ai-folder.html"><img class="nav-icon" src="_assets/icons/open-ai-folder.png" alt="">Open AI Folder</a>
+</nav>
+  <div class="side-foot">
+    <span>pyACAD 0.1.0</span>
+    <a class="side-link" href="https://docs.pyacad.com/">Authoring guide</a>
+    <button id="theme-toggle" type="button" aria-label="Toggle colour theme">
+      <span>Dark</span></button>
+  </div>
+</div>
+<main class="main">
+<article>
+  <div class="hero"><img class="hero-icon" src="_assets/icons/console.png" alt=""><div><p class="eyebrow">pyACAD panel</p><h1>Console</h1><p class="lead">An interactive Python console inside AutoCAD, with the same pyacad library every tool uses.</p></div></div><div class="facts"><div class="fact"><span class="fact-k">On the ribbon</span><span class="fact-v">Button, pyACAD panel</span></div><div class="fact"><span class="fact-k">Needs</span><span class="fact-v">Nothing (a drawing for anything that reads one)</span></div><div class="fact"><span class="fact-k">Command</span><span class="fact-v"><code>PYCONSOLE</code></span></div><div class="fact"><span class="fact-k">Shortcut</span><span class="fact-v">None set (bind one in Shortcuts)</span></div></div>
+  <h2 id="what-it-does">What it does<a class="anchor" href="#what-it-does" aria-label="Link to this section">#</a></h2>
+<p>Opens a window where you type Python and run it inside AutoCAD, in the same process and
+with the same <code>pyacad</code> library the ribbon tools use. It is the fastest way to
+answer "what does this call return on this drawing" before writing it into a tool, and a
+handy calculator for one-off jobs that do not deserve a button. The command is
+<code>PYCONSOLE</code>.</p>
+
+
+
+<h2 id="how-to-use-it">How to use it<a class="anchor" href="#how-to-use-it" aria-label="Link to this section">#</a></h2>
+<ol class="steps">
+  <li>Click <strong>Console</strong>. The window floats beside AutoCAD and AutoCAD stays
+    usable while it is open.</li>
+  <li>Type in the lower pane and press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> or click
+    <strong>Run</strong>. What you ran is echoed with <code>&gt;&gt;&gt;</code> in the upper
+    pane, then its printed output. When the input ends in an expression its value is shown,
+    as at any Python prompt. An error shows its traceback; nothing else is affected.</li>
+  <li><kbd>Up</kbd> on the first line and <kbd>Down</kbd> on the last line walk through what
+    you have run in this window. In the middle of a multi-line input they move the caret as
+    usual.</li>
+  <li>Names you assign survive between runs, so you can build up an answer a line at a
+    time.</li>
+</ol>
+
+<div class="code"><pre><code>from pyacad import blocks, doc, ents, layers, sel
+layers.current()                       # the current layer's name
+blocks.counts()                        # {block name: references}
+[ents.type_of(h) for h in sel.current()]   # what is selected, by DXF type</code></pre></div>
+
+<h2 id="good-to-know-limits">Good to know / limits<a class="anchor" href="#good-to-know-limits" aria-label="Link to this section">#</a></h2>
+<ul>
+  <li>The console runs outside any AutoCAD command, so code that changes the drawing must
+    lock it first: wrap it in <code>with doc.lock():</code>. Reading needs no lock.</li>
+  <li>It is a console, not an editor: there is no file and no save, and history lasts as long
+    as the window. Anything worth keeping belongs in a bundle.</li>
+  <li>Code runs on AutoCAD's UI thread, as every tool does. While it runs, Run reads
+    <em>Running</em> and the window shows the wait cursor; a long loop freezes AutoCAD until it
+    finishes.</li>
+  <li>This is the IronPython 3.4 engine. A bundle that needs numpy runs on CPython and cannot
+    be tried here.</li>
+  <li>Each click opens a new window with its own names and history.</li>
+  <li><code>print()</code> output lands in the upper pane. Rich output from
+    <code>pyacad.output</code> opens in its own window titled <em>pyACAD - Console</em>.</li>
+  <li><code>PYACADCONSOLE</code> is a different thing: the loader's diagnostic message box
+    (IronPython version, AutoCAD API version, extensions loaded), there for when the ribbon
+    itself failed to load.</li>
+</ul>
+
+<h2 id="other-uses">Other uses<a class="anchor" href="#other-uses" aria-label="Link to this section">#</a></h2>
+<ul>
+  <li>Count something the interface will not: references per block, entities per layer, the
+    layers matching a pattern.</li>
+  <li>Make a bulk change that does not deserve a tool:
+    <code>with doc.lock(): layers.freeze('A-ANNO-*')</code>.</li>
+  <li>Try a helper from the <a href="https://docs.pyacad.com/api-reference.html">API
+    reference</a> on the open drawing before you build a button around it. The
+    <a href="https://docs.pyacad.com/quickstart.html">quickstart</a> turns the lines you keep
+    pasting into a button.</li>
+</ul>
+<h2 id="source">Source<a class="anchor" href="#source" aria-label="Link to this section">#</a></h2>
+<p>The tool's own files, word for word as shipped in <code>pyACAD.panel/Console.pushbutton</code>. Every pyACAD tool is an ordinary bundle: copy these into your own extension and change what you like.</p>
+<div class="code src"><div class="code-head"><span><code>script.py</code> <span class="src-note">Runs on a click.</span> <a href="https://github.com/pyacad/pyACAD/blob/main/extensions/pyACAD.extension/pyACAD.tab/pyACAD.panel/Console.pushbutton/script.py" rel="noopener">View on GitHub</a></span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-s">&quot;&quot;&quot;Interactive python console running inside AutoCAD with the pyACAD environment.
+
+Built on the DesignSystem v2 toolkit: a solid surface, the real Windows titlebar,
+bordered monospace panes and an accent Run button - the same language as every
+other pyACAD form.
+&quot;&quot;&quot;</span>
+
+__title__ = <span class="tok-s">&#x27;Console&#x27;</span>
+
+<span class="tok-k">import</span> sys
+
+<span class="tok-k">import</span> clr
+
+<span class="tok-k">from</span> pyacad <span class="tok-k">import</span> _repl, script
+<span class="tok-k">from</span> pyacad._history <span class="tok-k">import</span> CommandHistory
+
+clr.AddReference(<span class="tok-s">&#x27;PresentationFramework&#x27;</span>)
+clr.AddReference(<span class="tok-s">&#x27;PresentationCore&#x27;</span>)
+clr.AddReference(<span class="tok-s">&#x27;WindowsBase&#x27;</span>)
+clr.AddReference(<span class="tok-s">&#x27;WindowsFormsIntegration&#x27;</span>)
+clr.AddReference(<span class="tok-s">&#x27;PyAcad.Runtime&#x27;</span>)
+
+<span class="tok-k">from</span> System.Windows <span class="tok-k">import</span> (
+    CornerRadius, GridLength, GridUnitType, HorizontalAlignment, Thickness,
+    TextWrapping, VerticalAlignment, Window, WindowStartupLocation,
+)
+<span class="tok-k">from</span> System.Windows.Controls <span class="tok-k">import</span> (
+    Border, ColumnDefinition, Grid, RowDefinition, ScrollBarVisibility, TextBox,
+)
+<span class="tok-k">from</span> System.Windows.Controls.Primitives <span class="tok-k">import</span> ScrollBar
+<span class="tok-k">from</span> System.Windows.Input <span class="tok-k">import</span> Cursors, Key, Keyboard, ModifierKeys
+<span class="tok-k">from</span> System.Windows.Forms.Integration <span class="tok-k">import</span> ElementHost
+<span class="tok-k">from</span> System.Windows.Media <span class="tok-k">import</span> Brushes, FontFamily
+<span class="tok-k">from</span> System.Windows.Threading <span class="tok-k">import</span> DispatcherFrame, DispatcherPriority
+<span class="tok-k">from</span> System <span class="tok-k">import</span> Action
+<span class="tok-k">from</span> System.Windows.Threading <span class="tok-k">import</span> Dispatcher
+
+<span class="tok-k">from</span> PyAcad.Runtime.Forms <span class="tok-k">import</span> DesignSystem, FluentChrome
+<span class="tok-k">from</span> PyAcad.Runtime.Output <span class="tok-k">import</span> OutputWindowWriter, PyAcadTheme
+
+<span class="tok-c"># Rich output (pyacad.output) goes to whichever writer the host holds, and that</span>
+<span class="tok-c"># is set per RIBBON command - so console output landed in the last button&#x27;s</span>
+<span class="tok-c"># window, under its title. The console owns one writer for its whole life and</span>
+<span class="tok-c"># re-asserts it before each run, so output.print_* always lands in a window</span>
+<span class="tok-c"># titled for the console.</span>
+_output = OutputWindowWriter(<span class="tok-s">&#x27;pyACAD - Console&#x27;</span>)
+
+
+<span class="tok-k">def</span> _pump():
+    <span class="tok-s">&quot;&quot;&quot;Lets WPF finish painting before we block the UI thread on a script.&quot;&quot;&quot;</span>
+    frame = DispatcherFrame()
+
+    <span class="tok-k">def</span> done():
+        frame.Continue = <span class="tok-k">False</span>
+
+    Dispatcher.CurrentDispatcher.BeginInvoke(
+        DispatcherPriority.Background, Action(done))
+    Dispatcher.PushFrame(frame)
+
+_BANNER = (
+    <span class="tok-s">&#x27;pyACAD console - IronPython %s.%s.%s\n&#x27;</span>
+    <span class="tok-s">&#x27;Run: Ctrl+Enter . History: Up/Down at the edges. Try: from pyacad import forms, output\n&#x27;</span>
+    % sys.version_info[:<span class="tok-n">3</span>])
+
+<span class="tok-c"># One namespace for the window&#x27;s lifetime, so assignments survive between runs.</span>
+_namespace = {<span class="tok-s">&#x27;__pyacad__&#x27;</span>: __pyacad__}
+_history = CommandHistory()
+
+_T = DesignSystem.Tokens.Current
+_MONO = FontFamily(<span class="tok-s">&#x27;Consolas&#x27;</span>)
+
+
+<span class="tok-k">def</span> _console_pane(read_only):
+    <span class="tok-s">&quot;&quot;&quot;A bordered v2 frame wrapping a borderless monospace TextBox. Returns (frame, box).&quot;&quot;&quot;</span>
+    box = TextBox()
+    box.FontFamily = _MONO
+    box.FontSize = <span class="tok-n">13</span>
+    box.AcceptsReturn = <span class="tok-k">True</span>
+    box.AcceptsTab = <span class="tok-k">True</span>
+    box.TextWrapping = TextWrapping.NoWrap
+    box.VerticalScrollBarVisibility = ScrollBarVisibility.Auto
+    box.HorizontalScrollBarVisibility = ScrollBarVisibility.Auto
+    box.IsReadOnly = read_only
+    box.Background = Brushes.Transparent
+    box.Foreground = DesignSystem.Brush(_T.Ink)
+    box.BorderThickness = Thickness(<span class="tok-n">0</span>)
+    box.Padding = Thickness(<span class="tok-n">8</span>)
+    box.FocusVisualStyle = DesignSystem.FocusRing(DesignSystem.Accent)
+    box.Resources.Add(clr.GetClrType(ScrollBar), DesignSystem.SlimScrollStyle())
+
+    frame = Border()
+    frame.CornerRadius = CornerRadius(<span class="tok-n">4</span>)
+    frame.BorderBrush = DesignSystem.Brush(_T.LineStrong)
+    frame.BorderThickness = Thickness(<span class="tok-n">1</span>)
+    frame.Background = DesignSystem.Brush(_T.Paper)
+    frame.Child = box
+    <span class="tok-k">return</span> frame, box
+
+
+<span class="tok-k">def</span> _build_window():
+    window = Window()
+    window.Title = <span class="tok-s">&#x27;pyACAD Console&#x27;</span>
+    window.Width = <span class="tok-n">720</span>
+    window.Height = <span class="tok-n">540</span>
+    window.MinWidth = <span class="tok-n">460</span>
+    window.MinHeight = <span class="tok-n">320</span>
+    window.WindowStartupLocation = WindowStartupLocation.CenterScreen
+    window.Background = DesignSystem.Brush(_T.Surface)
+    window.FontFamily = FontFamily(<span class="tok-s">&#x27;Segoe UI Variable Text, Segoe UI&#x27;</span>)
+    FluentChrome.Apply(window)  <span class="tok-c"># real Windows titlebar (dark attr in dark theme)</span>
+
+    grid = Grid()
+    grid.Margin = Thickness(<span class="tok-n">16</span>)
+    <span class="tok-k">for</span> height <span class="tok-k">in</span> (GridLength(<span class="tok-n">1</span>, GridUnitType.Star), GridLength.Auto):
+        row = RowDefinition()
+        row.Height = height
+        grid.RowDefinitions.Add(row)
+
+    output_frame, output_box = _console_pane(<span class="tok-k">True</span>)
+    output_box.Text = _BANNER
+    Grid.SetRow(output_frame, <span class="tok-n">0</span>)
+    grid.Children.Add(output_frame)
+
+    <span class="tok-c"># Two columns: the input pane fills the row, Run sits in its own auto column</span>
+    <span class="tok-c"># so the two never overlap and Run&#x27;s bottom aligns with the pane&#x27;s bottom.</span>
+    input_grid = Grid()
+    input_grid.Margin = Thickness(<span class="tok-n">0</span>, <span class="tok-n">12</span>, <span class="tok-n">0</span>, <span class="tok-n">0</span>)
+    Grid.SetRow(input_grid, <span class="tok-n">1</span>)
+    fill_col = ColumnDefinition()
+    fill_col.Width = GridLength(<span class="tok-n">1</span>, GridUnitType.Star)
+    run_col = ColumnDefinition()
+    run_col.Width = GridLength.Auto
+    input_grid.ColumnDefinitions.Add(fill_col)
+    input_grid.ColumnDefinitions.Add(run_col)
+
+    input_frame, input_box = _console_pane(<span class="tok-k">False</span>)
+    input_frame.MinHeight = <span class="tok-n">84</span>
+    input_frame.MaxHeight = <span class="tok-n">160</span>
+    Grid.SetColumn(input_frame, <span class="tok-n">0</span>)
+    input_grid.Children.Add(input_frame)
+
+    run = DesignSystem.Primary(_T, <span class="tok-s">&#x27;Run&#x27;</span>, <span class="tok-k">None</span>)
+    run.MinWidth = <span class="tok-n">0</span>
+    run.Width = <span class="tok-n">92</span>
+    run.Margin = Thickness(<span class="tok-n">12</span>, <span class="tok-n">0</span>, <span class="tok-n">0</span>, <span class="tok-n">0</span>)
+    run.VerticalAlignment = VerticalAlignment.Bottom
+    Grid.SetColumn(run, <span class="tok-n">1</span>)
+    input_grid.Children.Add(run)
+    grid.Children.Add(input_grid)
+
+    window.Content = grid
+
+    <span class="tok-k">def</span> append(text):
+        output_box.AppendText(text)
+        output_box.ScrollToEnd()
+
+    <span class="tok-k">def</span> run_code(sender, args):
+        code = input_box.Text.replace(<span class="tok-s">&#x27;\r\n&#x27;</span>, <span class="tok-s">&#x27;\n&#x27;</span>).strip()
+        <span class="tok-k">if</span> <span class="tok-k">not</span> code:
+            <span class="tok-k">return</span>
+        _history.add(code)
+        <span class="tok-k">for</span> line <span class="tok-k">in</span> code.split(<span class="tok-s">&#x27;\n&#x27;</span>):
+            append(<span class="tok-s">&#x27;&gt;&gt;&gt; %s\n&#x27;</span> % line)
+
+        <span class="tok-c"># A script runs on the UI thread (the AutoCAD API demands it), so a</span>
+        <span class="tok-c"># slow one freezes this window. Say so instead of looking hung: disable</span>
+        <span class="tok-c"># Run, show the wait cursor, and let WPF paint before we block.</span>
+        run.IsEnabled = <span class="tok-k">False</span>
+        run.Content = <span class="tok-s">&#x27;Running&#x27;</span>
+        window.Cursor = Cursors.Wait
+        <span class="tok-k">try</span>:
+            _pump()
+            <span class="tok-c"># Console output belongs in the console&#x27;s own window, not in whatever</span>
+            <span class="tok-c"># ribbon button ran last. Guarded: a failure here must never be the</span>
+            <span class="tok-c"># reason a script does not run.</span>
+            <span class="tok-k">try</span>:
+                __pyacad__.SetCurrentOutput(_output)
+            <span class="tok-k">except</span> Exception:
+                <span class="tok-k">pass</span>
+            append(_repl.execute(code, _namespace))
+        <span class="tok-k">finally</span>:
+            window.Cursor = <span class="tok-k">None</span>
+            run.Content = <span class="tok-s">&#x27;Run&#x27;</span>
+            run.IsEnabled = <span class="tok-k">True</span>
+        input_box.Clear()
+        input_box.Focus()
+
+    <span class="tok-k">def</span> recall(entry):
+        input_box.Text = entry
+        input_box.CaretIndex = len(input_box.Text)
+
+    <span class="tok-k">def</span> key_down(sender, args):
+        <span class="tok-c"># PREVIEW, not KeyDown: a TextBox with AcceptsReturn owns Enter (it</span>
+        <span class="tok-c"># inserts a line break) and the arrow keys (caret movement), and marks</span>
+        <span class="tok-c"># them handled in class handling, which runs BEFORE instance handlers.</span>
+        <span class="tok-c"># On the bubbling event this whole function never sees them, so both</span>
+        <span class="tok-c"># Ctrl+Enter and the history keys are dead. Tunnelling gets there first,</span>
+        <span class="tok-c"># and Handled=True here also stops the stray newline.</span>
+        <span class="tok-k">if</span> args.Key == Key.Enter <span class="tok-k">and</span> Keyboard.Modifiers == ModifierKeys.Control:
+            args.Handled = <span class="tok-k">True</span>
+            run_code(sender, args)
+            <span class="tok-k">return</span>
+        <span class="tok-c"># History: Up on the first line / Down on the last (REPL feel; middle</span>
+        <span class="tok-c"># lines keep normal caret movement for multiline editing).</span>
+        <span class="tok-k">if</span> args.Key == Key.Up:
+            <span class="tok-k">if</span> input_box.GetLineIndexFromCharacterIndex(input_box.CaretIndex) == <span class="tok-n">0</span>:
+                args.Handled = <span class="tok-k">True</span>
+                recall(_history.previous())
+        <span class="tok-k">elif</span> args.Key == Key.Down:
+            at_last = (input_box.GetLineIndexFromCharacterIndex(input_box.CaretIndex)
+                       == input_box.LineCount - <span class="tok-n">1</span>)
+            <span class="tok-k">if</span> at_last:
+                args.Handled = <span class="tok-k">True</span>
+                recall(_history.next())
+
+    run.Click += run_code
+    input_box.PreviewKeyDown += key_down
+    window.ContentRendered += <span class="tok-k">lambda</span> s, e: input_box.Focus()
+    <span class="tok-k">return</span> window
+
+
+<span class="tok-c"># Modeless: AutoCAD stays usable while the console floats. A modeless WPF</span>
+<span class="tok-c"># window rides the HOST&#x27;s message pump, which preprocesses keyboard messages</span>
+<span class="tok-c"># itself - most keydowns (digits, Enter) and every WM_CHAR die before the</span>
+<span class="tok-c"># window&#x27;s WndProc, so typing shows nothing and Ctrl+Enter never fires. The</span>
+<span class="tok-c"># interop call registers a filter that hands keyboard messages to this window</span>
+<span class="tok-c"># first; it must run before Show(). Modal ShowDialog windows pump for</span>
+<span class="tok-c"># themselves and do not need it.</span>
+_window = _build_window()
+ElementHost.EnableModelessKeyboardInterop(_window)
+_window.Show()</code></pre></div>
+  <div class="pagenav">
+<a href="shortcuts.html"><span class="dir">Previous</span><span class="ttl">Shortcuts</span></a>
+<a class="next" href="reload.html"><span class="dir">Next</span><span class="ttl">Reload</span></a>
+</div>
+</article>
+<aside class="toc"><div class="toc-head">On this page</div>
+<a href="#what-it-does">What it does</a>
+<a href="#how-to-use-it">How to use it</a>
+<a href="#good-to-know-limits">Good to know / limits</a>
+<a href="#other-uses">Other uses</a>
+<a href="#source">Source</a>
+</aside>
+</main>
+</div>
+<script src="_assets/search-index.js"></script>
+<script src="_assets/site.js"></script>
+</body>
+</html>

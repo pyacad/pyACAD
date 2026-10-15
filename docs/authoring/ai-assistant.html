@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Writing tools with an AI assistant - pyACAD authoring</title>
+<meta name="description" content="The Ask AI panel, what it sends and what it writes, and how to get the same result from any chatbot you already use.">
+<link rel="stylesheet" href="_assets/site.css">
+</head>
+<body data-base="">
+<div class="layout">
+<div class="sidebar">
+  <div class="brand"><a href="index.html"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="26" height="26" aria-hidden="true"><polygon points="157.0,327.8 351.8,327.8 363.1,342.4 363.1,403.3 168.3,403.3 157.0,388.7" fill="#78082A"/><polygon points="157.0,327.8 351.8,327.8 351.8,388.7 157.0,388.7" fill="#B80C40"/><polygon points="51.5,482.0 234.1,157.4 278.7,181.7 290.1,196.3 152.1,496.6 62.8,496.6" fill="#78082A"/><polygon points="51.5,482.0 140.8,482.0 278.7,181.7 234.1,157.4" fill="#E51050"/><polygon points="359.9,482.0 205.7,108.7 217.0,123.3 371.2,496.6" fill="#78082A"/><polygon points="205.7,108.7 201.6,55.9 213.0,70.5 217.0,123.3" fill="#78082A"/><polygon points="201.6,55.9 246.3,15.4 257.6,30.0 213.0,70.5" fill="#78082A"/><polygon points="246.3,15.4 343.7,23.5 355.0,38.1 257.6,30.0" fill="#78082A"/><polygon points="343.7,23.5 388.3,51.9 399.7,66.5 355.0,38.1" fill="#78082A"/><polygon points="388.3,51.9 347.7,76.2 359.1,90.8 399.7,66.5" fill="#78082A"/><polygon points="347.7,76.2 295.0,84.3 306.3,99.0 359.1,90.8" fill="#78082A"/><polygon points="295.0,84.3 449.2,482.0 460.5,496.6 306.3,99.0" fill="#78082A"/><polygon points="449.2,482.0 359.9,482.0 371.2,496.6 460.5,496.6" fill="#78082A"/><polygon points="359.9,482.0 205.7,108.7 201.6,55.9 246.3,15.4 343.7,23.5 388.3,51.9 347.7,76.2 295.0,84.3 449.2,482.0" fill="#E51050"/><polygon points="270.6,39.7 311.2,35.7 297.0,51.9" fill="#1F2329"/></svg><span class="brand-name">pyACAD
+    <span class="brand-sub">Tool authoring guide</span></span></a></div>
+  <div class="search-wrap">
+    <svg class="search-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <circle cx="6" cy="6" r="4.2" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M9.2 9.2 12.5 12.5" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round"/></svg>
+    <input id="search" type="search" placeholder="Search the docs" autocomplete="off"
+           spellcheck="false" aria-label="Search the documentation">
+    <span class="search-kbd">/</span>
+    <div id="search-results" class="search-results"></div>
+  </div>
+  <nav class="pages">
+<div class="grp">Start</div>
+<a href="overview.html"><span class="num">01</span>How pyACAD works</a>
+<a href="quickstart.html"><span class="num">02</span>Your first button</a>
+<div class="grp">Bundles</div>
+<a href="anatomy.html"><span class="num">03</span>Anatomy of an extension</a>
+<a href="buttons.html"><span class="num">04</span>Buttons, stacks and pulldowns</a>
+<a href="bundle-yaml.html"><span class="num">05</span>The bundle.yaml reference</a>
+<a href="icons.html"><span class="num">06</span>Icons</a>
+<a href="shortcuts.html"><span class="num">07</span>Shortcuts and keytips</a>
+<a href="click-actions.html"><span class="num">08</span>Click actions and config.py</a>
+<a href="hooks.html"><span class="num">09</span>Hooks</a>
+<div class="grp">Scripts</div>
+<a href="script-environment.html"><span class="num">10</span>The script environment</a>
+<a href="user-interface.html"><span class="num">11</span>Talking to the user</a>
+<a href="settings.html"><span class="num">12</span>Settings and per-tool state</a>
+<a href="commands.html"><span class="num">13</span>AutoCAD commands and AutoLISP</a>
+<a href="command-line.html"><span class="num">14</span>pyacad.exe and headless runs</a>
+<div class="grp">Reference</div>
+<a href="api-reference.html"><span class="num">15</span>Python API reference</a>
+<div class="grp">Practice</div>
+<a href="cookbook.html"><span class="num">16</span>Cookbook</a>
+<a href="ai-assistant.html" class="active"><span class="num">17</span>Writing tools with an AI assistant</a>
+<a href="troubleshooting.html"><span class="num">18</span>Troubleshooting</a>
+<a href="style-guide.html"><span class="num">19</span>Style guide for tools</a>
+</nav>
+  <div class="side-foot">
+    <span>pyACAD 0.1.0</span>
+    <button id="theme-toggle" type="button" aria-label="Toggle colour theme">
+      <span>Dark</span></button>
+  </div>
+</div>
+<main class="main">
+<article>
+  <p class="eyebrow">Practice</p>
+  <h1>Writing tools with an AI assistant</h1>
+  <p class="lead">The Ask AI panel, what it sends and what it writes, and how to get the same result from any chatbot you already use.</p>
+  <p>The shipped pyACAD tab has an <strong>AI (beta)</strong> panel. Its <strong>Ask AI</strong>
+button opens a docked palette with a chat that writes pyACAD tools from a plain-words request.
+It is a convenience over the same contract this guide describes, not a different way of
+building tools: what comes back is a <code>bundle.yaml</code>, a <code>script.py</code> and
+sometimes a <code>config.py</code>, written into an ordinary <code>*.pushbutton</code> folder
+you can open, edit or delete like any other. This page explains the mechanism so you can
+trust it, tune it, or reproduce it with another assistant.</p>
+
+<p>The panel holds three things:</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Button</th><th>Kind</th><th>Does</th></tr></thead>
+<tbody>
+<tr><td><strong>Ask AI</strong></td><td><code>*.dockpane</code></td><td>Shows or hides the chat
+    palette. AutoCAD remembers where you docked it.</td></tr>
+<tr><td><strong>AI Settings</strong></td><td>pushbutton, <code>PYAISETTINGS</code></td>
+    <td>Opens the Settings window on its <em>AI assistant (beta)</em> section.</td></tr>
+<tr><td><strong>Open AI Folder</strong></td><td>pushbutton, <code>PYOPENAIFOLDER</code></td>
+    <td>Opens the folder the generated tools live in, in Explorer. Before the first tool
+    exists it toasts <em>No AI tools yet</em> instead.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="the-panel-is-a-beta-and-not-the-only-way">The panel is a beta, and not the only way<a class="anchor" href="#the-panel-is-a-beta-and-not-the-only-way" aria-label="Link to this section">#</a></h2>
+
+<p>The panel is new and lightly tested, and says so at the top. Read every script it proposes
+before you click Create. And you do not need it at all: any assistant that can read a long
+document will write pyACAD tools once it has the authoring guide. The palette's footer has a
+<strong>Copy guide</strong> button that puts that exact guide on the clipboard, with no key
+needed, and <a href="#doing-the-same-with-any-assistant">the last section</a> says what to do
+with it.</p>
+
+<h2 id="setting-it-up">Setting it up<a class="anchor" href="#setting-it-up" aria-label="Link to this section">#</a></h2>
+
+<p>Click <strong>AI Settings</strong>. The section has five fields:</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Field</th><th>What to enter</th></tr></thead>
+<tbody>
+<tr><td>Provider</td><td><strong>Anthropic</strong>, or <strong>OpenAI-compatible</strong>
+    for OpenAI itself, Azure OpenAI, Ollama, LM Studio or any server that speaks the
+    chat-completions API.</td></tr>
+<tr><td>Base URL</td><td>Empty for the provider's public endpoint
+    (<code>https://api.anthropic.com</code> or <code>https://api.openai.com/v1</code>). For
+    another OpenAI-compatible server, its address ending in <code>/v1</code>.</td></tr>
+<tr><td>Model</td><td>Pick one from the list or type any name. Empty uses the provider's
+    default: <code>claude-opus-5</code> for Anthropic, <code>gpt-4o</code> for
+    OpenAI-compatible.</td></tr>
+<tr><td>API key</td><td>Your key. <strong>Test</strong> sends a short request with the
+    values in the window, saved or not, and shows the model's reply. <strong>Remove</strong>
+    deletes a saved key. A local server needs no key.</td></tr>
+<tr><td>Longest answer (tokens)</td><td>The reply length limit, 8192 by default. Raise it if
+    the panel says an answer hit the length limit.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Saved settings apply from your next message; no Reload is needed for them.</p>
+
+<h3 id="where-the-settings-and-the-key-live">Where the settings and the key live<a class="anchor" href="#where-the-settings-and-the-key-live" aria-label="Link to this section">#</a></h3>
+
+<p>Provider, base URL, model and answer length are the <code>"ai"</code> section of
+<code>%APPDATA%\pyACAD\config.json</code>. Only values that differ from the defaults are
+written:</p>
+
+<div class="code"><div class="code-head"><span>%APPDATA%\pyACAD\config.json</span><button class="copy-btn" type="button">Copy</button></div><pre><code>{
+  <span class="tok-f">&quot;ai&quot;</span>: {
+    <span class="tok-f">&quot;provider&quot;</span>: <span class="tok-s">&quot;openai&quot;</span>,
+    <span class="tok-f">&quot;baseUrl&quot;</span>: <span class="tok-s">&quot;http://localhost:11434/v1&quot;</span>,
+    <span class="tok-f">&quot;model&quot;</span>: <span class="tok-s">&quot;qwen2.5-coder:14b&quot;</span>,
+    <span class="tok-f">&quot;maxTokens&quot;</span>: <span class="tok-n">16000</span>
+  }
+}</code></pre></div>
+
+<p>The API key is <strong>not</strong> there. It is in <code>%APPDATA%\pyACAD\secrets.json</code>
+beside it, encrypted with Windows DPAPI for your Windows account, so a
+<code>config.json</code> that gets shared, screenshotted or pasted into a bug report never
+carries a key, and a copied <code>secrets.json</code> is useless on another account. A key
+that cannot be decrypted reads as no key.</p>
+
+<p>The key is saved for the endpoint it was entered with (its scheme, host and port) and is
+only ever sent back there, and only over https or to a server on this computer. Switch
+provider or point the panel at another server and the saved key stays behind rather than
+travelling with you; enter a key for the new endpoint. Typing a key for a plain-http server
+elsewhere on the network is refused with <em>Keys are only sent over https, or to a server on
+this computer.</em></p>
+
+<h2 id="using-the-panel">Using the panel<a class="anchor" href="#using-the-panel" aria-label="Link to this section">#</a></h2>
+
+<ol>
+  <li>Click <strong>Ask AI</strong>. Without a usable key the palette says so and offers
+    <strong>Open AI settings</strong>.</li>
+  <li>Describe the tool in the box at the bottom and press <strong>Send</strong> (or
+    <kbd>Ctrl</kbd>+<kbd>Enter</kbd>). Tick <strong>Attach selection</strong> first if the
+    tool works on the kind of objects you have selected. The reply streams in;
+    <strong>Cancel</strong> stops it.</li>
+  <li>When the reply contains a complete tool, a card appears under it with
+    <strong>Create tool</strong> and <strong>View files</strong>. If the model asked a
+    question instead, answer it.</li>
+  <li><strong>Create tool</strong> writes the bundle and reloads the ribbon. The tool is on
+    the <strong>AI</strong> tab, and like every bundle it is also an AutoCAD command
+    (<code>PY</code> plus its title).</li>
+  <li>Keep talking to change it. Each revision brings a new card that reads
+    <strong>Update tool</strong>, which rewrites the same folder.</li>
+</ol>
+
+<p>The conversation survives the Reload that Create triggers: the chat lives for the AutoCAD
+session, not for the palette's content. <strong>New tool</strong> in the header starts over.</p>
+
+<h3 id="coming-back-to-a-tool">Coming back to a tool<a class="anchor" href="#coming-back-to-a-tool" aria-label="Link to this section">#</a></h3>
+
+<p>The header's <strong>Edit an existing tool</strong> list holds every tool in the AI
+extension. Picking one starts a fresh conversation that is already editing it: its current
+files ride along with your next message, and the card reads <strong>Update tool</strong>.
+Nothing is sent until you type.</p>
+
+<h3 id="the-fix-loop">The fix loop<a class="anchor" href="#the-fix-loop" aria-label="Link to this section">#</a></h3>
+
+<p>Every script that fails has its traceback kept for the session, per bundle folder. When
+the tool the conversation is editing has one, the transcript offers <strong>Send last error to
+AI</strong>, which sends the traceback with a request for complete, fixed files. Creating or
+updating the tool clears the recorded error.</p>
+
+<h2 id="what-the-model-is-given">What the model is given<a class="anchor" href="#what-the-model-is-given" aria-label="Link to this section">#</a></h2>
+
+<p>Every request carries a system prompt in two parts:</p>
+
+<ul>
+  <li><strong>The output rules.</strong> Answer with one bundle; a <code>Title:</code> line;
+    an <code>Icon:</code> line naming one or two letters and a colour; one fenced block per
+    file with the file name in the fence's info string; no other files, folders or paths; no
+    <code>if __name__ == '__main__':</code>; top-level code; toasts, never
+    <code>print()</code>; a silent cancel; ask one short question rather than guess.</li>
+  <li><strong>The authoring guide.</strong> <code>authoring-pack.md</code>, shipped beside the
+    pyACAD runtime and generated from the same sources as this site: what a bundle is, the
+    rules, the failure modes, script templates and the <code>pyacad</code> API reference.</li>
+</ul>
+
+<p>The system prompt is identical on every turn. With Anthropic it is sent marked for prompt
+caching, so from the second message on most of it is a cache read rather than new input.</p>
+
+<p>Then the conversation so far. When it grows past about a hundred thousand characters the
+oldest exchanges are dropped first; your newest message always goes.</p>
+
+<p>When you tick <strong>Attach selection</strong>, your message also carries a summary of the
+current selection: how many objects are selected, and for each object type (by DXF name, such
+as <code>INSERT</code> or <code>LWPOLYLINE</code>) the property names of its .NET class.
+Names only, never values: no layer names, no attribute text, no coordinates, no file names or
+paths. At most 200 objects are read and the summary stops at about four thousand characters.
+It tells the model which properties exist without sending anything from your drawing.</p>
+
+<p>When the conversation is editing a tool, your newest message also carries that tool's
+files exactly as they are on disk, so the model edits what exists rather than what it
+remembers.</p>
+
+<p>Nothing else goes. Requests go from AutoCAD straight to the endpoint you configured:
+<code>POST /v1/messages</code> for Anthropic, <code>POST /chat/completions</code> for
+OpenAI-compatible servers, streamed. pyACAD runs no service in between and keeps no copy of
+the conversation beyond the open session.</p>
+
+<h2 id="what-comes-back-and-what-is-written">What comes back, and what is written<a class="anchor" href="#what-comes-back-and-what-is-written" aria-label="Link to this section">#</a></h2>
+
+<p>The reply is parsed for fenced blocks named <code>bundle.yaml</code>,
+<code>script.py</code> or <code>config.py</code>, named in the fence's info string or on the
+line just above it. Any other file name is refused and never written. One unnamed block that
+reads as Python is taken as <code>script.py</code>. A reply with no <code>script.py</code>, or
+no title, is a question or a comment, not a proposal, and gets no card.</p>
+
+<p>Create writes the bundle into the AI extension, which lives in the per-user extension root
+pyACAD always scans:</p>
+
+<div class="code"><div class="code-head"><span>folders</span><button class="copy-btn" type="button">Copy</button></div><pre><code>%APPDATA%\pyACAD\extensions\<span class="tok-f">AI.extension</span>\
+  <span class="tok-k">extension.yaml</span>                    name: AI, engine: ironpython
+  <span class="tok-f">AI.tab</span>\
+    <span class="tok-f">Generated.panel</span>\
+      <span class="tok-f">Isolate_Walls.pushbutton</span>\
+        <span class="tok-k">bundle.yaml</span>
+        <span class="tok-k">script.py</span>
+        <span class="tok-k">config.py</span>                   only when proposed
+        <span class="tok-k">icon.png</span>  <span class="tok-k">icon.dark.png</span>  <span class="tok-k">icon.small.png</span>  <span class="tok-k">icon.small.dark.png</span></code></pre></div>
+
+<ul>
+  <li><strong>The folder name</strong> is the title with spaces and hyphens turned into
+    underscores and everything but letters, digits and underscores removed, at most 40
+    characters. A title starting with a digit gets <code>Tool_</code> in front, so it is never
+    read as an ordering prefix. An existing name gets <code>_2</code>, <code>_3</code> and so
+    on.</li>
+  <li><strong>The icons</strong> are painted by pyACAD itself: a rounded square in violet,
+    teal, amber, rose or green with the letters from the <code>Icon:</code> line. Blue is
+    deliberately not in that set, so a tool the assistant wrote never passes for a shipped
+    one.</li>
+  <li><strong>A missing <code>bundle.yaml</code></strong> is written as just
+    <code>title: &lt;Title&gt;</code>.</li>
+  <li><strong>The write is atomic.</strong> Files go to a temporary folder that is moved into
+    place in one step, so a Reload never meets a half-written tool.</li>
+</ul>
+
+<p>Update rewrites the files in the same folder, so the bundle key, its command name (when the
+title is unchanged) and any keyboard shortcut bound to it survive. A <code>config.py</code>
+the new proposal no longer includes is deleted. The writer refuses to touch any folder outside
+<code>AI.extension</code>.</p>
+
+<div class="note">
+<span class="note-t">Generated tools are yours</span>
+<p>Once written, a generated tool is an ordinary bundle. Edit it by hand, move it into your
+own extension (it then leaves the panel's list), or delete its folder and Reload. Updates of
+pyACAD replace <code>pyACAD.extension</code> only, never <code>AI.extension</code>.</p>
+</div>
+
+<h2 id="when-a-reply-goes-wrong">When a reply goes wrong<a class="anchor" href="#when-a-reply-goes-wrong" aria-label="Link to this section">#</a></h2>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>You see</th><th>Means</th></tr></thead>
+<tbody>
+<tr><td>An error with an <strong>Open AI settings</strong> button</td><td>The server rejected
+    the key. Check it in AI Settings and use <strong>Test</strong>.</td></tr>
+<tr><td><em>The answer hit the length limit.</em></td><td>The reply was cut off at
+    <em>Longest answer</em>. Raise it and ask again.</td></tr>
+<tr><td><em>The model declined this request.</em></td><td>The provider refused to
+    answer.</td></tr>
+<tr><td>No card under a reply</td><td>The reply had no <code>script.py</code> or no title.
+    Ask for the complete files.</td></tr>
+<tr><td><em>Could not write the tool: ...</em></td><td>The bundle could not be written to
+    disk; the reason follows.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Request failures are also written to <code>%APPDATA%\pyACAD\logs\pyACAD.log</code> as
+<code>AI request failed</code>.</p>
+
+<h2 id="doing-the-same-with-any-assistant">Doing the same with any assistant<a class="anchor" href="#doing-the-same-with-any-assistant" aria-label="Link to this section">#</a></h2>
+
+<ol>
+  <li>In the Ask AI palette, click <strong>Copy guide</strong>. The clipboard now holds the
+    output rules and the authoring guide. (The footer's <strong>Docs</strong> button opens
+    this page.)</li>
+  <li>Paste it into your chatbot as the first message, or as a project or custom instruction
+    if it supports one, then describe the tool.</li>
+  <li>Save what comes back as files: make a folder <code>&lt;Name&gt;.pushbutton</code> under a
+    panel in one of your extensions, put <code>script.py</code> and <code>bundle.yaml</code> in
+    it, and click Reload. See <a href="quickstart.html">Your first button</a> for the folder
+    chain and <a href="icons.html">Icons</a> for the art; without an icon the button still
+    works, it just shows its caption only.</li>
+  <li>If it fails, copy the traceback from the output window or the log back into the
+    chat.</li>
+</ol>
+
+<p>The guide is what makes this work. A model that has not read it will happily wrap the code
+in <code>if __name__ == '__main__':</code> (which never excludes anything in pyACAD, so it is
+noise at best), <code>print()</code> its result (which opens an output window for one line)
+and invent library functions. With it, the answer usually runs first time.</p>
+
+<div class="cards">
+  <a href="quickstart.html"><span class="c-t">Your first button</span>
+    <span class="c-d">The folder chain a generated tool lives in.</span></a>
+  <a href="script-environment.html"><span class="c-t">The script environment</span>
+    <span class="c-d">What a generated script can rely on.</span></a>
+  <a href="style-guide.html"><span class="c-t">Writing good tools</span>
+    <span class="c-d">The rules to hold a generated tool to before you keep it.</span></a>
+</div>
+  <div class="pagenav">
+<a href="cookbook.html"><span class="dir">Previous</span><span class="ttl">Cookbook</span></a>
+<a class="next" href="troubleshooting.html"><span class="dir">Next</span><span class="ttl">Troubleshooting</span></a>
+</div>
+</article>
+<aside class="toc"><div class="toc-head">On this page</div>
+<a href="#the-panel-is-a-beta-and-not-the-only-way">The panel is a beta, and not the only way</a>
+<a href="#setting-it-up">Setting it up</a>
+<a href="#where-the-settings-and-the-key-live" class="h3">Where the settings and the key live</a>
+<a href="#using-the-panel">Using the panel</a>
+<a href="#coming-back-to-a-tool" class="h3">Coming back to a tool</a>
+<a href="#the-fix-loop" class="h3">The fix loop</a>
+<a href="#what-the-model-is-given">What the model is given</a>
+<a href="#what-comes-back-and-what-is-written">What comes back, and what is written</a>
+<a href="#when-a-reply-goes-wrong">When a reply goes wrong</a>
+<a href="#doing-the-same-with-any-assistant">Doing the same with any assistant</a>
+</aside>
+</main>
+</div>
+<script src="_assets/search-index.js"></script>
+<script src="_assets/site.js"></script>
+</body>
+</html>

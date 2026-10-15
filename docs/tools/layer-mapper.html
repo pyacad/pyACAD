@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Layer Mapper - pyACAD tools</title>
+<meta name="description" content="Applies a layer standard from a CSV with the columns old, new and optionally color and linetype: matching layers are renamed, or merged when the new name already exists, and you ti">
+<link rel="stylesheet" href="_assets/site.css">
+<link rel="stylesheet" href="_assets/tools.css">
+</head>
+<body data-base="">
+<div class="layout">
+<div class="sidebar">
+  <div class="brand"><a href="index.html"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="26" height="26" aria-hidden="true"><polygon points="157.0,327.8 351.8,327.8 363.1,342.4 363.1,403.3 168.3,403.3 157.0,388.7" fill="#78082A"/><polygon points="157.0,327.8 351.8,327.8 351.8,388.7 157.0,388.7" fill="#B80C40"/><polygon points="51.5,482.0 234.1,157.4 278.7,181.7 290.1,196.3 152.1,496.6 62.8,496.6" fill="#78082A"/><polygon points="51.5,482.0 140.8,482.0 278.7,181.7 234.1,157.4" fill="#E51050"/><polygon points="359.9,482.0 205.7,108.7 217.0,123.3 371.2,496.6" fill="#78082A"/><polygon points="205.7,108.7 201.6,55.9 213.0,70.5 217.0,123.3" fill="#78082A"/><polygon points="201.6,55.9 246.3,15.4 257.6,30.0 213.0,70.5" fill="#78082A"/><polygon points="246.3,15.4 343.7,23.5 355.0,38.1 257.6,30.0" fill="#78082A"/><polygon points="343.7,23.5 388.3,51.9 399.7,66.5 355.0,38.1" fill="#78082A"/><polygon points="388.3,51.9 347.7,76.2 359.1,90.8 399.7,66.5" fill="#78082A"/><polygon points="347.7,76.2 295.0,84.3 306.3,99.0 359.1,90.8" fill="#78082A"/><polygon points="295.0,84.3 449.2,482.0 460.5,496.6 306.3,99.0" fill="#78082A"/><polygon points="449.2,482.0 359.9,482.0 371.2,496.6 460.5,496.6" fill="#78082A"/><polygon points="359.9,482.0 205.7,108.7 201.6,55.9 246.3,15.4 343.7,23.5 388.3,51.9 347.7,76.2 295.0,84.3 449.2,482.0" fill="#E51050"/><polygon points="270.6,39.7 311.2,35.7 297.0,51.9" fill="#1F2329"/></svg><span class="brand-name">pyACAD
+    <span class="brand-sub">Tools guide</span></span></a></div>
+  <div class="search-wrap">
+    <svg class="search-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <circle cx="6" cy="6" r="4.2" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M9.2 9.2 12.5 12.5" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round"/></svg>
+    <input id="search" type="search" placeholder="Search the tools" autocomplete="off"
+           spellcheck="false" aria-label="Search the tools guide">
+    <span class="search-kbd">/</span>
+    <div id="search-results" class="search-results"></div>
+  </div>
+  <nav class="pages">
+<div class="grp">pyACAD</div>
+<a href="settings.html"><img class="nav-icon" src="_assets/icons/settings.png" alt="">Settings</a>
+<a href="shortcuts.html"><img class="nav-icon" src="_assets/icons/shortcuts.png" alt="">Shortcuts</a>
+<a href="console.html"><img class="nav-icon" src="_assets/icons/console.png" alt="">Console</a>
+<a href="reload.html"><img class="nav-icon" src="_assets/icons/reload.png" alt="">Reload</a>
+<div class="grp">Data</div>
+<a href="blocks-to-excel.html"><img class="nav-icon" src="_assets/icons/blocks-to-excel.png" alt="">Blocks to Excel</a>
+<a href="excel-to-blocks.html"><img class="nav-icon" src="_assets/icons/excel-to-blocks.png" alt="">Excel to Blocks</a>
+<a href="block-schedule.html"><img class="nav-icon" src="_assets/icons/block-schedule.png" alt="">Block Schedule</a>
+<a href="find-replace-attributes.html"><img class="nav-icon" src="_assets/icons/find-replace-attributes.png" alt="">Find and Replace Attributes</a>
+<div class="grp">Layers</div>
+<a href="layer-manager.html"><img class="nav-icon" src="_assets/icons/layer-manager.png" alt="">Layer Manager</a>
+<a href="layer-mapper.html" class="active"><img class="nav-icon" src="_assets/icons/layer-mapper.png" alt="">Layer Mapper</a>
+<a href="layer-snapshot.html"><img class="nav-icon" src="_assets/icons/layer-snapshot.png" alt="">Layer Snapshot</a>
+<div class="grp">Xrefs</div>
+<a href="xref-manager.html"><img class="nav-icon" src="_assets/icons/xref-manager.png" alt="">Xref Manager</a>
+<a href="xref-repath.html"><img class="nav-icon" src="_assets/icons/xref-repath.png" alt="">Xref Repath</a>
+<div class="grp">Cleanup</div>
+<a href="drawing-cleanup.html"><img class="nav-icon" src="_assets/icons/drawing-cleanup.png" alt="">Drawing Cleanup</a>
+<a href="font-proxy-report.html"><img class="nav-icon" src="_assets/icons/font-proxy-report.png" alt="">Font and Proxy Report</a>
+<div class="grp">Output</div>
+<a href="batch-plot.html"><img class="nav-icon" src="_assets/icons/batch-plot.png" alt="">Batch Plot</a>
+<a href="layout-manager.html"><img class="nav-icon" src="_assets/icons/layout-manager.png" alt="">Layout Manager</a>
+<div class="grp">Takeoff</div>
+<a href="length-takeoff.html"><img class="nav-icon" src="_assets/icons/length-takeoff.png" alt="">Length Takeoff</a>
+<a href="tag-audit.html"><img class="nav-icon" src="_assets/icons/tag-audit.png" alt="">Tag Audit</a>
+<div class="grp">AI (beta)</div>
+<a href="ask-ai.html"><img class="nav-icon" src="_assets/icons/ask-ai.png" alt="">Ask AI</a>
+<a href="ai-settings.html"><img class="nav-icon" src="_assets/icons/ai-settings.png" alt="">AI Settings</a>
+<a href="open-ai-folder.html"><img class="nav-icon" src="_assets/icons/open-ai-folder.png" alt="">Open AI Folder</a>
+</nav>
+  <div class="side-foot">
+    <span>pyACAD 0.1.0</span>
+    <a class="side-link" href="https://docs.pyacad.com/">Authoring guide</a>
+    <button id="theme-toggle" type="button" aria-label="Toggle colour theme">
+      <span>Dark</span></button>
+  </div>
+</div>
+<main class="main">
+<article>
+  <div class="hero"><img class="hero-icon" src="_assets/icons/layer-mapper.png" alt=""><div><p class="eyebrow">Layers panel</p><h1>Layer Mapper</h1><p class="lead">Applies a layer standard from a CSV with the columns old, new and optionally color and linetype: matching layers are renamed, or merged when the new name already exists, and you tick what to apply.</p></div></div><div class="facts"><div class="fact"><span class="fact-k">On the ribbon</span><span class="fact-v">Button, Layers panel</span></div><div class="fact"><span class="fact-k">Needs</span><span class="fact-v">An open drawing, and a CSV of old and new layer names</span></div><div class="fact"><span class="fact-k">Command</span><span class="fact-v"><code>PYLAYERMAPPER</code></span></div><div class="fact"><span class="fact-k">Alias</span><span class="fact-v"><code>LMAP</code></span></div><div class="fact"><span class="fact-k">Shortcut</span><span class="fact-v">None set (bind one in Shortcuts)</span></div></div>
+  <h2 id="what-it-does">What it does<a class="anchor" href="#what-it-does" aria-label="Link to this section">#</a></h2>
+<p>Reads a CSV that maps old layer names to new ones and brings the drawing into line. Each
+layer that matches a row is renamed to the new name, or merged into it when a layer of that
+name already exists. New names that no layer was renamed to can be created, with the colour
+and linetype the CSV gives. Everything planned is shown with a tick box before anything
+changes. The command is <code>PYLAYERMAPPER</code>.</p>
+
+<h2 id="the-csv">The CSV<a class="anchor" href="#the-csv" aria-label="Link to this section">#</a></h2>
+<p>One mapping per row: <code>old,new[,color][,linetype]</code>.</p>
+<div class="code"><pre><code>old,new,color,linetype
+A-WALL*,A-WALL,1,
+E-LITE,E-LIGHTING,yellow,
+OLD-HIDDEN,M-HIDDEN,4,HIDDEN</code></pre></div>
+<ul>
+  <li><strong>old</strong> may use <code>*</code> (any run of characters) and <code>?</code>
+    (one character), matched against the whole name, ignoring case. Each layer takes the
+    first row that fits it, so put specific rows above general ones.</li>
+  <li><strong>new</strong> is the standard name.</li>
+  <li><strong>color</strong>, optional, is a colour number from 1 to 255 or one of red,
+    yellow, green, cyan, blue, magenta, white (black means 7 too).</li>
+  <li><strong>linetype</strong>, optional, must already be loaded in the drawing.</li>
+  <li>Any columns after the fourth, such as a notes column, are ignored. Blank lines are
+    skipped, and so is a first row that reads like a header (<code>old,new</code>,
+    <code>from,to</code>, <code>existing,standard</code> and the like).</li>
+  <li>Cells may be separated by commas, semicolons or tabs, whichever the first row uses, and
+    may be quoted. Excel's CSV, CSV UTF-8 and Unicode text files all read.</li>
+</ul>
+
+<h2 id="how-to-use-it">How to use it<a class="anchor" href="#how-to-use-it" aria-label="Link to this section">#</a></h2>
+<ol class="steps">
+  <li>Click <strong>Layer Mapper</strong> (or type <code>PYLAYERMAPPER</code>) and pick the
+    CSV.</li>
+  <li>If the standard names layers the drawing does not have, it lists them (with the colour
+    and linetype each would get) and asks whether to create them too.</li>
+  <li>A checklist shows every step, all ticked: <em>Rename A to B</em>, <em>Merge A into
+    B</em>, <em>Create B (color 3, DASHED)</em>. Layers that will be left alone are named
+    above the list. Untick anything that should not change, then confirm.</li>
+  <li>The steps run in plan order. A toast sums up what was renamed, merged (and how many
+    objects moved) and created. Steps that failed are counted in the toast and listed in the
+    pyACAD log.</li>
+</ol>
+
+
+
+<h2 id="how-the-plan-is-made">How the plan is made<a class="anchor" href="#how-the-plan-is-made" aria-label="Link to this section">#</a></h2>
+<ul>
+  <li>A layer is renamed when no layer has the new name yet. When several layers map to the
+    same new name (<code>A-WALL*</code> above), the first is renamed and the rest are merged
+    into it.</li>
+  <li>A layer is merged when a layer with the new name already exists: everything on it
+    moves across, including objects inside blocks, and the old layer is deleted.</li>
+  <li>A layer already called the new name is left as it is. A name that differs only in case
+    is renamed, so the case comes into line.</li>
+  <li>Layer 0, Defpoints, xref layers and new names AutoCAD would refuse (with characters such
+    as <code>&lt; &gt; / \ : ; ? * | , =</code>) are skipped, with the reason.</li>
+</ul>
+
+<h2 id="good-to-know-limits">Good to know / limits<a class="anchor" href="#good-to-know-limits" aria-label="Link to this section">#</a></h2>
+<ul>
+  <li>The colour and linetype in the CSV are used only for layers it creates. A layer that is
+    renamed or merged keeps its own colour and linetype.</li>
+  <li>A created layer with no colour in the CSV gets colour 7, and one with no linetype gets
+    Continuous. A linetype that is not loaded makes that create step fail; load it first.</li>
+  <li>Unticking a rename that a later merge depends on makes the merge fail (its target does
+    not exist); it is reported, the rest still run.</li>
+  <li>The whole run is one AutoCAD command, so <code>U</code> takes it back.</li>
+</ul>
+
+<h2 id="other-uses">Other uses<a class="anchor" href="#other-uses" aria-label="Link to this section">#</a></h2>
+<ul>
+  <li>Bring a consultant's drawing onto your office standard before you xref it.</li>
+  <li>Collapse a drawing's dozens of near-duplicate layers (<code>WALL</code>,
+    <code>Walls</code>, <code>wall-new</code>) into one with a few wildcard rows.</li>
+  <li>Keep one CSV per client standard and run the matching one on every drawing that comes
+    in.</li>
+</ul>
+<h2 id="source">Source<a class="anchor" href="#source" aria-label="Link to this section">#</a></h2>
+<p>The tool's own files, word for word as shipped in <code>Layers.panel/Layer_Mapper.pushbutton</code>. Every pyACAD tool is an ordinary bundle: copy these into your own extension and change what you like.</p>
+<div class="code src"><div class="code-head"><span><code>script.py</code> <span class="src-note">Runs on a click.</span> <a href="https://github.com/pyacad/pyACAD/blob/main/extensions/pyACAD.extension/pyACAD.tab/Layers.panel/Layer_Mapper.pushbutton/script.py" rel="noopener">View on GitHub</a></span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-c"># -*- coding: utf-8 -*-</span>
+<span class="tok-s">&quot;&quot;&quot;Applies a layer standard from a CSV: renames, merges and creates layers.
+
+The CSV has the columns old,new[,color][,linetype], one row per mapping; old may
+use * and ? wildcards and the first row that fits a layer wins. A layer is
+renamed to new, or merged into it when a layer of that name already exists.
+New names that no layer was renamed to can be created too, with the row&#x27;s color
+and linetype. Everything planned is listed with a tick box before anything
+changes, so a row can be left out. The pure work is layers.parse_mapping and
+layers.plan_mapping.
+&quot;&quot;&quot;</span>
+
+__title__ = <span class="tok-s">&#x27;Layer Mapper&#x27;</span>
+
+<span class="tok-k">import</span> codecs
+
+<span class="tok-k">from</span> pyacad <span class="tok-k">import</span> doc, forms, layers, script, toast
+
+CSV_FILTER = <span class="tok-s">&#x27;CSV files (*.csv)|*.csv|Text files (*.txt)|*.txt|All files (*.*)|*.*&#x27;</span>
+SHOWN = <span class="tok-n">8</span>           <span class="tok-c"># names listed in a prompt before &quot;and N more&quot;</span>
+
+
+<span class="tok-k">def</span> has_drawing():
+    <span class="tok-k">try</span>:
+        doc.active()
+        <span class="tok-k">return</span> <span class="tok-k">True</span>
+    <span class="tok-k">except</span> RuntimeError:
+        <span class="tok-k">return</span> <span class="tok-k">False</span>
+
+
+<span class="tok-k">def</span> read_text(path):
+    <span class="tok-s">&quot;&quot;&quot;The file&#x27;s text: UTF-16 when it starts with that byte order mark (Excel&#x27;s
+    &quot;Unicode text&quot;), UTF-8 when it decodes, else the Windows code page Excel
+    saves plain CSV in.&quot;&quot;&quot;</span>
+    <span class="tok-k">with</span> open(path, <span class="tok-s">&#x27;rb&#x27;</span>) <span class="tok-k">as</span> f:
+        data = f.read()
+    <span class="tok-k">if</span> data.startswith(codecs.BOM_UTF16_LE) <span class="tok-k">or</span> data.startswith(codecs.BOM_UTF16_BE):
+        <span class="tok-k">return</span> data.decode(<span class="tok-s">&#x27;utf-16&#x27;</span>)
+    <span class="tok-k">for</span> encoding <span class="tok-k">in</span> (<span class="tok-s">&#x27;utf-8&#x27;</span>, <span class="tok-s">&#x27;cp1252&#x27;</span>):
+        <span class="tok-k">try</span>:
+            <span class="tok-k">return</span> data.decode(encoding)
+        <span class="tok-k">except</span> (UnicodeDecodeError, LookupError):
+            <span class="tok-k">continue</span>
+    <span class="tok-k">return</span> data.decode(<span class="tok-s">&#x27;latin-1&#x27;</span>)
+
+
+<span class="tok-k">def</span> listed(items, more=<span class="tok-s">&#x27;and %d more&#x27;</span>):
+    <span class="tok-s">&quot;&quot;&quot;Up to SHOWN items, one per line, then a count of the rest.&quot;&quot;&quot;</span>
+    lines = [<span class="tok-s">&#x27;  &#x27;</span> + str(item) <span class="tok-k">for</span> item <span class="tok-k">in</span> items[:SHOWN]]
+    <span class="tok-k">if</span> len(items) &gt; SHOWN:
+        lines.append(<span class="tok-s">&#x27;  &#x27;</span> + more % (len(items) - SHOWN))
+    <span class="tok-k">return</span> <span class="tok-s">&#x27;\n&#x27;</span>.join(lines)
+
+
+<span class="tok-k">def</span> words(step):
+    <span class="tok-s">&quot;&quot;&quot;A plan step in words without its verb: &#x27;MECH (color 4)&#x27;, &#x27;0: reason&#x27;.&quot;&quot;&quot;</span>
+    <span class="tok-k">return</span> layers.describe_action(step).split(<span class="tok-s">&#x27; &#x27;</span>, <span class="tok-n">1</span>)[<span class="tok-n">1</span>]
+
+
+<span class="tok-k">def</span> apply(actions):
+    <span class="tok-s">&quot;&quot;&quot;Runs the steps in plan order; returns (counts, objects moved, failures).&quot;&quot;&quot;</span>
+    counts = {<span class="tok-s">&#x27;rename&#x27;</span>: <span class="tok-n">0</span>, <span class="tok-s">&#x27;merge&#x27;</span>: <span class="tok-n">0</span>, <span class="tok-s">&#x27;create&#x27;</span>: <span class="tok-n">0</span>}
+    moved = <span class="tok-n">0</span>
+    failures = []
+    <span class="tok-k">for</span> step <span class="tok-k">in</span> actions:
+        kind = step[<span class="tok-n">0</span>]
+        <span class="tok-k">try</span>:
+            <span class="tok-k">if</span> kind == <span class="tok-s">&#x27;rename&#x27;</span>:
+                layers.rename(step[<span class="tok-n">1</span>], step[<span class="tok-n">2</span>])
+            <span class="tok-k">elif</span> kind == <span class="tok-s">&#x27;merge&#x27;</span>:
+                moved += layers.merge(step[<span class="tok-n">1</span>], step[<span class="tok-n">2</span>])
+            <span class="tok-k">elif</span> kind == <span class="tok-s">&#x27;create&#x27;</span>:
+                layers.create(step[<span class="tok-n">1</span>], step[<span class="tok-n">2</span>] <span class="tok-k">or</span> <span class="tok-n">7</span>, step[<span class="tok-n">3</span>] <span class="tok-k">or</span> <span class="tok-s">&#x27;Continuous&#x27;</span>)
+            <span class="tok-k">else</span>:
+                <span class="tok-k">continue</span>
+            counts[kind] += <span class="tok-n">1</span>
+        <span class="tok-k">except</span> Exception <span class="tok-k">as</span> error:
+            failures.append(<span class="tok-s">&#x27;%s: %s&#x27;</span> % (layers.describe_action(step), error))
+    <span class="tok-k">return</span> counts, moved, failures
+
+
+<span class="tok-k">def</span> summary(counts, moved):
+    parts = []
+    <span class="tok-k">if</span> counts[<span class="tok-s">&#x27;rename&#x27;</span>]:
+        parts.append(<span class="tok-s">&#x27;%d renamed&#x27;</span> % counts[<span class="tok-s">&#x27;rename&#x27;</span>])
+    <span class="tok-k">if</span> counts[<span class="tok-s">&#x27;merge&#x27;</span>]:
+        parts.append(<span class="tok-s">&#x27;%d merged (%d object%s moved)&#x27;</span> % (counts[<span class="tok-s">&#x27;merge&#x27;</span>], moved,
+                                                         <span class="tok-s">&#x27;&#x27;</span> <span class="tok-k">if</span> moved == <span class="tok-n">1</span> <span class="tok-k">else</span> <span class="tok-s">&#x27;s&#x27;</span>))
+    <span class="tok-k">if</span> counts[<span class="tok-s">&#x27;create&#x27;</span>]:
+        parts.append(<span class="tok-s">&#x27;%d created&#x27;</span> % counts[<span class="tok-s">&#x27;create&#x27;</span>])
+    <span class="tok-k">return</span> <span class="tok-s">&#x27;, &#x27;</span>.join(parts) <span class="tok-k">or</span> <span class="tok-s">&#x27;nothing changed&#x27;</span>
+
+
+<span class="tok-k">def</span> run():
+    <span class="tok-k">if</span> <span class="tok-k">not</span> has_drawing():
+        toast.warning(<span class="tok-s">&#x27;Open a drawing first&#x27;</span>, <span class="tok-s">&#x27;Layer Mapper changes the active drawing&#x27;</span>)
+        <span class="tok-k">return</span>
+
+    path = forms.open_file(CSV_FILTER, <span class="tok-s">&#x27;Pick a layer standard (old,new,color,linetype)&#x27;</span>)
+    <span class="tok-k">if</span> <span class="tok-k">not</span> path:
+        <span class="tok-k">return</span>
+    <span class="tok-k">try</span>:
+        mapping = layers.parse_mapping(read_text(path))
+    <span class="tok-k">except</span> (IOError, OSError) <span class="tok-k">as</span> error:
+        toast.error(<span class="tok-s">&#x27;Could not read the CSV&#x27;</span>, str(error))
+        <span class="tok-k">return</span>
+    <span class="tok-k">except</span> ValueError <span class="tok-k">as</span> error:
+        toast.error(<span class="tok-s">&#x27;The CSV has a problem&#x27;</span>, str(error))
+        <span class="tok-k">return</span>
+    <span class="tok-k">if</span> <span class="tok-k">not</span> mapping:
+        toast.warning(<span class="tok-s">&#x27;The CSV has no mapping rows&#x27;</span>, <span class="tok-s">&#x27;Expected columns old,new[,color][,linetype]&#x27;</span>)
+        <span class="tok-k">return</span>
+
+    plan = layers.plan_mapping(layers.names(), mapping)
+    changes = [step <span class="tok-k">for</span> step <span class="tok-k">in</span> plan <span class="tok-k">if</span> step[<span class="tok-n">0</span>] <span class="tok-k">in</span> (<span class="tok-s">&#x27;rename&#x27;</span>, <span class="tok-s">&#x27;merge&#x27;</span>)]
+    creates = [step <span class="tok-k">for</span> step <span class="tok-k">in</span> plan <span class="tok-k">if</span> step[<span class="tok-n">0</span>] == <span class="tok-s">&#x27;create&#x27;</span>]
+    skips = [step <span class="tok-k">for</span> step <span class="tok-k">in</span> plan <span class="tok-k">if</span> step[<span class="tok-n">0</span>] == <span class="tok-s">&#x27;skip&#x27;</span>]
+
+    <span class="tok-k">if</span> creates <span class="tok-k">and</span> <span class="tok-k">not</span> forms.confirm(
+            <span class="tok-s">&#x27;%d layer%s in the standard %s not in this drawing:\n\n%s\n\nCreate them too?&#x27;</span>
+            % (len(creates), <span class="tok-s">&#x27;&#x27;</span> <span class="tok-k">if</span> len(creates) == <span class="tok-n">1</span> <span class="tok-k">else</span> <span class="tok-s">&#x27;s&#x27;</span>,
+               <span class="tok-s">&#x27;is&#x27;</span> <span class="tok-k">if</span> len(creates) == <span class="tok-n">1</span> <span class="tok-k">else</span> <span class="tok-s">&#x27;are&#x27;</span>,
+               listed([words(s) <span class="tok-k">for</span> s <span class="tok-k">in</span> creates])),
+            <span class="tok-s">&#x27;Layer Mapper&#x27;</span>):
+        creates = []
+
+    steps = changes + creates
+    <span class="tok-k">if</span> <span class="tok-k">not</span> steps:
+        <span class="tok-k">if</span> skips:
+            forms.alert(<span class="tok-s">&#x27;Nothing to change. These layers were left alone:\n\n%s&#x27;</span>
+                        % listed([words(s) <span class="tok-k">for</span> s <span class="tok-k">in</span> skips]),
+                        <span class="tok-s">&#x27;Layer Mapper&#x27;</span>)
+        <span class="tok-k">else</span>:
+            toast.info(<span class="tok-s">&#x27;Nothing to change&#x27;</span>, <span class="tok-s">&#x27;The layers already follow the standard&#x27;</span>)
+        <span class="tok-k">return</span>
+
+    prompt = <span class="tok-s">&#x27;Untick anything that should not change.&#x27;</span>
+    <span class="tok-k">if</span> skips:
+        prompt += <span class="tok-s">&#x27; %d layer%s left alone: %s.&#x27;</span> % (
+            len(skips), <span class="tok-s">&#x27;&#x27;</span> <span class="tok-k">if</span> len(skips) == <span class="tok-n">1</span> <span class="tok-k">else</span> <span class="tok-s">&#x27;s&#x27;</span>,
+            <span class="tok-s">&#x27;; &#x27;</span>.join(words(s) <span class="tok-k">for</span> s <span class="tok-k">in</span> skips[:<span class="tok-n">3</span>])
+            + (<span class="tok-s">&#x27;; ...&#x27;</span> <span class="tok-k">if</span> len(skips) &gt; <span class="tok-n">3</span> <span class="tok-k">else</span> <span class="tok-s">&#x27;&#x27;</span>))
+    picked = forms.select_from_list([(layers.describe_action(s), s) <span class="tok-k">for</span> s <span class="tok-k">in</span> steps],
+                                    title=<span class="tok-s">&#x27;Layer Mapper: %d change%s&#x27;</span>
+                                          % (len(steps), <span class="tok-s">&#x27;&#x27;</span> <span class="tok-k">if</span> len(steps) == <span class="tok-n">1</span> <span class="tok-k">else</span> <span class="tok-s">&#x27;s&#x27;</span>),
+                                    multiselect=<span class="tok-k">True</span>, prompt=prompt, checked=steps)
+    <span class="tok-k">if</span> <span class="tok-k">not</span> picked:
+        <span class="tok-k">return</span>
+    <span class="tok-c"># The picker hands back what was ticked; run it in plan order, since a merge</span>
+    <span class="tok-c"># may target a name an earlier rename made.</span>
+    picked = [step <span class="tok-k">for</span> step <span class="tok-k">in</span> steps <span class="tok-k">if</span> step <span class="tok-k">in</span> picked]
+
+    counts, moved, failures = apply(picked)
+    <span class="tok-k">for</span> failure <span class="tok-k">in</span> failures:
+        script.get_logger().warning(failure)
+    <span class="tok-k">if</span> failures:
+        toast.warning(<span class="tok-s">&#x27;Layer standard applied with %d problem%s&#x27;</span>
+                      % (len(failures), <span class="tok-s">&#x27;&#x27;</span> <span class="tok-k">if</span> len(failures) == <span class="tok-n">1</span> <span class="tok-k">else</span> <span class="tok-s">&#x27;s&#x27;</span>),
+                      <span class="tok-s">&#x27;%s. %s&#x27;</span> % (summary(counts, moved), failures[<span class="tok-n">0</span>]))
+    <span class="tok-k">else</span>:
+        toast.success(<span class="tok-s">&#x27;Layer standard applied&#x27;</span>, summary(counts, moved))
+
+
+<span class="tok-k">if</span> <span class="tok-s">&#x27;__commandpath__&#x27;</span> <span class="tok-k">in</span> globals():
+    run()</code></pre></div>
+<div class="code src"><div class="code-head"><span><code>bundle.yaml</code> <span class="src-note">The bundle contract: the keys pyACAD reads for this tool.</span> <a href="https://github.com/pyacad/pyACAD/blob/main/extensions/pyACAD.extension/pyACAD.tab/Layers.panel/Layer_Mapper.pushbutton/bundle.yaml" rel="noopener">View on GitHub</a></span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-k">title</span>: Layer Mapper
+<span class="tok-k">tooltip</span>: Applies a layer standard from a CSV with the columns old,new and optionally color and linetype. Matching layers are renamed, or merged when the new name already exists, and you tick what to apply before anything changes.
+<span class="tok-k">context</span>: doc
+<span class="tok-k">keytip</span>: LP
+<span class="tok-k">alias</span>: LMAP</code></pre></div>
+  <div class="pagenav">
+<a href="layer-manager.html"><span class="dir">Previous</span><span class="ttl">Layer Manager</span></a>
+<a class="next" href="layer-snapshot.html"><span class="dir">Next</span><span class="ttl">Layer Snapshot</span></a>
+</div>
+</article>
+<aside class="toc"><div class="toc-head">On this page</div>
+<a href="#what-it-does">What it does</a>
+<a href="#the-csv">The CSV</a>
+<a href="#how-to-use-it">How to use it</a>
+<a href="#how-the-plan-is-made">How the plan is made</a>
+<a href="#good-to-know-limits">Good to know / limits</a>
+<a href="#other-uses">Other uses</a>
+<a href="#source">Source</a>
+</aside>
+</main>
+</div>
+<script src="_assets/search-index.js"></script>
+<script src="_assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Batch Plot - pyACAD tools</title>
+<meta name="description" content="Plots the layouts you pick to PDF, one file per layout, in a folder you choose, and remembers the folder, the naming and the page setup for next time.">
+<link rel="stylesheet" href="_assets/site.css">
+<link rel="stylesheet" href="_assets/tools.css">
+</head>
+<body data-base="">
+<div class="layout">
+<div class="sidebar">
+  <div class="brand"><a href="index.html"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="26" height="26" aria-hidden="true"><polygon points="157.0,327.8 351.8,327.8 363.1,342.4 363.1,403.3 168.3,403.3 157.0,388.7" fill="#78082A"/><polygon points="157.0,327.8 351.8,327.8 351.8,388.7 157.0,388.7" fill="#B80C40"/><polygon points="51.5,482.0 234.1,157.4 278.7,181.7 290.1,196.3 152.1,496.6 62.8,496.6" fill="#78082A"/><polygon points="51.5,482.0 140.8,482.0 278.7,181.7 234.1,157.4" fill="#E51050"/><polygon points="359.9,482.0 205.7,108.7 217.0,123.3 371.2,496.6" fill="#78082A"/><polygon points="205.7,108.7 201.6,55.9 213.0,70.5 217.0,123.3" fill="#78082A"/><polygon points="201.6,55.9 246.3,15.4 257.6,30.0 213.0,70.5" fill="#78082A"/><polygon points="246.3,15.4 343.7,23.5 355.0,38.1 257.6,30.0" fill="#78082A"/><polygon points="343.7,23.5 388.3,51.9 399.7,66.5 355.0,38.1" fill="#78082A"/><polygon points="388.3,51.9 347.7,76.2 359.1,90.8 399.7,66.5" fill="#78082A"/><polygon points="347.7,76.2 295.0,84.3 306.3,99.0 359.1,90.8" fill="#78082A"/><polygon points="295.0,84.3 449.2,482.0 460.5,496.6 306.3,99.0" fill="#78082A"/><polygon points="449.2,482.0 359.9,482.0 371.2,496.6 460.5,496.6" fill="#78082A"/><polygon points="359.9,482.0 205.7,108.7 201.6,55.9 246.3,15.4 343.7,23.5 388.3,51.9 347.7,76.2 295.0,84.3 449.2,482.0" fill="#E51050"/><polygon points="270.6,39.7 311.2,35.7 297.0,51.9" fill="#1F2329"/></svg><span class="brand-name">pyACAD
+    <span class="brand-sub">Tools guide</span></span></a></div>
+  <div class="search-wrap">
+    <svg class="search-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <circle cx="6" cy="6" r="4.2" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M9.2 9.2 12.5 12.5" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round"/></svg>
+    <input id="search" type="search" placeholder="Search the tools" autocomplete="off"
+           spellcheck="false" aria-label="Search the tools guide">
+    <span class="search-kbd">/</span>
+    <div id="search-results" class="search-results"></div>
+  </div>
+  <nav class="pages">
+<div class="grp">pyACAD</div>
+<a href="settings.html"><img class="nav-icon" src="_assets/icons/settings.png" alt="">Settings</a>
+<a href="shortcuts.html"><img class="nav-icon" src="_assets/icons/shortcuts.png" alt="">Shortcuts</a>
+<a href="console.html"><img class="nav-icon" src="_assets/icons/console.png" alt="">Console</a>
+<a href="reload.html"><img class="nav-icon" src="_assets/icons/reload.png" alt="">Reload</a>
+<div class="grp">Data</div>
+<a href="blocks-to-excel.html"><img class="nav-icon" src="_assets/icons/blocks-to-excel.png" alt="">Blocks to Excel</a>
+<a href="excel-to-blocks.html"><img class="nav-icon" src="_assets/icons/excel-to-blocks.png" alt="">Excel to Blocks</a>
+<a href="block-schedule.html"><img class="nav-icon" src="_assets/icons/block-schedule.png" alt="">Block Schedule</a>
+<a href="find-replace-attributes.html"><img class="nav-icon" src="_assets/icons/find-replace-attributes.png" alt="">Find and Replace Attributes</a>
+<div class="grp">Layers</div>
+<a href="layer-manager.html"><img class="nav-icon" src="_assets/icons/layer-manager.png" alt="">Layer Manager</a>
+<a href="layer-mapper.html"><img class="nav-icon" src="_assets/icons/layer-mapper.png" alt="">Layer Mapper</a>
+<a href="layer-snapshot.html"><img class="nav-icon" src="_assets/icons/layer-snapshot.png" alt="">Layer Snapshot</a>
+<div class="grp">Xrefs</div>
+<a href="xref-manager.html"><img class="nav-icon" src="_assets/icons/xref-manager.png" alt="">Xref Manager</a>
+<a href="xref-repath.html"><img class="nav-icon" src="_assets/icons/xref-repath.png" alt="">Xref Repath</a>
+<div class="grp">Cleanup</div>
+<a href="drawing-cleanup.html"><img class="nav-icon" src="_assets/icons/drawing-cleanup.png" alt="">Drawing Cleanup</a>
+<a href="font-proxy-report.html"><img class="nav-icon" src="_assets/icons/font-proxy-report.png" alt="">Font and Proxy Report</a>
+<div class="grp">Output</div>
+<a href="batch-plot.html" class="active"><img class="nav-icon" src="_assets/icons/batch-plot.png" alt="">Batch Plot</a>
+<a href="layout-manager.html"><img class="nav-icon" src="_assets/icons/layout-manager.png" alt="">Layout Manager</a>
+<div class="grp">Takeoff</div>
+<a href="length-takeoff.html"><img class="nav-icon" src="_assets/icons/length-takeoff.png" alt="">Length Takeoff</a>
+<a href="tag-audit.html"><img class="nav-icon" src="_assets/icons/tag-audit.png" alt="">Tag Audit</a>
+<div class="grp">AI (beta)</div>
+<a href="ask-ai.html"><img class="nav-icon" src="_assets/icons/ask-ai.png" alt="">Ask AI</a>
+<a href="ai-settings.html"><img class="nav-icon" src="_assets/icons/ai-settings.png" alt="">AI Settings</a>
+<a href="open-ai-folder.html"><img class="nav-icon" src="_assets/icons/open-ai-folder.png" alt="">Open AI Folder</a>
+</nav>
+  <div class="side-foot">
+    <span>pyACAD 0.1.0</span>
+    <a class="side-link" href="https://docs.pyacad.com/">Authoring guide</a>
+    <button id="theme-toggle" type="button" aria-label="Toggle colour theme">
+      <span>Dark</span></button>
+  </div>
+</div>
+<main class="main">
+<article>
+  <div class="hero"><img class="hero-icon" src="_assets/icons/batch-plot.png" alt=""><div><p class="eyebrow">Output panel</p><h1>Batch Plot</h1><p class="lead">Plots the layouts you pick to PDF, one file per layout, in a folder you choose, and remembers the folder, the naming and the page setup for next time.</p></div></div><div class="facts"><div class="fact"><span class="fact-k">On the ribbon</span><span class="fact-v">Button, Output panel</span></div><div class="fact"><span class="fact-k">Needs</span><span class="fact-v">An open drawing with at least one layout (the button is greyed without a drawing)</span></div><div class="fact"><span class="fact-k">Command</span><span class="fact-v"><code>PYBATCHPLOT</code></span></div><div class="fact"><span class="fact-k">Alias</span><span class="fact-v"><code>BP</code></span></div></div>
+  <h2 id="what-it-does">What it does<a class="anchor" href="#what-it-does" aria-label="Link to this section">#</a></h2>
+<p>Plots each ticked paper space layout to its own PDF with AutoCAD's
+<code>DWG To PDF.pc3</code>, in the foreground, one after another. A layout that fails does
+not stop the rest; the failures are listed at the end. The folder, the naming pattern and the
+page setup you used are remembered and offered first next time.</p>
+
+
+
+<h2 id="how-to-use-it">How to use it<a class="anchor" href="#how-to-use-it" aria-label="Link to this section">#</a></h2>
+<ol class="steps">
+  <li>Click <strong>Batch Plot</strong>, or type <code>PYBATCHPLOT</code>. A drawing with only
+    the model tab gets a toast instead.</li>
+  <li>Untick the layouts you do not want. They are listed in tab order and all start
+    ticked.</li>
+  <li>Pick the folder for the PDFs. The picker starts in the folder you used last time, else
+    the drawing's own folder.</li>
+  <li>Pick the naming. The three choices are shown as real file names for the first layout
+    you ticked, the one you used last time first:
+    <div class="table-scroll"><table>
+      <thead><tr><th>Pattern</th><th>Example for <code>Level 2.dwg</code>, layout <code>A-201</code></th></tr></thead>
+      <tbody>
+        <tr><td><code>{drawing} - {layout}.pdf</code></td><td><code>Level 2 - A-201.pdf</code></td></tr>
+        <tr><td><code>{layout}.pdf</code></td><td><code>A-201.pdf</code></td></tr>
+        <tr><td><code>{drawing}_{layout}.pdf</code></td><td><code>Level 2_A-201.pdf</code></td></tr>
+      </tbody>
+    </table></div></li>
+  <li>If the drawing has named page setups for paper space, pick one, or <strong>Each
+    layout's own settings</strong>. A drawing without any skips this question.</li>
+  <li>If any of the PDFs already exist in the folder, confirm that they may be replaced.</li>
+  <li>A progress window shows "Plotting A-201 (2 of 6)". <strong>Cancel</strong> stops after
+    the layout being plotted.</li>
+  <li>A toast reports "Plotted 6 layouts to PDF" with the folder. If some failed, a window
+    lists each layout with the reason, and <strong>Copy</strong> puts the list on the
+    clipboard.</li>
+</ol>
+
+
+
+<h2 id="what-goes-into-each-pdf">What goes into each PDF<a class="anchor" href="#what-goes-into-each-pdf" aria-label="Link to this section">#</a></h2>
+<p>Each plot starts from the layout's own plot settings, or from the page setup you picked
+(the layouts themselves are not changed). Then a few settings are always overridden:</p>
+<ul>
+  <li>The device is always <code>DWG To PDF.pc3</code>, whatever the layout or page setup
+    names.</li>
+  <li>The paper size is kept when <code>DWG To PDF.pc3</code> offers the same paper; when it
+    does not, the device's default paper is used, without a warning.</li>
+  <li>The plot area is the layout, <strong>scaled to fit</strong>, centred, with no
+    rotation. A layout set up at 1:1 therefore plots fitted to the printable area, not at an
+    exact 1:1.</li>
+</ul>
+<p>The plot style table, lineweights and the other settings come from the layout or page
+setup unchanged.</p>
+
+<h2 id="limitations">Limitations<a class="anchor" href="#limitations" aria-label="Link to this section">#</a></h2>
+<ul>
+  <li>PDF only, through <code>DWG To PDF.pc3</code>. To plot to a printer or another PC3, use
+    PUBLISH.</li>
+  <li>One PDF per layout. There is no option to combine them into one multi-sheet PDF.</li>
+  <li>The model tab is not offered. Only paper space layouts plot.</li>
+  <li>Only the open drawing. To plot many drawings, run the tool in each.</li>
+  <li>Scale, rotation and centring are fixed, as described above. A page setup that relies
+    on a set scale or a 90 degree rotation will not plot the way it does from PLOT.</li>
+  <li>A PDF that is open in a viewer cannot be replaced; that layout is listed as
+    failed.</li>
+</ul>
+
+<h2 id="good-to-know">Good to know<a class="anchor" href="#good-to-know" aria-label="Link to this section">#</a></h2>
+<p>Characters Windows does not allow in a file name (<code>&lt; &gt; : " / \ | ? *</code>)
+become <code>_</code>. Two layouts never write the same file: if their names collide, the
+second gets <code>(2)</code> before <code>.pdf</code>. An unsaved drawing is called
+<code>untitled</code> in the name.</p>
+<p>Background plotting is switched off for the run (BACKGROUNDPLOT is set to 0) and put back
+afterwards, so each PDF is finished before the next starts.</p>
+<p>The remembered choices are stored in
+<code>%APPDATA%\pyACAD\settings\cfg_pyacad_tab_output_panel_batch_plot_pushbutton.json</code>.
+There is no Shift+Click action; delete that file to forget them.</p>
+
+<h2 id="other-uses">Other uses<a class="anchor" href="#other-uses" aria-label="Link to this section">#</a></h2>
+<ul>
+  <li>Name layouts by sheet number and use <code>{layout}.pdf</code>: the PDFs come out named
+    exactly like the sheets.</li>
+  <li>Keep a "Check print" page setup and pick it for quick review sets, without touching
+    the layouts' own settings.</li>
+</ul>
+<h2 id="source">Source<a class="anchor" href="#source" aria-label="Link to this section">#</a></h2>
+<p>The tool's own files, word for word as shipped in <code>Output.panel/Batch_Plot.pushbutton</code>. Every pyACAD tool is an ordinary bundle: copy these into your own extension and change what you like.</p>
+<div class="code src"><div class="code-head"><span><code>script.py</code> <span class="src-note">Runs on a click.</span> <a href="https://github.com/pyacad/pyACAD/blob/main/extensions/pyACAD.extension/pyACAD.tab/Output.panel/Batch_Plot.pushbutton/script.py" rel="noopener">View on GitHub</a></span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-c"># -*- coding: utf-8 -*-</span>
+<span class="tok-s">&quot;&quot;&quot;Plots the layouts you pick to PDF, one file per layout, in a folder you choose.
+
+File names come from plot.batch_names, so two layouts never write the same
+file. The folder, the naming and the page setup are remembered for next time.
+A layout that fails to plot does not stop the rest: the failures are listed
+at the end.
+&quot;&quot;&quot;</span>
+
+<span class="tok-k">import</span> os
+
+<span class="tok-k">from</span> pyacad <span class="tok-k">import</span> doc, forms, layouts, plot, script, toast
+
+__title__ = <span class="tok-s">&#x27;Batch Plot&#x27;</span>
+
+_TITLE = <span class="tok-s">&#x27;Batch plot&#x27;</span>
+_PATTERNS = [<span class="tok-s">&#x27;{drawing} - {layout}.pdf&#x27;</span>, <span class="tok-s">&#x27;{layout}.pdf&#x27;</span>, <span class="tok-s">&#x27;{drawing}_{layout}.pdf&#x27;</span>]
+_OWN_SETTINGS = <span class="tok-s">&quot;Each layout&#x27;s own settings&quot;</span>
+_DEFAULTS = {<span class="tok-s">&#x27;folder&#x27;</span>: <span class="tok-s">&#x27;&#x27;</span>, <span class="tok-s">&#x27;pattern&#x27;</span>: _PATTERNS[<span class="tok-n">0</span>], <span class="tok-s">&#x27;page_setup&#x27;</span>: <span class="tok-s">&#x27;&#x27;</span>}
+
+
+<span class="tok-k">def</span> run():
+    <span class="tok-k">if</span> <span class="tok-k">not</span> _has_drawing():
+        toast.warning(<span class="tok-s">&#x27;No drawing is open&#x27;</span>, <span class="tok-s">&#x27;Open a drawing and run Batch Plot again.&#x27;</span>)
+        <span class="tok-k">return</span>
+    names = layouts.names()
+    <span class="tok-k">if</span> <span class="tok-k">not</span> names:
+        toast.info(<span class="tok-s">&#x27;No layouts to plot&#x27;</span>, <span class="tok-s">&#x27;This drawing has only the model tab.&#x27;</span>)
+        <span class="tok-k">return</span>
+    config = script.get_config(_DEFAULTS)
+    drawing = doc.path()
+
+    picked = forms.select_from_list(names, _TITLE, multiselect=<span class="tok-k">True</span>,
+                                    prompt=<span class="tok-s">&#x27;Layouts to plot&#x27;</span>, checked=names)
+    <span class="tok-k">if</span> picked <span class="tok-k">is</span> <span class="tok-k">None</span>:
+        <span class="tok-k">return</span>
+    <span class="tok-k">if</span> <span class="tok-k">not</span> picked:
+        toast.info(<span class="tok-s">&#x27;Nothing plotted&#x27;</span>, <span class="tok-s">&#x27;No layout was ticked.&#x27;</span>)
+        <span class="tok-k">return</span>
+
+    folder = forms.pick_folder(<span class="tok-s">&#x27;Folder for the PDFs&#x27;</span>, _start_folder(config[<span class="tok-s">&#x27;folder&#x27;</span>], drawing))
+    <span class="tok-k">if</span> <span class="tok-k">not</span> folder:
+        <span class="tok-k">return</span>
+
+    pattern = _ask_pattern(drawing, picked[<span class="tok-n">0</span>], config[<span class="tok-s">&#x27;pattern&#x27;</span>])
+    <span class="tok-k">if</span> pattern <span class="tok-k">is</span> <span class="tok-k">None</span>:
+        <span class="tok-k">return</span>
+
+    setup = _ask_page_setup(config[<span class="tok-s">&#x27;page_setup&#x27;</span>])
+    <span class="tok-k">if</span> setup <span class="tok-k">is</span> <span class="tok-k">False</span>:
+        <span class="tok-k">return</span>
+
+    targets = plot.batch_names(drawing, picked, folder, pattern)
+    existing = [path <span class="tok-k">for</span> _, path <span class="tok-k">in</span> targets <span class="tok-k">if</span> os.path.exists(path)]
+    <span class="tok-k">if</span> existing <span class="tok-k">and</span> <span class="tok-k">not</span> forms.confirm(
+            <span class="tok-s">&#x27;%s already in %s. Replace %s?&#x27;</span>
+            % (_count(len(existing), <span class="tok-s">&#x27;of these PDFs is&#x27;</span>, <span class="tok-s">&#x27;of these PDFs are&#x27;</span>), folder,
+               <span class="tok-s">&#x27;it&#x27;</span> <span class="tok-k">if</span> len(existing) == <span class="tok-n">1</span> <span class="tok-k">else</span> <span class="tok-s">&#x27;them&#x27;</span>), _TITLE):
+        <span class="tok-k">return</span>
+
+    script.save_config({<span class="tok-s">&#x27;folder&#x27;</span>: folder, <span class="tok-s">&#x27;pattern&#x27;</span>: pattern, <span class="tok-s">&#x27;page_setup&#x27;</span>: setup <span class="tok-k">or</span> <span class="tok-s">&#x27;&#x27;</span>})
+
+    done, failures, stopped = _plot_all(targets, setup)
+    _report(done, failures, stopped, len(targets), folder)
+
+
+<span class="tok-k">def</span> _has_drawing():
+    <span class="tok-k">try</span>:
+        doc.active()
+    <span class="tok-k">except</span> RuntimeError:
+        <span class="tok-k">return</span> <span class="tok-k">False</span>
+    <span class="tok-k">return</span> <span class="tok-k">True</span>
+
+
+<span class="tok-k">def</span> _start_folder(saved, drawing):
+    <span class="tok-s">&quot;&quot;&quot;The folder last plotted to, else the drawing&#x27;s own folder, else none.&quot;&quot;&quot;</span>
+    <span class="tok-k">if</span> saved <span class="tok-k">and</span> os.path.isdir(saved):
+        <span class="tok-k">return</span> saved
+    folder = os.path.dirname(drawing)
+    <span class="tok-k">return</span> folder <span class="tok-k">if</span> folder <span class="tok-k">and</span> os.path.isdir(folder) <span class="tok-k">else</span> <span class="tok-k">None</span>
+
+
+<span class="tok-k">def</span> _ask_pattern(drawing, layout, saved):
+    <span class="tok-s">&quot;&quot;&quot;The naming pattern, offered as example file names for the first picked
+    layout; the one used last time comes first.&quot;&quot;&quot;</span>
+    order = sorted(_PATTERNS, key=<span class="tok-k">lambda</span> p: p != saved)
+    examples = [plot.output_name(p, drawing, layout) <span class="tok-k">for</span> p <span class="tok-k">in</span> order]
+    choice = forms.ask_options(<span class="tok-s">&#x27;Each layout plots to its own PDF. Name them like:&#x27;</span>,
+                               examples, _TITLE)
+    <span class="tok-k">return</span> <span class="tok-k">None</span> <span class="tok-k">if</span> choice <span class="tok-k">is</span> <span class="tok-k">None</span> <span class="tok-k">else</span> order[examples.index(choice)]
+
+
+<span class="tok-k">def</span> _ask_page_setup(saved):
+    <span class="tok-s">&quot;&quot;&quot;A paper space page setup name, None for each layout&#x27;s own settings, or
+    False on cancel. No question when the drawing has no page setups.&quot;&quot;&quot;</span>
+    setups = layouts.page_setups(paper_only=<span class="tok-k">True</span>)
+    <span class="tok-k">if</span> <span class="tok-k">not</span> setups:
+        <span class="tok-k">return</span> <span class="tok-k">None</span>
+    options = [_OWN_SETTINGS] + setups
+    choice = forms.select_from_list(options, _TITLE, prompt=<span class="tok-s">&#x27;Plot with which page setup?&#x27;</span>,
+                                    checked=[saved <span class="tok-k">if</span> saved <span class="tok-k">in</span> setups <span class="tok-k">else</span> _OWN_SETTINGS])
+    <span class="tok-k">if</span> choice <span class="tok-k">is</span> <span class="tok-k">None</span>:
+        <span class="tok-k">return</span> <span class="tok-k">False</span>
+    <span class="tok-k">return</span> <span class="tok-k">None</span> <span class="tok-k">if</span> choice == _OWN_SETTINGS <span class="tok-k">else</span> choice
+
+
+<span class="tok-k">def</span> _plot_all(targets, setup):
+    <span class="tok-s">&quot;&quot;&quot;Plots each (layout, path); returns (plotted count, [(layout, reason)],
+    True when the person cancelled part way).&quot;&quot;&quot;</span>
+    done = <span class="tok-n">0</span>
+    failures = []
+    total = len(targets)
+    <span class="tok-k">try</span>:
+        <span class="tok-k">with</span> forms.progress(_TITLE, <span class="tok-s">&#x27;Starting&#x27;</span>) <span class="tok-k">as</span> bar:
+            <span class="tok-k">for</span> index, (layout, path) <span class="tok-k">in</span> enumerate(targets):
+                bar.check()
+                bar.update(float(index) / total,
+                           <span class="tok-s">&#x27;Plotting %s (%d of %d)&#x27;</span> % (layout, index + <span class="tok-n">1</span>, total))
+                <span class="tok-k">try</span>:
+                    plot.to_pdf(layout, path, page_setup=setup)
+                    done += <span class="tok-n">1</span>
+                <span class="tok-k">except</span> Exception <span class="tok-k">as</span> error:
+                    script.get_logger().error(<span class="tok-s">&#x27;batch plot: %s failed: %s&#x27;</span> % (layout, error))
+                    failures.append((layout, str(error) <span class="tok-k">or</span> type(error).__name__))
+            bar.update(<span class="tok-n">1.0</span>, <span class="tok-s">&#x27;Done&#x27;</span>)
+    <span class="tok-k">except</span> forms.Cancelled:
+        <span class="tok-k">return</span> done, failures, <span class="tok-k">True</span>
+    <span class="tok-k">return</span> done, failures, <span class="tok-k">False</span>
+
+
+<span class="tok-k">def</span> _report(done, failures, stopped, total, folder):
+    <span class="tok-k">if</span> stopped:
+        toast.info(<span class="tok-s">&#x27;Batch plot stopped&#x27;</span>, <span class="tok-s">&#x27;Plotted %d of %s before you cancelled&#x27;</span>
+                   % (done, _count(total, <span class="tok-s">&#x27;layout&#x27;</span>, <span class="tok-s">&#x27;layouts&#x27;</span>)))
+    <span class="tok-k">elif</span> <span class="tok-k">not</span> failures:
+        toast.success(<span class="tok-s">&#x27;Plotted %s to PDF&#x27;</span> % _count(done, <span class="tok-s">&#x27;layout&#x27;</span>, <span class="tok-s">&#x27;layouts&#x27;</span>), folder)
+    <span class="tok-k">if</span> failures:
+        <span class="tok-k">if</span> <span class="tok-k">not</span> stopped:
+            toast.warning(<span class="tok-s">&#x27;Plotted %d of %s&#x27;</span> % (done, _count(total, <span class="tok-s">&#x27;layout&#x27;</span>, <span class="tok-s">&#x27;layouts&#x27;</span>)),
+                          <span class="tok-s">&#x27;%d failed&#x27;</span> % len(failures))
+        text = <span class="tok-s">&#x27;\n&#x27;</span>.join(<span class="tok-s">&#x27;%s: %s&#x27;</span> % (layout, reason) <span class="tok-k">for</span> layout, reason <span class="tok-k">in</span> failures)
+        forms.alert(<span class="tok-s">&#x27;%s did not plot:\n\n%s&#x27;</span>
+                    % (_count(len(failures), <span class="tok-s">&#x27;layout&#x27;</span>, <span class="tok-s">&#x27;layouts&#x27;</span>), text), _TITLE, copy=text)
+
+
+<span class="tok-k">def</span> _count(n, one, many):
+    <span class="tok-k">return</span> <span class="tok-s">&#x27;%d %s&#x27;</span> % (n, one <span class="tok-k">if</span> n == <span class="tok-n">1</span> <span class="tok-k">else</span> many)
+
+
+run()</code></pre></div>
+<div class="code src"><div class="code-head"><span><code>bundle.yaml</code> <span class="src-note">The bundle contract: the keys pyACAD reads for this tool.</span> <a href="https://github.com/pyacad/pyACAD/blob/main/extensions/pyACAD.extension/pyACAD.tab/Output.panel/Batch_Plot.pushbutton/bundle.yaml" rel="noopener">View on GitHub</a></span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-k">title</span>: Batch Plot
+<span class="tok-k">tooltip</span>: Plots the layouts you pick to PDF, one file per layout, in a folder you choose. Remembers the folder, the file naming and the page setup for next time.
+<span class="tok-k">context</span>: doc
+<span class="tok-k">keytip</span>: OP
+<span class="tok-k">alias</span>: BP</code></pre></div>
+  <div class="pagenav">
+<a href="font-proxy-report.html"><span class="dir">Previous</span><span class="ttl">Font and Proxy Report</span></a>
+<a class="next" href="layout-manager.html"><span class="dir">Next</span><span class="ttl">Layout Manager</span></a>
+</div>
+</article>
+<aside class="toc"><div class="toc-head">On this page</div>
+<a href="#what-it-does">What it does</a>
+<a href="#how-to-use-it">How to use it</a>
+<a href="#what-goes-into-each-pdf">What goes into each PDF</a>
+<a href="#limitations">Limitations</a>
+<a href="#good-to-know">Good to know</a>
+<a href="#other-uses">Other uses</a>
+<a href="#source">Source</a>
+</aside>
+</main>
+</div>
+<script src="_assets/search-index.js"></script>
+<script src="_assets/site.js"></script>
+</body>
+</html>

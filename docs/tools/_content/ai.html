@@ -1,0 +1,176 @@
+<p>The AI panel is a beta. It puts a chat inside AutoCAD that writes pyACAD tools for you:
+describe the button you want, read what the model proposes, click Create, and the button
+appears on its own <strong>AI</strong> tab. The two small buttons beside it hold the setup
+and the folder the tools land in. It is new and lightly tested, and it is not the only way
+to do this: the same authoring guide the panel gives the model can be copied into any
+assistant you already use.</p>
+
+<section id="ask-ai" title="Ask AI" kind="Dock panel"
+         bundle="AI_(beta).panel/Ask_AI.dockpane"
+         summary="Beta. A chat palette that turns a plain-words request into a working pyACAD tool on the ribbon, and revises it when you ask."
+         needs="An API key from AI Settings, or a local OpenAI-compatible server with none"
+         shortcut="None (keytip A A)">
+
+<h2>What it does</h2>
+<p>Ask AI is an AutoCAD palette. You type what the tool should do. The panel sends that,
+together with the pyACAD authoring guide, to the model you chose in
+<a href="ai-settings.html">AI Settings</a>. The reply streams in as a short explanation plus
+the files of one bundle: <code>bundle.yaml</code>, <code>script.py</code> and, when the
+tool has settings, <code>config.py</code>. Nothing touches disk until you click
+<strong>Create tool</strong>. Then the bundle is written into
+<code>%APPDATA%\pyACAD\extensions\AI.extension</code>, the ribbon reloads, and the tool is on
+the AI tab, with its own AutoCAD command like any other tool.</p>
+
+<figure data-shot="ask-ai-panel" data-wide>
+<figcaption>The Ask AI palette: a request, the model's reply with its files, and the Create
+tool card above the message box.</figcaption>
+</figure>
+
+<h2>How to use it</h2>
+<ol class="steps">
+  <li>Click <strong>AI Settings</strong> once, pick a provider, paste your key, and click
+    <strong>Test</strong> until the status line says it connected. Until a key is saved the
+    palette says so, offers an <strong>Open AI settings</strong> button, and Send stays
+    greyed.</li>
+  <li>Click <strong>Ask AI</strong> to show the palette, and dock it beside the drawing. The
+    ribbon button stays pressed while it is showing.</li>
+  <li>Describe the tool in plain words. <kbd>Ctrl</kbd>+<kbd>Enter</kbd> sends;
+    <strong>Cancel</strong> stops a reply that is still coming in.</li>
+  <li>Read the reply. <strong>View files</strong> shows exactly what would be written, with a
+    Copy button. If the model asked a question instead, answer it.</li>
+  <li>Click <strong>Create tool</strong>. The ribbon reloads and the button is on the AI tab.
+    Click it.</li>
+  <li>Keep talking to change it, for example "also put the count in a table". The model is
+    shown the tool's files as they were last written, the card now reads <strong>Update
+    tool</strong>, and the tool is rewritten in place. If the tool failed when you ran it,
+    <strong>Send last error to AI</strong> sends the traceback for a fix.</li>
+  <li><strong>New tool</strong> starts a fresh conversation. Once Ask AI has made a tool, a
+    dropdown beside it lists every tool it has made; pick one to continue it in a new
+    conversation, with its files put in front of the model.</li>
+</ol>
+
+<h2>Attach selection</h2>
+<p>Tick <strong>Attach selection</strong> before you send and the message carries a short
+summary of what is selected in the drawing: how many objects, and for each kind of object
+(by its DXF name, such as <code>INSERT</code> or <code>LWPOLYLINE</code>) the names of the
+properties the AutoCAD API gives it. That helps the model spell API properties right. It
+reads at most 200 objects and sends at most about 4,000 characters. It never reads a value,
+so no layer names, attribute tags or text from the drawing are sent: if the tool depends on
+those, type them into your request.</p>
+
+<h2>What leaves your machine</h2>
+<p>Every request carries the authoring guide and your conversation so far, plus the current
+tool's files when you are revising one, plus the selection summary when you ticked the box.
+No file name, no path, no geometry, no user name. The request goes to the provider you
+configured and nowhere else; pyACAD has no server in the middle.</p>
+
+<h2>Good to know / limits</h2>
+<ul>
+  <li>Beta. Read the code before you run it. The model works from the guide and from what
+    you say; it cannot see your drawing beyond the selection summary, and it cannot run the
+    tool itself.</li>
+  <li>One bundle per conversation, with only those three files. The model cannot write helper
+    modules, hooks, dock panels or icons. Generated tools get a lettered icon in one of five
+    colours (violet, teal, amber, rose, green), never the blue of the shipped tools, so you
+    can always tell them apart.</li>
+  <li>It writes only inside <code>AI.extension</code>, on its one panel. Hand-written
+    bundles are never touched.</li>
+  <li>Update tool overwrites the tool's files. If you edited <code>script.py</code> by hand
+    since it was written, that edit is lost unless the model's version kept it.</li>
+  <li>The conversation lives for the AutoCAD session and survives a Reload. Closing AutoCAD
+    forgets it; the tools stay, and the dropdown brings any of them back for editing. A very
+    long conversation drops its oldest messages to stay within budget.</li>
+  <li>If the answer is cut off, the transcript says it hit the length limit: raise
+    <strong>Longest answer</strong> in AI Settings and ask again.</li>
+  <li>With Anthropic, the guide is sent as a cached prompt block, so from the second message
+    on most of it is read from the provider's cache rather than billed in full.</li>
+</ul>
+
+<h2>Other uses</h2>
+<ul>
+  <li>Use it as a starting point: create the tool, then open its folder with
+    <a href="open-ai-folder.html">Open AI Folder</a> and edit <code>script.py</code> by hand
+    like any other bundle. A script edit does not even need a Reload.</li>
+  <li>Prefer your own chatbot? <strong>Copy guide</strong> in the palette's footer puts the
+    same guide on the clipboard. Paste it, ask for the tool, and save the files it gives you
+    into a <code>*.pushbutton</code> folder yourself. <strong>Docs</strong> opens the
+    <a href="https://docs.pyacad.com/ai-assistant.html">authoring guide page</a> that walks
+    through that path.</li>
+</ul>
+</section>
+
+<section id="ai-settings" title="AI Settings" kind="Stacked button"
+         bundle="AI_(beta).panel/Setup.stack/AI_Settings.pushbutton"
+         summary="The provider, endpoint, model and API key Ask AI uses: the Settings window opened on its AI section."
+         needs="Nothing"
+         shortcut="None set (bind one in Shortcuts)">
+
+<h2>What it does</h2>
+<p>Opens the ordinary <a href="settings.html">Settings</a> window scrolled to <strong>AI
+assistant (beta)</strong>. Two providers: <strong>Anthropic</strong>, and
+<strong>OpenAI-compatible</strong>, which covers OpenAI itself, Azure OpenAI, Ollama, LM
+Studio and most local servers through one base URL. The command is
+<code>PYAISETTINGS</code>.</p>
+
+<figure data-shot="ai-settings-section">
+<figcaption>The AI assistant section of Settings: provider, base URL, model, the API key
+with Test, and the longest answer.</figcaption>
+</figure>
+
+<h2>How to use it</h2>
+<ol class="steps">
+  <li>Pick the <strong>Provider</strong>.</li>
+  <li><strong>Base URL</strong>: leave it empty for the provider's public endpoint. For a
+    local or private server choose OpenAI-compatible and give its address ending in
+    <code>/v1</code>, for example <code>http://localhost:11434/v1</code>.</li>
+  <li><strong>Model</strong>: pick from the list or type any model name. Empty means the
+    provider's default (<code>claude-opus-5</code> for Anthropic, <code>gpt-4o</code> for
+    OpenAI-compatible).</li>
+  <li><strong>API key</strong>: paste it. A local server needs none. When a key is already
+    saved, the box stays empty and the hint names the endpoint it was saved for: leave the
+    box empty to keep it, type a new one to replace it, or press <strong>Remove</strong>.</li>
+  <li>Click <strong>Test</strong>. It sends one tiny request with the values as they stand
+    in the window and reports <em>Connected</em> with the model's reply, or the error.</li>
+  <li><strong>Longest answer (tokens)</strong> caps a reply. The default is 8192.</li>
+  <li>Click <strong>Save</strong>. pyACAD offers to reload, because the window also holds
+    every other setting; Ask AI uses the new AI values from its next message either way.</li>
+</ol>
+
+<h2>Good to know / limits</h2>
+<ul>
+  <li>The key is stored encrypted for your Windows account in
+    <code>%APPDATA%\pyACAD\secrets.json</code>, never in <code>config.json</code>, so sharing
+    your config never shares the key. A copied <code>secrets.json</code> reads as "no key" on
+    another account or machine.</li>
+  <li>A key belongs to the endpoint it was saved with, and is only ever sent there, over
+    https or to a server on this computer. Change the provider or base URL and you enter
+    that endpoint's key.</li>
+  <li>An OpenAI-compatible base URL other than OpenAI's own is treated as a server that may
+    need no key, so the chat opens without one.</li>
+  <li>Provider, base URL, model and longest answer live in <code>config.json</code> under
+    <code>ai</code>, like every other setting.</li>
+</ul>
+</section>
+
+<section id="open-ai-folder" title="Open AI Folder" kind="Stacked button"
+         bundle="AI_(beta).panel/Setup.stack/Open_AI_Folder.pushbutton"
+         summary="Explorer on the folder where Ask AI writes its tools."
+         needs="At least one tool created"
+         shortcut="None set (bind one in Shortcuts)">
+
+<h2>What it does</h2>
+<p>Opens <code>%APPDATA%\pyACAD\extensions\AI.extension\AI.tab\Generated.panel</code> in
+Explorer. Every generated tool is an ordinary bundle folder there: read it, edit it, copy it
+into your own extension, or delete it. Before Ask AI has created anything it says so in a
+toast instead of opening an empty window. The command is
+<code>PYOPENAIFOLDER</code>.</p>
+
+<h2>Good to know</h2>
+<ul>
+  <li>Deleting a tool's folder and clicking Reload removes it from the ribbon.</li>
+  <li>Renaming a folder changes its bundle key, so a chord bound to it in the Shortcuts
+    editor would need binding again.</li>
+  <li>To keep a generated tool for good, copy its folder into your own extension and give it
+    a proper icon; the AI tab is meant as a workbench.</li>
+</ul>
+</section>

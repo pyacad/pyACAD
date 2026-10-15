@@ -30,8 +30,8 @@ MASTER = os.path.join(OUT, 'logo.svg')
 FONTS = os.path.join(os.environ.get('WINDIR', r'C:\Windows'), 'Fonts')
 
 TILE = '#1F2329'
-ACCENT = '#178571'         # "ACAD" on a light background (the diagonal's teal)
-ACCENT_DARK = '#1FA38A'    # "ACAD" on a dark background (the stems' teal)
+ACCENT = '#E51050'         # "ACAD" on a light background (the legs' AutoCAD red)
+ACCENT_DARK = '#F2577F'    # "ACAD" on a dark background (the same red, lifted for contrast)
 INK_LIGHT = '#3D4451'      # "py" on a light background
 INK_DARK = '#E8E8E8'       # "py" on a dark background
 

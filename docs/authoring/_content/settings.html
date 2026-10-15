@@ -1,0 +1,494 @@
+<!-- title: Settings and per-tool state -->
+<!-- eyebrow: Scripts -->
+<!-- lead: Every key pyACAD reads from config.json, the Settings window that edits them, how a tool remembers its own options, and what lives under %APPDATA%\pyACAD. -->
+
+<p>pyACAD keeps two kinds of settings, in two places, and they never mix:</p>
+
+<ul>
+  <li><strong>pyACAD's own</strong>, in one file, <code>%APPDATA%\pyACAD\config.json</code>:
+    where extensions load from, the theme, engine paths, shortcuts, ribbon hints, the
+    assistant and updates.</li>
+  <li><strong>Each tool's own</strong>, one small JSON file per tool under
+    <code>%APPDATA%\pyACAD\settings\</code>, written and read through
+    <code>pyacad.script</code> or <code>pyacad.settings</code>.</li>
+</ul>
+
+<p>Both are per Windows user, not per drawing and not per machine.</p>
+
+<h2>config.json</h2>
+
+<p>The file is a single JSON object. It does not need to exist: a fresh install has none,
+and every key has a default. Unknown keys are ignored, and the runtime's own writers keep
+them, so you can leave notes or keys for a later version in it.</p>
+
+<h3>Who writes it</h3>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Writer</th><th>Keys it touches</th></tr></thead>
+<tbody>
+<tr><td>The <strong>Settings</strong> window (pyACAD panel)</td>
+    <td><code>theme</code>, <code>extensions</code>, <code>pyacadlib</code>,
+    <code>cpython</code>, <code>shortcuts.allowBareKeys</code>, the four
+    <code>ribbon</code> keys, <code>ai</code>, <code>updates</code></td></tr>
+<tr><td>The <strong>Shortcuts</strong> editor (pyACAD panel)</td>
+    <td><code>shortcuts.bindings</code> only</td></tr>
+<tr><td>Settings' <em>Skip this version</em> button</td>
+    <td><code>updates.skip</code> only, at once</td></tr>
+<tr><td><code>pyacad extensions add &lt;dir&gt;</code> (the command line)</td>
+    <td><code>extensions</code></td></tr>
+<tr><td>The repository's developer deploy script</td>
+    <td><code>runtime&lt;year&gt;</code>, <code>extensions</code>, <code>pyacadlib</code></td></tr>
+<tr><td>You, in a text editor</td><td>Anything</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The installer never writes it. The runtime's writers read the file, change only their own
+keys, write the result to a temporary file beside it and swap it in, so a crash mid-write
+cannot leave a half-written file. A key set back to its default is removed rather than written
+out, so a file only ever holds what someone changed.</p>
+
+<div class="note trap">
+<span class="note-t">Invalid JSON: the runtime reads defaults and refuses to save</span>
+<p>If <code>config.json</code> does not parse (a stray comma after a hand edit), the runtime
+logs <code>Failed to load config ... - using defaults.</code> and carries on with every
+default: no extra extension roots, the detected theme, no shortcut overrides. The Settings
+window and the Shortcuts editor then refuse to write over it (<em>is not valid JSON, so nothing
+was saved. Fix the file or delete it.</em>), because saving would throw away everything the
+file held. <code>pyacad extensions add</code> is less careful: it warns <em>treating as
+empty</em> and writes a file holding only <code>extensions</code>. Fix the JSON first.</p>
+</div>
+
+<h3>When changes take effect</h3>
+
+<ul>
+  <li><strong>On Reload</strong>: <code>extensions</code>, <code>theme</code>, the
+    <code>shortcuts</code> and <code>ribbon</code> sections. The file is read again at every
+    Reload. (A newly added or removed <code>*.lib</code> folder is the exception: that needs a
+    restart.)</li>
+  <li><strong>On the next AutoCAD start</strong>: <code>pyacadlib</code>,
+    <code>cpython</code>, <code>runtime&lt;year&gt;</code> and <code>automatedBoot</code>.
+    The engines and the loader read these once.</li>
+  <li><strong>When next used</strong>: <code>ai</code> (the next request), and
+    <code>updates</code> (the next start's check).</li>
+</ul>
+
+<h2>Every key</h2>
+
+<h3>Loading and engines</h3>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Key</th><th>Type and default</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>extensions</code></td><td>array of folder paths; none</td>
+    <td>Extension roots: folders holding <code>*.extension</code> (and <code>*.lib</code>)
+    folders. They are scanned first, in order, then the installer's defaults that exist:
+    <code>%APPDATA%\pyACAD\extensions</code>, then
+    <code>%PROGRAMDATA%\pyACAD\extensions</code>. The machine-wide folder is used only when
+    nobody but administrators can write to it; list it here to load it anyway.</td></tr>
+<tr><td><code>pyacadlib</code></td><td>folder path; the runtime's own
+    <code>pyacadlib</code></td>
+    <td>The folder containing the <code>pyacad</code> package. If the path does not exist
+    the runtime logs it and falls back to the installed copy. A wrong value here is the one
+    setting that can stop every script importing <code>pyacad</code>.</td></tr>
+<tr><td><code>cpython</code></td><td><code>python3XX.dll</code> path or a Python install
+    folder; detected</td>
+    <td>The CPython that <code>engine: cpython</code> bundles run on. When absent: the
+    <code>PYACAD_CPYTHON</code> environment variable (same forms), then the newest 64-bit
+    Python 3.7 to 3.13 registered for the user, then for the machine. A folder is searched for
+    its highest <code>python3XX.dll</code>.</td></tr>
+<tr><td><code>runtime2026</code> (one per release year)</td><td>folder path; none</td>
+    <td>Read by the loader, not the runtime, at AutoCAD start: the runtime folder for that
+    release. The order is the <code>PYACAD_RUNTIME</code> environment variable, this key,
+    <code>%APPDATA%\pyACAD\&lt;year&gt;\runtime</code>, then
+    <code>%PROGRAMDATA%\pyACAD\&lt;year&gt;\runtime</code>. Used for development
+    builds.</td></tr>
+<tr><td><code>automatedBoot</code></td><td>string; absent</td>
+    <td><code>"full"</code> makes an AutoCAD started through COM automation (no one at the
+    screen) build the ribbon, hooks, shortcuts and notices as a normal session does. Absent,
+    those stages are skipped there.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>Appearance and the keyboard</h3>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Key</th><th>Type and default</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>theme</code></td><td><code>"light"</code> or <code>"dark"</code>; absent</td>
+    <td>Forces pyACAD's theme. Absent (or any other value), pyACAD follows AutoCAD's
+    <code>COLORTHEME</code>. See <a href="icons.html#light-or-dark">Light or dark</a>.</td></tr>
+<tr><td><code>shortcuts.allowBareKeys</code></td><td>boolean; <code>false</code></td>
+    <td>Allows chords without Ctrl or Alt. A bare key is then swallowed everywhere in
+    AutoCAD outside a text box.</td></tr>
+<tr><td><code>shortcuts.bindings</code></td><td>object; empty</td>
+    <td>Bundle key to chord string, or <code>null</code> to disable an author's default.
+    See <a href="shortcuts.html">Shortcuts and keytips</a>.</td></tr>
+<tr><td><code>aliases</code></td><td>object; empty</td>
+    <td>Bundle key to your own short names for that tool (<code>"BXL"</code> or
+    <code>"BXL, B2X"</code>), replacing the bundle's <code>alias:</code>; <code>null</code>
+    drops them. See <a href="commands.html#aliases">Aliases</a>.</td></tr>
+<tr><td><code>ribbon.showShortcutMarker</code></td><td>boolean; <code>true</code></td>
+    <td>Appends a marker to the caption of a button that has a chord.</td></tr>
+<tr><td><code>ribbon.shortcutMarker</code></td><td>string; <code>"&#9679;"</code>
+    (U+25CF)</td>
+    <td>That marker. A value starting with <code>\n</code> puts it on its own line. Empty
+    means the default glyph, never "off".</td></tr>
+<tr><td><code>ribbon.showConfigMarker</code></td><td>boolean; <code>false</code></td>
+    <td>Appends a marker to the caption of a button whose bundle has a
+    <code>config.py</code> (a Shift+Click action).</td></tr>
+<tr><td><code>ribbon.configMarker</code></td><td>string; U+1F845, a wide upward arrow</td>
+    <td>That marker. Empty means the default.</td></tr>
+<tr><td><code>ribbon.configDot</code></td><td>boolean</td>
+    <td>The older name for <code>showConfigMarker</code>, read only when that key is
+    absent. The Settings window removes it on save.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h3>The assistant and updates</h3>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Key</th><th>Type and default</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td><code>ai.provider</code></td><td><code>"anthropic"</code> or <code>"openai"</code>;
+    <code>"anthropic"</code></td>
+    <td><code>"openai"</code> means any OpenAI-compatible endpoint.</td></tr>
+<tr><td><code>ai.baseUrl</code></td><td>string; the provider's public endpoint</td>
+    <td>For Azure OpenAI, Ollama or a local server.</td></tr>
+<tr><td><code>ai.model</code></td><td>string; <code>claude-opus-5</code> or
+    <code>gpt-4o</code></td><td>Any model name the endpoint accepts.</td></tr>
+<tr><td><code>ai.maxTokens</code></td><td>positive integer; <code>8192</code></td>
+    <td>The longest answer.</td></tr>
+<tr><td><code>updates.check</code></td><td>boolean; <code>true</code></td>
+    <td>Ask GitHub once a day whether a newer release exists.</td></tr>
+<tr><td><code>updates.installOnClose</code></td><td>boolean; <code>true</code></td>
+    <td>Download a newer release in the background and install it when AutoCAD
+    closes.</td></tr>
+<tr><td><code>updates.skip</code></td><td>version string; none</td>
+    <td>A release the user chose to skip.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The assistant's API key is not in <code>config.json</code>: it is encrypted for the
+current Windows user in <code>secrets.json</code> beside it. See
+<a href="ai-assistant.html">AI assistant</a>.</p>
+
+<h3>Read but not used</h3>
+
+<p>The runtime also parses <code>panes.assignments</code>, <code>panes.extraSlots</code> and
+<code>layout.&lt;dialog&gt;.&lt;part&gt;</code>, but nothing in this release acts on them:
+dock panes are AutoCAD palettes that remember their own size and position, and no window
+stores a layout width yet. Leave them alone if they are in your file.</p>
+
+<div class="note warn">
+<span class="note-t">Types are checked, not coerced</span>
+<p>A value of the wrong JSON type is ignored and the default used, with no log line.
+<code>"allowBareKeys": "true"</code> (a string) leaves bare keys off; it has to be
+<code>true</code>. Paths are JSON strings, so every backslash is doubled.</p>
+</div>
+
+<h3>A complete example</h3>
+
+<pre data-lang="json" data-file="%APPDATA%\pyACAD\config.json">
+{
+  "extensions": [
+    "D:\\CAD\\Extensions",
+    "\\\\fileserver\\cad\\pyacad-office"
+  ],
+  "theme": "dark",
+  "cpython": "C:\\Python312",
+  "shortcuts": {
+    "allowBareKeys": false,
+    "bindings": {
+      "pyACAD.tab/Output.panel/Batch_Plot.pushbutton": "Ctrl+Shift+P",
+      "MyTools.tab/Blocks.panel/Count.pushbutton": null
+    }
+  },
+  "aliases": {
+    "pyACAD.tab/Output.panel/Batch_Plot.pushbutton": "BP"
+  },
+  "ribbon": {
+    "showShortcutMarker": true,
+    "showConfigMarker": true
+  },
+  "ai": {
+    "provider": "openai",
+    "baseUrl": "http://localhost:11434/v1",
+    "model": "qwen2.5-coder"
+  },
+  "updates": {
+    "installOnClose": false
+  }
+}
+</pre>
+
+<h2>The Settings window</h2>
+
+<p>The <strong>Settings</strong> button on the pyACAD panel (command <code>PYSETTINGS</code>)
+opens <em>pyACAD settings</em>, which edits everything in <code>config.json</code> a person is
+meant to change. Each section says what its change costs.</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Section</th><th>Fields</th><th>Takes effect</th></tr></thead>
+<tbody>
+<tr><td>Appearance</td>
+    <td>Theme (Follow AutoCAD, Light, Dark); the shortcut marker on or off and its glyph; the
+    Shift+Click marker on or off and its glyph.</td><td>Reload</td></tr>
+<tr><td>Shortcuts</td><td>Allow shortcuts without Ctrl or Alt.</td><td>Reload</td></tr>
+<tr><td>Where extensions are loaded from</td>
+    <td>The <code>extensions</code> list, with Add (a folder picker) and Remove.</td>
+    <td>Reload</td></tr>
+<tr><td>Engines</td><td>pyacadlib folder; CPython. Empty lets pyACAD resolve
+    them.</td><td>Restart</td></tr>
+<tr><td>Assistant</td>
+    <td>Provider, base URL, model, API key (with Test and Remove), longest answer.</td>
+    <td>Next request</td></tr>
+<tr><td>Updates</td>
+    <td>Status, Check now, Release page, Skip this version; check daily; install on
+    close.</td><td>Next start</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>On <strong>Save</strong>, if either engine path changed it toasts <em>Settings saved</em>,
+<em>The engine paths changed, so AutoCAD needs restarting</em>. Otherwise it asks
+<em>Reload pyACAD now so the changes show?</em> and reloads on Yes. Cancel or closing the
+window writes nothing.</p>
+
+<p>The window deliberately does not edit <code>shortcuts.bindings</code>: which tool has which
+chord belongs to the Shortcuts editor, and two windows rewriting one section would fight.</p>
+
+<div class="note">
+<span class="note-t">The CPython field takes a DLL or a folder</span>
+<p>The field is labelled <em>CPython executable</em>, but what the engine loads is the
+<code>python3XX.dll</code>. Point it at the DLL or at the Python install folder that
+contains it, not at <code>python.exe</code>.</p>
+</div>
+
+<h2>Per-tool settings</h2>
+
+<p>Most tools eventually grow an option: an output folder, a tolerance, a choice someone
+wants remembered. A tool's settings are a Python dict that round-trips through a JSON file,
+and there are two ways to name that file.</p>
+
+<h3>The easy way: pyacad.script</h3>
+
+<p>Inside a bundle's <code>script.py</code> or <code>config.py</code>, let pyACAD name the
+file after the bundle:</p>
+
+<pre data-lang="python" data-file="script.py">
+from pyacad import forms, script
+
+DEFAULTS = {'folder': '', 'pattern': '{drawing} - {layout}.pdf'}
+
+config = script.get_config(DEFAULTS)       # always a complete dict
+folder = forms.pick_folder('Folder for the PDFs', config['folder'] or None)
+if folder:
+    config['folder'] = folder
+    script.save_config(config)
+</pre>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Function</th><th>Does</th></tr></thead>
+<tbody>
+<tr><td><code>script.get_config(defaults)</code></td>
+    <td>This tool's saved values merged over <code>defaults</code>. Never raises.</td></tr>
+<tr><td><code>script.save_config(values)</code></td>
+    <td>Writes <code>values</code> as the tool's whole file. Keys you leave out are
+    gone.</td></tr>
+<tr><td><code>script.reset_config()</code></td>
+    <td>Deletes the tool's file, so the next <code>get_config</code> returns the
+    defaults.</td></tr>
+<tr><td><code>script.bind()</code></td>
+    <td>Pins the tool's identity for code that runs after the script returns (see
+    below).</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The file is <code>%APPDATA%\pyACAD\settings\cfg_&lt;slug&gt;.json</code>, where the slug
+is the tool's bundle key lowercased with every run of other characters turned into one
+underscore. Batch Plot, whose bundle key is
+<code>pyACAD.tab/Output.panel/Batch_Plot.pushbutton</code>, stores its choices in
+<code>cfg_pyacad_tab_output_panel_batch_plot_pushbutton.json</code>. Because
+<code>script.py</code> and <code>config.py</code> share the bundle key, they share the file,
+which is the whole Shift+Click convention (see
+<a href="click-actions.html">Click actions</a>).</p>
+
+<div class="note trap">
+<span class="note-t">Renaming the bundle folder starts from the defaults</span>
+<p>The key comes from the folder path (leading <code>NN_</code> prefixes are dropped, so
+renumbering is safe). Rename <code>Batch_Plot.pushbutton</code> or move it to another panel
+and the tool looks for a different file. The old file stays on disk, unread.</p>
+</div>
+
+<h3>Callbacks that outlive the script</h3>
+
+<p><code>get_config</code> and <code>save_config</code> ask the runtime "which tool is
+running?" at the moment they are called, and the runtime answers with the most recent
+command, even after it finished. Inside <code>script.py</code> that is right. In a modeless
+window's click handler, a dock pane handler or a timer it is wrong: the user may have run
+another tool since, and you would read or overwrite <em>its</em> settings. Take the answer
+while it is still correct:</p>
+
+<pre data-lang="python" data-file="script.py">
+from pyacad import script
+
+me = script.bind()                         # at the top of script.py
+
+def on_closed(sender, args):               # fires long after script.py returned
+    me.save_config({'width': sender.Width})
+</pre>
+
+<p>A <code>BoundScript</code> has the same <code>get_config</code>, <code>save_config</code>,
+<code>reset_config</code>, <code>store_data</code>, <code>load_data</code> and
+<code>data_exists</code> methods, all pinned to the tool that called
+<code>bind()</code>.</p>
+
+<h3>The explicit way: pyacad.settings</h3>
+
+<p>Hooks, <code>startup.py</code> and shared library code have no bundle of their own (and
+the <code>script</code> functions would answer for whichever tool ran last), so they name the
+file themselves. <code>pyacad.settings</code> is pure standard library: it imports no AutoCAD
+API and works on either engine, in a unit test, and outside AutoCAD.</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Function</th><th>Does</th></tr></thead>
+<tbody>
+<tr><td><code>settings.path_for(tool)</code></td>
+    <td><code>%APPDATA%\pyACAD\settings\&lt;tool&gt;.json</code>; the file need not
+    exist.</td></tr>
+<tr><td><code>settings.merge(defaults, stored)</code></td>
+    <td>Defaults overlaid with stored values; keys not in <code>defaults</code> are
+    dropped.</td></tr>
+<tr><td><code>settings.load(tool, defaults)</code></td>
+    <td>The saved values merged over <code>defaults</code>. Never raises.</td></tr>
+<tr><td><code>settings.save(tool, values)</code></td>
+    <td>Writes indented, key-sorted JSON, creating the folder when needed.</td></tr>
+</tbody>
+</table>
+</div>
+
+<pre data-lang="python" data-file="hooks\doc-saved.py">
+from pyacad import settings, toast
+
+DEFAULTS = {'remind_purge': True}
+
+if settings.load('mytools_hooks', DEFAULTS)['remind_purge']:
+    toast.info('Saved', 'Remember to purge before you issue the drawing.')
+</pre>
+
+<p>Pick a key that is unique across every extension a user might install: prefix it with your
+extension's name. The <code>cfg_</code> prefix is what <code>pyacad.script</code> uses, so
+keep clear of it.</p>
+
+<h3>How load and save behave</h3>
+
+<ul>
+  <li><strong>Load never raises.</strong> A missing file, an empty file, half-written JSON or a
+    file someone edited into a list all return a fresh copy of the defaults, so a bad
+    preferences file can never stop a tool from running. The next save repairs it.</li>
+  <li><strong>The keys come from your defaults.</strong> The result holds exactly the keys in
+    <code>defaults</code>: values from the file where present, defaults elsewhere. A key you
+    remove from a later version of the tool is dropped, and a key you add arrives at its
+    default for everyone. Index the result directly; there is nothing to check.</li>
+  <li><strong>Renaming a key loses that one value.</strong> The old name is dropped and the new
+    one starts at its default.</li>
+  <li><strong>Save is atomic.</strong> It writes a temporary file beside the target and
+    replaces the target with it, so a crash mid-save leaves the previous file intact.</li>
+</ul>
+
+<h3>Data, as opposed to settings</h3>
+
+<p>For things a tool accumulates rather than options a user picks (a list of recent paths, a
+cache, results per drawing), <code>pyacad.script</code> has a key/value store under
+<code>%APPDATA%\pyACAD\data\</code>:</p>
+
+<pre data-lang="python" data-file="script.py">
+from pyacad import script
+
+runs = script.load_data('runs', 0, per_document=True) + 1
+script.store_data('runs', runs, per_document=True)
+</pre>
+
+<p>Each call reads and rewrites one JSON object per tool (with
+<code>per_document=True</code>, one per tool and drawing, named after the drawing's file plus
+a short hash of its full path). A file that will not parse is copied aside as
+<code>.corrupt</code> before the store overwrites it. Per-document data needs an open drawing
+and raises <code>RuntimeError</code> without one.</p>
+
+<h2>What lives under %APPDATA%\pyACAD</h2>
+
+<pre data-lang="tree">
+%APPDATA%\pyACAD\
+  config.json              pyACAD's settings (this page)
+  secrets.json             the assistant's API key, encrypted for your Windows account
+  settings\                per-tool settings: cfg_*.json and your own keys
+  data\                    per-tool data from script.store_data
+  logs\
+    pyACAD.log             the runtime log
+    loader.log             the loader's log: which runtime it found
+  extensions\              the per-user extension root (shipped and AI-made extensions)
+  2026\runtime\            the runtime the per-user installer put there, one per release
+  cli\                     pyacad.exe, the command line
+  webview2\                the output window's browser profile
+  updates\                 update state, downloaded installers and their logs
+  runs\                    one folder per pyacad run
+  last-upgrade.json        what the last update kept of your work
+</pre>
+
+<p>An update replaces only the runtime folders, <code>cli</code> and the shipped
+<code>extensions\pyACAD.extension</code>; <code>config.json</code>, <code>secrets.json</code>,
+<code>settings</code>, <code>data</code>, the logs and every extension of your own are kept. Deleting <code>config.json</code> is a safe reset of
+pyACAD's own settings; deleting a file under <code>settings</code> resets one tool.</p>
+
+<h2>Logs</h2>
+
+<p>There is no debugger inside AutoCAD. The log is the debugger.</p>
+
+<ul>
+  <li><code>logs\pyACAD.log</code>: everything the runtime does, one timestamped line each,
+    tagged <code>[INFO ]</code> or <code>[ERROR]</code>. Boot and Reload, which extension roots
+    were scanned, skipped bundles and why, theme detection, commands registered, shortcut
+    problems, every script run and every traceback. A hook's or <code>startup.py</code>'s
+    <code>print()</code> lands here too, prefixed <code>[hook MyTools:doc-saved]</code> or
+    <code>[startup MyTools]</code>.</li>
+  <li><code>logs\loader.log</code>: the small loader AutoCAD loads first. If the ribbon never
+    appears, this says whether the runtime was found and where.</li>
+</ul>
+
+<p>A script writes to the runtime log through its logger:</p>
+
+<pre data-lang="python" data-file="script.py">
+from pyacad import script
+
+log = script.get_logger()
+log.info('exporting %d layouts' % 12)         # [INFO ] [info] [Batch Plot] exporting 12 layouts
+log.warning('layout A3-02 has no page setup')  # also shown in an open output window
+log.set_level('debug')                         # debug lines are dropped until you do this
+log.debug('page setup lookup took 40 ms')
+</pre>
+
+<p>Lines are labelled with the tool's title, or with <code>hook ...</code> and
+<code>startup ...</code> for those scripts. Warnings and errors also appear in the output
+window when one is already open; the logger never opens one by itself. The logs are plain
+appended text and are not rotated: delete them when they grow.</p>
+
+<div class="cards">
+  <a href="click-actions.html"><span class="c-t">Click actions and config.py</span>
+    <span class="c-d">The Shift+Click convention that per-tool settings serve.</span></a>
+  <a href="shortcuts.html"><span class="c-t">Shortcuts and keytips</span>
+    <span class="c-d">The shortcuts section of config.json in depth.</span></a>
+  <a href="troubleshooting.html"><span class="c-t">Troubleshooting</span>
+    <span class="c-d">Reading the logs when something does not load.</span></a>
+</div>

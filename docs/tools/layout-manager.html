@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Layout Manager - pyACAD tools</title>
+<meta name="description" content="Renames, reorders, copies or deletes paper space layouts, or applies one named page setup to many layouts at once.">
+<link rel="stylesheet" href="_assets/site.css">
+<link rel="stylesheet" href="_assets/tools.css">
+</head>
+<body data-base="">
+<div class="layout">
+<div class="sidebar">
+  <div class="brand"><a href="index.html"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="26" height="26" aria-hidden="true"><polygon points="157.0,327.8 351.8,327.8 363.1,342.4 363.1,403.3 168.3,403.3 157.0,388.7" fill="#78082A"/><polygon points="157.0,327.8 351.8,327.8 351.8,388.7 157.0,388.7" fill="#B80C40"/><polygon points="51.5,482.0 234.1,157.4 278.7,181.7 290.1,196.3 152.1,496.6 62.8,496.6" fill="#78082A"/><polygon points="51.5,482.0 140.8,482.0 278.7,181.7 234.1,157.4" fill="#E51050"/><polygon points="359.9,482.0 205.7,108.7 217.0,123.3 371.2,496.6" fill="#78082A"/><polygon points="205.7,108.7 201.6,55.9 213.0,70.5 217.0,123.3" fill="#78082A"/><polygon points="201.6,55.9 246.3,15.4 257.6,30.0 213.0,70.5" fill="#78082A"/><polygon points="246.3,15.4 343.7,23.5 355.0,38.1 257.6,30.0" fill="#78082A"/><polygon points="343.7,23.5 388.3,51.9 399.7,66.5 355.0,38.1" fill="#78082A"/><polygon points="388.3,51.9 347.7,76.2 359.1,90.8 399.7,66.5" fill="#78082A"/><polygon points="347.7,76.2 295.0,84.3 306.3,99.0 359.1,90.8" fill="#78082A"/><polygon points="295.0,84.3 449.2,482.0 460.5,496.6 306.3,99.0" fill="#78082A"/><polygon points="449.2,482.0 359.9,482.0 371.2,496.6 460.5,496.6" fill="#78082A"/><polygon points="359.9,482.0 205.7,108.7 201.6,55.9 246.3,15.4 343.7,23.5 388.3,51.9 347.7,76.2 295.0,84.3 449.2,482.0" fill="#E51050"/><polygon points="270.6,39.7 311.2,35.7 297.0,51.9" fill="#1F2329"/></svg><span class="brand-name">pyACAD
+    <span class="brand-sub">Tools guide</span></span></a></div>
+  <div class="search-wrap">
+    <svg class="search-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <circle cx="6" cy="6" r="4.2" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M9.2 9.2 12.5 12.5" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round"/></svg>
+    <input id="search" type="search" placeholder="Search the tools" autocomplete="off"
+           spellcheck="false" aria-label="Search the tools guide">
+    <span class="search-kbd">/</span>
+    <div id="search-results" class="search-results"></div>
+  </div>
+  <nav class="pages">
+<div class="grp">pyACAD</div>
+<a href="settings.html"><img class="nav-icon" src="_assets/icons/settings.png" alt="">Settings</a>
+<a href="shortcuts.html"><img class="nav-icon" src="_assets/icons/shortcuts.png" alt="">Shortcuts</a>
+<a href="console.html"><img class="nav-icon" src="_assets/icons/console.png" alt="">Console</a>
+<a href="reload.html"><img class="nav-icon" src="_assets/icons/reload.png" alt="">Reload</a>
+<div class="grp">Data</div>
+<a href="blocks-to-excel.html"><img class="nav-icon" src="_assets/icons/blocks-to-excel.png" alt="">Blocks to Excel</a>
+<a href="excel-to-blocks.html"><img class="nav-icon" src="_assets/icons/excel-to-blocks.png" alt="">Excel to Blocks</a>
+<a href="block-schedule.html"><img class="nav-icon" src="_assets/icons/block-schedule.png" alt="">Block Schedule</a>
+<a href="find-replace-attributes.html"><img class="nav-icon" src="_assets/icons/find-replace-attributes.png" alt="">Find and Replace Attributes</a>
+<div class="grp">Layers</div>
+<a href="layer-manager.html"><img class="nav-icon" src="_assets/icons/layer-manager.png" alt="">Layer Manager</a>
+<a href="layer-mapper.html"><img class="nav-icon" src="_assets/icons/layer-mapper.png" alt="">Layer Mapper</a>
+<a href="layer-snapshot.html"><img class="nav-icon" src="_assets/icons/layer-snapshot.png" alt="">Layer Snapshot</a>
+<div class="grp">Xrefs</div>
+<a href="xref-manager.html"><img class="nav-icon" src="_assets/icons/xref-manager.png" alt="">Xref Manager</a>
+<a href="xref-repath.html"><img class="nav-icon" src="_assets/icons/xref-repath.png" alt="">Xref Repath</a>
+<div class="grp">Cleanup</div>
+<a href="drawing-cleanup.html"><img class="nav-icon" src="_assets/icons/drawing-cleanup.png" alt="">Drawing Cleanup</a>
+<a href="font-proxy-report.html"><img class="nav-icon" src="_assets/icons/font-proxy-report.png" alt="">Font and Proxy Report</a>
+<div class="grp">Output</div>
+<a href="batch-plot.html"><img class="nav-icon" src="_assets/icons/batch-plot.png" alt="">Batch Plot</a>
+<a href="layout-manager.html" class="active"><img class="nav-icon" src="_assets/icons/layout-manager.png" alt="">Layout Manager</a>
+<div class="grp">Takeoff</div>
+<a href="length-takeoff.html"><img class="nav-icon" src="_assets/icons/length-takeoff.png" alt="">Length Takeoff</a>
+<a href="tag-audit.html"><img class="nav-icon" src="_assets/icons/tag-audit.png" alt="">Tag Audit</a>
+<div class="grp">AI (beta)</div>
+<a href="ask-ai.html"><img class="nav-icon" src="_assets/icons/ask-ai.png" alt="">Ask AI</a>
+<a href="ai-settings.html"><img class="nav-icon" src="_assets/icons/ai-settings.png" alt="">AI Settings</a>
+<a href="open-ai-folder.html"><img class="nav-icon" src="_assets/icons/open-ai-folder.png" alt="">Open AI Folder</a>
+</nav>
+  <div class="side-foot">
+    <span>pyACAD 0.1.0</span>
+    <a class="side-link" href="https://docs.pyacad.com/">Authoring guide</a>
+    <button id="theme-toggle" type="button" aria-label="Toggle colour theme">
+      <span>Dark</span></button>
+  </div>
+</div>
+<main class="main">
+<article>
+  <div class="hero"><img class="hero-icon" src="_assets/icons/layout-manager.png" alt=""><div><p class="eyebrow">Output panel</p><h1>Layout Manager</h1><p class="lead">Renames, reorders, copies or deletes paper space layouts, or applies one named page setup to many layouts at once.</p></div></div><div class="facts"><div class="fact"><span class="fact-k">On the ribbon</span><span class="fact-v">Button, Output panel</span></div><div class="fact"><span class="fact-k">Needs</span><span class="fact-v">An open drawing with at least one layout (the button is greyed without a drawing)</span></div><div class="fact"><span class="fact-k">Command</span><span class="fact-v"><code>PYLAYOUTMANAGER</code></span></div><div class="fact"><span class="fact-k">Alias</span><span class="fact-v"><code>LYM</code></span></div></div>
+  <h2 id="what-it-does">What it does<a class="anchor" href="#what-it-does" aria-label="Link to this section">#</a></h2>
+<p>One action per run, picked from the first window:</p>
+<ul>
+  <li><strong>Rename</strong> one layout.</li>
+  <li><strong>Reorder</strong>: move one layout to a new position among the tabs.</li>
+  <li><strong>Copy</strong> one layout, with everything drawn on it and its plot
+    settings.</li>
+  <li><strong>Delete</strong> several layouts at once.</li>
+  <li><strong>Apply page setup</strong>: make one named page setup the plot settings of
+    every layout you tick.</li>
+</ul>
+<p>Each run is one AutoCAD command, so a single <code>U</code> takes the change back.</p>
+
+
+
+<h2 id="how-to-use-it">How to use it<a class="anchor" href="#how-to-use-it" aria-label="Link to this section">#</a></h2>
+<ol class="steps">
+  <li>Click <strong>Layout Manager</strong>, or type <code>PYLAYOUTMANAGER</code>, and pick an
+    action.</li>
+  <li><strong>Rename.</strong> Pick the layout (the current one is picked to start with) and
+    type the new name. A name another layout already has is refused; a change of case alone
+    is allowed.</li>
+  <li><strong>Reorder.</strong> Pick the layout from the numbered list, then type its new
+    position, from 1 to the number of layouts. Position 1 is the first tab after Model.</li>
+  <li><strong>Copy.</strong> Pick the layout and type a name for the copy. The suggestion is
+    the source name with <code>(2)</code>; a name already in use gains a counter the way
+    AutoCAD's own Move or Copy does, so copying <code>A1 (2)</code> again gives
+    <code>A1 (3)</code>.</li>
+  <li><strong>Delete.</strong> Tick the layouts and confirm. Everything drawn on them goes
+    with them. If the current layout is among them, the drawing switches to Model first.</li>
+  <li><strong>Apply page setup.</strong> Pick a named page setup, then tick the layouts to
+    apply it to (all start ticked).</li>
+  <li>A toast confirms the change, for example "Moved A-301 to position 2".</li>
+</ol>
+
+
+
+<h2 id="limitations">Limitations<a class="anchor" href="#limitations" aria-label="Link to this section">#</a></h2>
+<ul>
+  <li>The model tab cannot be renamed, moved, copied or deleted, and is not listed.</li>
+  <li>Delete refuses to remove every layout: a drawing keeps at least one. Untick one and run
+    it again.</li>
+  <li>Apply page setup offers only page setups made for paper space, and creates none. If the
+    drawing has none, a toast tells you to make one with PAGESETUP first. It is all or
+    nothing: if one layout cannot take the setup, none is changed.</li>
+  <li>Reorder moves one layout per run. Copy makes one copy per run.</li>
+  <li>Page setups from other drawings are not offered. Import them with PSETUPIN first.</li>
+</ul>
+
+<h2 id="good-to-know">Good to know<a class="anchor" href="#good-to-know" aria-label="Link to this section">#</a></h2>
+<p>If an action fails, a toast says "Could not ..." with AutoCAD's reason, and the log at
+<code>%APPDATA%\pyACAD\logs\pyACAD.log</code> has the detail. Delete reports each layout it
+could not remove and still removes the rest.</p>
+
+<h2 id="other-uses">Other uses<a class="anchor" href="#other-uses" aria-label="Link to this section">#</a></h2>
+<ul>
+  <li>After you bring in sheets with Layout from Template, apply the office page setup to
+    all of them in one go before you run Batch Plot.</li>
+  <li>Copy a finished sheet as the starting point for the next one: title block, viewports
+    and all.</li>
+  <li>Clear out the default Layout1 and Layout2 tabs a template left behind.</li>
+</ul>
+<h2 id="source">Source<a class="anchor" href="#source" aria-label="Link to this section">#</a></h2>
+<p>The tool's own files, word for word as shipped in <code>Output.panel/Layout_Manager.pushbutton</code>. Every pyACAD tool is an ordinary bundle: copy these into your own extension and change what you like.</p>
+<div class="code src"><div class="code-head"><span><code>script.py</code> <span class="src-note">Runs on a click.</span> <a href="https://github.com/pyacad/pyACAD/blob/main/extensions/pyACAD.extension/pyACAD.tab/Output.panel/Layout_Manager.pushbutton/script.py" rel="noopener">View on GitHub</a></span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-c"># -*- coding: utf-8 -*-</span>
+<span class="tok-s">&quot;&quot;&quot;Renames, reorders, copies and deletes paper space layouts, and applies one
+named page setup to many layouts at once.
+
+One action per run, picked from the first dialog. Each run is one AutoCAD
+command, so a single Undo takes the change back.
+&quot;&quot;&quot;</span>
+
+<span class="tok-k">from</span> pyacad <span class="tok-k">import</span> doc, forms, layouts, script, toast
+
+__title__ = <span class="tok-s">&#x27;Layout Manager&#x27;</span>
+
+_TITLE = <span class="tok-s">&#x27;Layout manager&#x27;</span>
+
+
+<span class="tok-k">def</span> run():
+    <span class="tok-k">if</span> <span class="tok-k">not</span> _has_drawing():
+        toast.warning(<span class="tok-s">&#x27;No drawing is open&#x27;</span>, <span class="tok-s">&#x27;Open a drawing and run Layout Manager again.&#x27;</span>)
+        <span class="tok-k">return</span>
+    names = layouts.names()
+    <span class="tok-k">if</span> <span class="tok-k">not</span> names:
+        toast.info(<span class="tok-s">&#x27;No layouts&#x27;</span>, <span class="tok-s">&#x27;This drawing has only the model tab.&#x27;</span>)
+        <span class="tok-k">return</span>
+    action = forms.ask_options(<span class="tok-s">&#x27;What do you want to do with the layouts?&#x27;</span>,
+                               [label <span class="tok-k">for</span> label, _ <span class="tok-k">in</span> _ACTIONS], _TITLE)
+    <span class="tok-k">if</span> action <span class="tok-k">is</span> <span class="tok-k">None</span>:
+        <span class="tok-k">return</span>
+    handler = dict(_ACTIONS)[action]
+    <span class="tok-k">try</span>:
+        handler(names)
+    <span class="tok-k">except</span> Exception <span class="tok-k">as</span> error:
+        script.get_logger().error(<span class="tok-s">&#x27;layout manager: %s failed: %s&#x27;</span> % (action, error))
+        toast.error(<span class="tok-s">&#x27;Could not %s&#x27;</span> % action.lower(), str(error))
+
+
+<span class="tok-k">def</span> _has_drawing():
+    <span class="tok-k">try</span>:
+        doc.active()
+    <span class="tok-k">except</span> RuntimeError:
+        <span class="tok-k">return</span> <span class="tok-k">False</span>
+    <span class="tok-k">return</span> <span class="tok-k">True</span>
+
+
+<span class="tok-k">def</span> _rename(names):
+    old = _pick_layout(names, <span class="tok-s">&#x27;Layout to rename&#x27;</span>)
+    <span class="tok-k">if</span> old <span class="tok-k">is</span> <span class="tok-k">None</span>:
+        <span class="tok-k">return</span>
+    new = forms.ask_string(<span class="tok-s">&#x27;New name for %s&#x27;</span> % old, old, _TITLE)
+    <span class="tok-k">if</span> new <span class="tok-k">is</span> <span class="tok-k">None</span>:
+        <span class="tok-k">return</span>
+    new = new.strip()
+    <span class="tok-k">if</span> <span class="tok-k">not</span> new:
+        toast.warning(<span class="tok-s">&#x27;Nothing renamed&#x27;</span>, <span class="tok-s">&#x27;A layout needs a name.&#x27;</span>)
+        <span class="tok-k">return</span>
+    <span class="tok-k">if</span> new == old:
+        toast.info(<span class="tok-s">&#x27;Nothing renamed&#x27;</span>, <span class="tok-s">&#x27;The name did not change.&#x27;</span>)
+        <span class="tok-k">return</span>
+    layouts.rename(old, new)
+    toast.success(<span class="tok-s">&#x27;Renamed %s to %s&#x27;</span> % (old, new))
+
+
+<span class="tok-k">def</span> _reorder(names):
+    <span class="tok-k">if</span> len(names) &lt; <span class="tok-n">2</span>:
+        toast.info(<span class="tok-s">&#x27;Nothing to reorder&#x27;</span>, <span class="tok-s">&#x27;The drawing has one layout.&#x27;</span>)
+        <span class="tok-k">return</span>
+    items = [(<span class="tok-s">&#x27;%d. %s&#x27;</span> % (i + <span class="tok-n">1</span>, name), name) <span class="tok-k">for</span> i, name <span class="tok-k">in</span> enumerate(names)]
+    name = forms.select_from_list(items, _TITLE, prompt=<span class="tok-s">&#x27;Layout to move&#x27;</span>,
+                                  checked=_current_among(names))
+    <span class="tok-k">if</span> name <span class="tok-k">is</span> <span class="tok-k">None</span>:
+        <span class="tok-k">return</span>
+    now = names.index(name) + <span class="tok-n">1</span>
+    position = forms.ask_number(<span class="tok-s">&#x27;New position for %s, from 1 to %d (now %d)&#x27;</span>
+                                % (name, len(names), now),
+                                default=now, min_value=<span class="tok-n">1</span>, max_value=len(names), title=_TITLE)
+    <span class="tok-k">if</span> position <span class="tok-k">is</span> <span class="tok-k">None</span>:
+        <span class="tok-k">return</span>
+    order = layouts.reorder(names, name, int(round(position)) - <span class="tok-n">1</span>)
+    <span class="tok-k">if</span> order == names:
+        toast.info(<span class="tok-s">&#x27;Nothing moved&#x27;</span>, <span class="tok-s">&#x27;%s is already at position %d.&#x27;</span> % (name, now))
+        <span class="tok-k">return</span>
+    layouts.set_order(order)
+    toast.success(<span class="tok-s">&#x27;Moved %s to position %d&#x27;</span> % (name, order.index(name) + <span class="tok-n">1</span>))
+
+
+<span class="tok-k">def</span> _copy(names):
+    source = _pick_layout(names, <span class="tok-s">&#x27;Layout to copy&#x27;</span>)
+    <span class="tok-k">if</span> source <span class="tok-k">is</span> <span class="tok-k">None</span>:
+        <span class="tok-k">return</span>
+    wanted = forms.ask_string(<span class="tok-s">&#x27;Name for the copy of %s&#x27;</span> % source,
+                              layouts.unique_name(names, source), _TITLE)
+    <span class="tok-k">if</span> wanted <span class="tok-k">is</span> <span class="tok-k">None</span>:
+        <span class="tok-k">return</span>
+    <span class="tok-k">if</span> <span class="tok-k">not</span> wanted.strip():
+        toast.warning(<span class="tok-s">&#x27;Nothing copied&#x27;</span>, <span class="tok-s">&#x27;The copy needs a name.&#x27;</span>)
+        <span class="tok-k">return</span>
+    <span class="tok-c"># Like AutoCAD&#x27;s own Move or Copy, a name already in use gains a counter.</span>
+    name = layouts.copy(source, layouts.unique_name(names, wanted))
+    toast.success(<span class="tok-s">&#x27;Copied %s to %s&#x27;</span> % (source, name))
+
+
+<span class="tok-k">def</span> _delete(names):
+    doomed = forms.select_from_list(names, _TITLE, multiselect=<span class="tok-k">True</span>, prompt=<span class="tok-s">&#x27;Layouts to delete&#x27;</span>)
+    <span class="tok-k">if</span> doomed <span class="tok-k">is</span> <span class="tok-k">None</span>:
+        <span class="tok-k">return</span>
+    <span class="tok-k">if</span> <span class="tok-k">not</span> doomed:
+        toast.info(<span class="tok-s">&#x27;Nothing deleted&#x27;</span>, <span class="tok-s">&#x27;No layout was ticked.&#x27;</span>)
+        <span class="tok-k">return</span>
+    <span class="tok-k">if</span> len(doomed) == len(names):
+        toast.warning(<span class="tok-s">&#x27;Nothing deleted&#x27;</span>, <span class="tok-s">&#x27;A drawing keeps at least one layout. Untick one and try again.&#x27;</span>)
+        <span class="tok-k">return</span>
+    <span class="tok-k">if</span> <span class="tok-k">not</span> forms.confirm(<span class="tok-s">&#x27;Delete %s? Everything drawn on %s goes with %s.&#x27;</span>
+                         % (_listing(doomed), <span class="tok-s">&#x27;it&#x27;</span> <span class="tok-k">if</span> len(doomed) == <span class="tok-n">1</span> <span class="tok-k">else</span> <span class="tok-s">&#x27;them&#x27;</span>,
+                            <span class="tok-s">&#x27;it&#x27;</span> <span class="tok-k">if</span> len(doomed) == <span class="tok-n">1</span> <span class="tok-k">else</span> <span class="tok-s">&#x27;them&#x27;</span>), _TITLE):
+        <span class="tok-k">return</span>
+    <span class="tok-k">if</span> layouts.current().lower() <span class="tok-k">in</span> [n.lower() <span class="tok-k">for</span> n <span class="tok-k">in</span> doomed]:
+        layouts.set_current(<span class="tok-s">&#x27;Model&#x27;</span>)
+    deleted = []
+    failures = []
+    <span class="tok-k">for</span> name <span class="tok-k">in</span> doomed:
+        <span class="tok-k">try</span>:
+            layouts.delete(name)
+            deleted.append(name)
+        <span class="tok-k">except</span> Exception <span class="tok-k">as</span> error:
+            failures.append(<span class="tok-s">&#x27;%s: %s&#x27;</span> % (name, error))
+    <span class="tok-k">if</span> failures:
+        toast.warning(<span class="tok-s">&#x27;Deleted %d of %d layouts&#x27;</span> % (len(deleted), len(doomed)), <span class="tok-s">&#x27;; &#x27;</span>.join(failures))
+    <span class="tok-k">else</span>:
+        toast.success(<span class="tok-s">&#x27;Deleted %s&#x27;</span> % _count(len(deleted), <span class="tok-s">&#x27;layout&#x27;</span>, <span class="tok-s">&#x27;layouts&#x27;</span>), _listing(deleted))
+
+
+<span class="tok-k">def</span> _apply_page_setup(names):
+    setups = layouts.page_setups(paper_only=<span class="tok-k">True</span>)
+    <span class="tok-k">if</span> <span class="tok-k">not</span> setups:
+        toast.info(<span class="tok-s">&#x27;No page setups&#x27;</span>,
+                   <span class="tok-s">&#x27;This drawing has no named paper space page setups. Make one with PAGESETUP first.&#x27;</span>)
+        <span class="tok-k">return</span>
+    setup = forms.select_from_list(setups, _TITLE, prompt=<span class="tok-s">&#x27;Page setup to apply&#x27;</span>)
+    <span class="tok-k">if</span> setup <span class="tok-k">is</span> <span class="tok-k">None</span>:
+        <span class="tok-k">return</span>
+    targets = forms.select_from_list(names, _TITLE, multiselect=<span class="tok-k">True</span>,
+                                     prompt=<span class="tok-s">&#x27;Layouts to apply %s to&#x27;</span> % setup, checked=names)
+    <span class="tok-k">if</span> targets <span class="tok-k">is</span> <span class="tok-k">None</span>:
+        <span class="tok-k">return</span>
+    <span class="tok-k">if</span> <span class="tok-k">not</span> targets:
+        toast.info(<span class="tok-s">&#x27;Nothing changed&#x27;</span>, <span class="tok-s">&#x27;No layout was ticked.&#x27;</span>)
+        <span class="tok-k">return</span>
+    count = layouts.apply_page_setup(setup, targets)
+    toast.success(<span class="tok-s">&#x27;Applied %s to %s&#x27;</span> % (setup, _count(count, <span class="tok-s">&#x27;layout&#x27;</span>, <span class="tok-s">&#x27;layouts&#x27;</span>)))
+
+
+<span class="tok-k">def</span> _pick_layout(names, prompt):
+    <span class="tok-s">&quot;&quot;&quot;One layout, the current one picked to start with.&quot;&quot;&quot;</span>
+    <span class="tok-k">return</span> forms.select_from_list(names, _TITLE, prompt=prompt, checked=_current_among(names))
+
+
+<span class="tok-k">def</span> _current_among(names):
+    current = layouts.current()
+    <span class="tok-k">return</span> [current] <span class="tok-k">if</span> current <span class="tok-k">in</span> names <span class="tok-k">else</span> <span class="tok-k">None</span>
+
+
+<span class="tok-k">def</span> _listing(names, limit=<span class="tok-n">4</span>):
+    <span class="tok-s">&quot;&quot;&quot;&#x27;A1&#x27;, &#x27;A1 and A2&#x27;, &#x27;A1, A2 and A3&#x27;, or the first few and how many more.&quot;&quot;&quot;</span>
+    names = list(names)
+    <span class="tok-k">if</span> len(names) &gt; limit:
+        <span class="tok-k">return</span> <span class="tok-s">&#x27;%s and %d more&#x27;</span> % (<span class="tok-s">&#x27;, &#x27;</span>.join(names[:limit - <span class="tok-n">1</span>]), len(names) - limit + <span class="tok-n">1</span>)
+    <span class="tok-k">if</span> len(names) == <span class="tok-n">1</span>:
+        <span class="tok-k">return</span> names[<span class="tok-n">0</span>]
+    <span class="tok-k">return</span> <span class="tok-s">&#x27;%s and %s&#x27;</span> % (<span class="tok-s">&#x27;, &#x27;</span>.join(names[:-<span class="tok-n">1</span>]), names[-<span class="tok-n">1</span>])
+
+
+<span class="tok-k">def</span> _count(n, one, many):
+    <span class="tok-k">return</span> <span class="tok-s">&#x27;%d %s&#x27;</span> % (n, one <span class="tok-k">if</span> n == <span class="tok-n">1</span> <span class="tok-k">else</span> many)
+
+
+_ACTIONS = [
+    (<span class="tok-s">&#x27;Rename&#x27;</span>, _rename),
+    (<span class="tok-s">&#x27;Reorder&#x27;</span>, _reorder),
+    (<span class="tok-s">&#x27;Copy&#x27;</span>, _copy),
+    (<span class="tok-s">&#x27;Delete&#x27;</span>, _delete),
+    (<span class="tok-s">&#x27;Apply page setup&#x27;</span>, _apply_page_setup),
+]
+
+
+run()</code></pre></div>
+<div class="code src"><div class="code-head"><span><code>bundle.yaml</code> <span class="src-note">The bundle contract: the keys pyACAD reads for this tool.</span> <a href="https://github.com/pyacad/pyACAD/blob/main/extensions/pyACAD.extension/pyACAD.tab/Output.panel/Layout_Manager.pushbutton/bundle.yaml" rel="noopener">View on GitHub</a></span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-k">title</span>: Layout Manager
+<span class="tok-k">tooltip</span>: Renames, reorders, copies or deletes paper space layouts, or applies one named page setup to many layouts at once.
+<span class="tok-k">context</span>: doc
+<span class="tok-k">keytip</span>: OL
+<span class="tok-k">alias</span>: LYM</code></pre></div>
+  <div class="pagenav">
+<a href="batch-plot.html"><span class="dir">Previous</span><span class="ttl">Batch Plot</span></a>
+<a class="next" href="length-takeoff.html"><span class="dir">Next</span><span class="ttl">Length Takeoff</span></a>
+</div>
+</article>
+<aside class="toc"><div class="toc-head">On this page</div>
+<a href="#what-it-does">What it does</a>
+<a href="#how-to-use-it">How to use it</a>
+<a href="#limitations">Limitations</a>
+<a href="#good-to-know">Good to know</a>
+<a href="#other-uses">Other uses</a>
+<a href="#source">Source</a>
+</aside>
+</main>
+</div>
+<script src="_assets/search-index.js"></script>
+<script src="_assets/site.js"></script>
+</body>
+</html>

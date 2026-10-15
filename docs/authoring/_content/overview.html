@@ -1,0 +1,495 @@
+<!-- title: How pyACAD works -->
+<!-- eyebrow: Start -->
+<!-- lead: The mental model behind every tool you will write: folders on disk become ribbon buttons, every button is an AutoCAD command, and a command runs a Python file. -->
+
+<p>pyACAD is a Python scripting host for Autodesk AutoCAD 2021 to 2026. A small .NET add-in
+loads when AutoCAD starts, scans folders on disk, and builds ribbon tabs from what it finds.
+Each button it builds is also registered as an AutoCAD command, and running that command
+executes a Python file against the active drawing. Hooks, dock panes, keyboard shortcuts and
+the AutoLISP bridge all hang off the same folder scan.</p>
+
+<p>If you have written pyRevit extensions, most of this will feel familiar. If you have not,
+the one idea to hold on to is that <strong>the folder structure is the configuration</strong>.
+There is no manifest listing your tools, no registration call, no project file and no compile
+step. A folder named <code>Export.pushbutton</code> containing a <code>script.py</code> is a
+working button and a working command.</p>
+
+<h2>From disk to ribbon</h2>
+
+<p>Each level of the folder tree maps to one level of the ribbon. The suffix on a folder name
+decides what it becomes; the rest of the name becomes the visible label unless a
+<code>bundle.yaml</code> gives a better one.</p>
+
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 760 300" width="760" role="img"
+     aria-label="A folder tree on the left maps to an AutoCAD ribbon tab on the right, and each button is also a command.">
+  <style>
+    .ov-t   { font: 12px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--ink); }
+    .ov-m   { font: 11px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--muted); }
+    .ov-mono{ font: 12px Consolas, monospace; fill: var(--ink); }
+    .ov-cmd { font: 11.5px Consolas, monospace; fill: var(--accent); }
+    .ov-lbl { font: 10.5px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--muted);
+              text-transform: uppercase; letter-spacing: .07em; }
+    .ov-box { fill: var(--paper); stroke: var(--line-strong); stroke-width: 1; }
+    .ov-arw { stroke: var(--frame); stroke-width: 1.25; fill: none; }
+    .ov-acc { fill: var(--accent); }
+  </style>
+  <defs>
+    <marker id="ov-a" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path d="M0 0.6 L6.4 3.5 L0 6.4 z" fill="var(--frame)"/>
+    </marker>
+  </defs>
+
+  <text class="ov-lbl" x="0" y="12">On disk</text>
+  <text class="ov-mono" x="0"  y="42">CadTools.extension</text>
+  <text class="ov-mono" x="16" y="66">CadTools.tab</text>
+  <text class="ov-mono" x="32" y="90">Blocks.panel</text>
+  <text class="ov-mono" x="48" y="114">bundle.yaml</text>
+  <text class="ov-mono" x="48" y="138">Count.pushbutton</text>
+  <text class="ov-mono" x="64" y="162">script.py</text>
+  <text class="ov-mono" x="64" y="186">icon.png</text>
+  <text class="ov-mono" x="48" y="210">Rename.pushbutton</text>
+  <text class="ov-mono" x="64" y="234">script.py</text>
+
+  <path class="ov-arw" d="M255 60 H 300" marker-end="url(#ov-a)"/>
+  <text class="ov-m" x="258" y="53">tab</text>
+  <path class="ov-arw" d="M255 88 H 300" marker-end="url(#ov-a)"/>
+  <text class="ov-m" x="258" y="81">panel</text>
+  <path class="ov-arw" d="M255 174 H 300" marker-end="url(#ov-a)"/>
+  <text class="ov-m" x="258" y="167">buttons</text>
+
+  <text class="ov-lbl" x="320" y="12">On the ribbon</text>
+  <rect class="ov-box" x="320" y="24" width="420" height="190" rx="4"/>
+  <line x1="320" y1="52" x2="740" y2="52" stroke="var(--line)" stroke-width="1"/>
+  <text class="ov-m" x="336" y="44">Home</text>
+  <text class="ov-m" x="382" y="44">Insert</text>
+  <text class="ov-m" x="430" y="44">pyACAD</text>
+  <text class="ov-t" x="488" y="44" font-weight="600">CadTools</text>
+  <rect class="ov-acc" x="484" y="49" width="60" height="2.5"/>
+
+  <rect x="338" y="66" width="180" height="134" rx="3"
+        fill="none" stroke="var(--line)" stroke-dasharray="3 3"/>
+  <text class="ov-m" x="410" y="193">Blocks</text>
+
+  <rect class="ov-box" x="352" y="76" width="72" height="88" rx="3"/>
+  <rect x="373" y="90" width="30" height="28" fill="none" stroke="var(--frame)" stroke-width="1.4"/>
+  <circle class="ov-acc" cx="397" cy="96" r="4"/>
+  <text class="ov-t" x="388" y="140" text-anchor="middle">Count</text>
+
+  <rect class="ov-box" x="432" y="76" width="72" height="88" rx="3"/>
+  <path d="M453 118 L468 90 L483 118 z" fill="none" stroke="var(--frame)" stroke-width="1.4"/>
+  <text class="ov-t" x="468" y="140" text-anchor="middle">Rename</text>
+
+  <text class="ov-lbl" x="540" y="84">Also commands</text>
+  <text class="ov-cmd" x="540" y="108">PYCOUNT</text>
+  <text class="ov-cmd" x="540" y="130">PYRENAME</text>
+  <text class="ov-m"   x="540" y="156">type them, put them</text>
+  <text class="ov-m"   x="540" y="172">in a macro, or call</text>
+  <text class="ov-m"   x="540" y="188">them from AutoLISP</text>
+
+  <text class="ov-m" x="320" y="240">The folder name becomes the label. A layout: list in the</text>
+  <text class="ov-m" x="320" y="258">panel's bundle.yaml decides that Count comes before Rename.</text>
+</svg>
+</div>
+<figcaption>Four folder levels, four ribbon levels, and one AutoCAD command per button.
+Nothing else registers a tool: if the folders are right, the button and its command
+exist.</figcaption>
+</figure>
+
+<p>The full vocabulary is an <code>*.extension</code> folder (the unit you ship), holding
+<code>*.tab</code> folders (ribbon tabs), holding <code>*.panel</code> folders (ribbon
+panels), holding bundles. A bundle is a folder whose suffix says what kind of control it is:
+twelve kinds in all, from <code>*.pushbutton</code> to <code>*.dockpane</code>.
+<a href="anatomy.html">Anatomy of an extension</a> covers the tree and
+<a href="buttons.html">Buttons, stacks and pulldowns</a> covers the twelve kinds.</p>
+
+<h2>Every button is a command</h2>
+
+<p>This is the design decision the rest of pyACAD leans on. At boot and on every Reload, each
+pushbutton-shaped bundle (pushbuttons, plus stack rows, menu rows, toggles, smartbuttons and
+nobuttons) is registered as an AutoCAD command through AutoCAD's runtime command API. The
+name comes from <code>command:</code> in <code>bundle.yaml</code>, or else from the title:
+<code>PY</code> followed by the title's letters and digits, uppercased. A button titled
+<em>Blocks to Excel</em> is the command <code>PYBLOCKSTOEXCEL</code>. A bundle with a
+<code>config.py</code> also gets a twin with <code>CFG</code> on the end.</p>
+
+<p>A ribbon click does not run the script itself. It sends the command to the active drawing,
+exactly as an Autodesk ribbon button does, so AutoCAD enters document context, locks the
+drawing and opens an undo group before the script starts. The result is that a tool behaves
+the same however it was started:</p>
+
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 760 300" width="760" role="img"
+     aria-label="Six ways to start a tool. Four send the registered AutoCAD command; PYACAD and the pyacad LISP function call the bundle by name. All end in the same script run.">
+  <style>
+    .ovc-t   { font: 12px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--ink); }
+    .ovc-b   { font: 12px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--ink); font-weight: 600; }
+    .ovc-m   { font: 11px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--muted); }
+    .ovc-mono{ font: 11.5px Consolas, monospace; fill: var(--ink); }
+    .ovc-acc { font: 12px Consolas, monospace; fill: var(--accent); font-weight: 600; }
+    .ovc-lbl { font: 10.5px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--muted);
+               text-transform: uppercase; letter-spacing: .07em; }
+    .ovc-box { fill: var(--paper); stroke: var(--line-strong); stroke-width: 1; }
+    .ovc-hot { fill: var(--surface); stroke: var(--accent); stroke-width: 1.4; }
+    .ovc-arw { stroke: var(--frame); stroke-width: 1.25; fill: none; }
+    .ovc-dsh { stroke: var(--frame); stroke-width: 1.25; fill: none; stroke-dasharray: 4 3; }
+  </style>
+  <defs>
+    <marker id="ovc-a" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path d="M0 0.6 L6.4 3.5 L0 6.4 z" fill="var(--frame)"/>
+    </marker>
+  </defs>
+
+  <text class="ovc-lbl" x="0" y="14">How it starts</text>
+  <rect class="ovc-box" x="0" y="26"  width="200" height="34" rx="4"/>
+  <text class="ovc-t"   x="12" y="48">Ribbon click</text>
+  <rect class="ovc-box" x="0" y="68"  width="200" height="34" rx="4"/>
+  <text class="ovc-t"   x="12" y="90">Keyboard chord</text>
+  <rect class="ovc-box" x="0" y="110" width="200" height="34" rx="4"/>
+  <text class="ovc-t"   x="12" y="132">Typed: PYCOUNT</text>
+  <rect class="ovc-box" x="0" y="152" width="200" height="34" rx="4"/>
+  <text class="ovc-t"   x="12" y="174">CUI macro or script file</text>
+  <rect class="ovc-box" x="0" y="206" width="200" height="34" rx="4"/>
+  <text class="ovc-mono" x="12" y="228">PYACAD  Count  a b</text>
+  <rect class="ovc-box" x="0" y="248" width="200" height="34" rx="4"/>
+  <text class="ovc-mono" x="12" y="270">(pyacad "PYCOUNT" ...)</text>
+
+  <path class="ovc-arw" d="M200 43 H 250 V 95 H 276" />
+  <path class="ovc-arw" d="M200 85 H 250" />
+  <path class="ovc-arw" d="M200 127 H 250 V 95" />
+  <path class="ovc-arw" d="M200 169 H 250 V 120" />
+  <path class="ovc-arw" d="M250 95 H 278" marker-end="url(#ovc-a)"/>
+
+  <rect class="ovc-hot" x="280" y="56" width="220" height="82" rx="5"/>
+  <text class="ovc-acc" x="296" y="80">_.PYCOUNT</text>
+  <text class="ovc-m"   x="296" y="100">registered AutoCAD command:</text>
+  <text class="ovc-m"   x="296" y="116">document context, drawing locked,</text>
+  <text class="ovc-m"   x="296" y="132">one undo group</text>
+
+  <path class="ovc-dsh" d="M200 223 H 560 V 160" marker-end="url(#ovc-a)"/>
+  <path class="ovc-dsh" d="M200 265 H 572 V 160" />
+  <text class="ovc-m" x="300" y="215">by name, with arguments in __args__</text>
+  <text class="ovc-m" x="300" y="257">__result__ goes back to LISP</text>
+
+  <path class="ovc-arw" d="M500 97 H 538" marker-end="url(#ovc-a)"/>
+  <rect class="ovc-box" x="540" y="56" width="214" height="102" rx="5"/>
+  <text class="ovc-b"  x="556" y="80">script.py runs</text>
+  <text class="ovc-m"  x="556" y="100">on IronPython or CPython,</text>
+  <text class="ovc-m"  x="556" y="116">with the pyacad library and</text>
+  <text class="ovc-m"  x="556" y="132">the same globals every time</text>
+</svg>
+</div>
+<figcaption>Clicks, chords, typed names and macros all send the same registered command.
+<code>PYACAD</code> and the <code>(pyacad ...)</code> LISP function look the bundle up by
+command name and run it directly, which is how they pass arguments in and get a value
+back.</figcaption>
+</figure>
+
+<ul>
+  <li><strong>Clicked, typed or chorded, it is one code path.</strong> A keyboard shortcut and
+    a click both send the command; typing <code>PYCOUNT</code> at the command line runs the
+    same thing.</li>
+  <li><strong>Macros and scripts can use it.</strong> A CUI macro such as
+    <code>^C^C_PYCOUNT</code> or a line in a <code>.scr</code> file is an ordinary command
+    call.</li>
+  <li><strong>AutoLISP can call it and get an answer.</strong>
+    <code>(pyacad "PYCOUNT" "E-*")</code> runs the bundle with <code>"E-*"</code> in
+    <code>__args__</code> and returns whatever the script put in <code>__result__</code>.
+    <a href="commands.html">Commands, macros and AutoLISP</a> covers the bridge and the type
+    conversions.</li>
+  <li><strong>A pickfirst selection survives.</strong> Commands are registered with
+    AutoCAD's pickfirst flag, so objects selected before the click are still selected when the
+    script asks for them.</li>
+</ul>
+
+<p>A click with no drawing open does nothing but toast <em>Open a drawing first.</em>, because
+there is no drawing to send the command to. If a command name is already taken (by another
+bundle, by one of the loader's own commands, or by anything else AutoCAD already answers
+to) the later bundle gets no command, a toast says so, and its button runs the script
+directly under a document lock instead. It still works from the ribbon; it just cannot be
+typed.</p>
+
+<p>The loader also defines four commands of its own, which exist even when the ribbon failed
+to build:</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Command</th><th>Does</th></tr></thead>
+<tbody>
+<tr><td><code>PYACAD</code></td><td>Prompts for a <code>.py</code> path or a bundle's command
+    name, plus optional arguments, and runs it. Quotes keep a path with spaces together.</td></tr>
+<tr><td><code>PYACADRELOAD</code></td><td>Rescans every extension folder and rebuilds the ribbon,
+    commands, shortcuts, hooks and dock panes.</td></tr>
+<tr><td><code>PYACADCONSOLE</code></td><td>A diagnostic dialog naming the IronPython version,
+    the AutoCAD API version and how many extensions loaded. It works when nothing else
+    does.</td></tr>
+<tr><td><code>PYACADRUN</code></td><td>Used by <code>pyacad run</code> inside AutoCAD Core
+    Console; not meant to be typed. See <a href="command-line.html">The command line</a>.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>What a script looks like</h2>
+
+<p>When the command runs, the runtime picks the bundle's engine, creates a fresh scope,
+injects a handful of globals (<code>__file__</code>, <code>__title__</code>,
+<code>__commandpath__</code>, <code>__args__</code> and a few more, listed in
+<a href="script-environment.html">The script environment</a>) and executes
+<code>script.py</code> top to bottom. Your script talks to the drawing through the
+<code>pyacad</code> library, which wraps the AutoCAD .NET API in plain Python: handles are hex
+strings, points are <code>(x, y, z)</code> tuples, and every object you get back is a
+snapshot, so no script holds an AutoCAD object past its transaction.</p>
+
+<pre data-lang="python" data-file="CadTools.extension/CadTools.tab/Blocks.panel/Count.pushbutton/script.py">
+"""Counts block references by name in model space."""
+from pyacad import blocks, output, toast
+
+counts = blocks.counts('model')
+if not counts:
+    toast.info('No block references', 'Model space holds no inserted blocks.')
+else:
+    rows = sorted(counts.items(), key=lambda pair: -pair[1])
+    output.set_title('Blocks in model space')
+    output.print_table(rows, ['Block', 'Count'])
+</pre>
+
+<p>That script is a complete, shippable tool: a button titled <em>Count</em> from its folder
+name, a tooltip taken from its docstring, a command named <code>PYCOUNT</code>, and a table in
+pyACAD's output window. The library is organised by domain: <code>doc</code>,
+<code>sel</code>, <code>ents</code>, <code>layers</code>, <code>blocks</code>,
+<code>xrefs</code>, <code>layouts</code>, <code>plot</code>, <code>audit</code>,
+<code>lisp</code> and <code>units</code> face the drawing; <code>toast</code>,
+<code>forms</code> and <code>output</code> face the user; <code>script</code> and
+<code>settings</code> face pyACAD itself. <a href="api-reference.html">The API reference</a>
+lists every function.</p>
+
+<h2>The two engines</h2>
+
+<p>Every bundle runs on one of two Python engines, chosen by <code>engine:</code> in
+<code>bundle.yaml</code> (or once for a whole extension in <code>extension.yaml</code>).</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>&nbsp;</th><th>IronPython</th><th>CPython</th></tr></thead>
+<tbody>
+<tr><td><strong>Engine id</strong></td><td><code>ironpython</code> (the default)</td><td><code>cpython</code></td></tr>
+<tr><td><strong>Version</strong></td><td>3.4, shipped with pyACAD</td><td>Whatever 64-bit 3.7 to 3.13 install is found</td></tr>
+<tr><td><strong>How it runs</strong></td><td>In-process, on AutoCAD's own .NET runtime</td><td>In-process, through Python.NET 3.0</td></tr>
+<tr><td><strong>Compiled packages (numpy, pandas)</strong></td><td>No</td><td>Yes</td></tr>
+<tr><td><strong>Needs Python installed</strong></td><td>No</td><td>Yes</td></tr>
+<tr><td><strong>Use it when</strong></td><td>Almost always</td><td>You need a compiled package or a newer language feature</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>CPython is found from the <code>"cpython"</code> key in <code>config.json</code> (a
+<code>python3XX.dll</code> or an install folder), then the <code>PYACAD_CPYTHON</code>
+environment variable, then the newest registered 64-bit install in that range. An engine id
+other than those two is not checked when the ribbon is built; the click fails with
+<code>Unknown engine</code>.</p>
+
+<div class="note">
+<span class="note-t">Rule of thumb</span>
+<p>Start on IronPython. It is the default, it needs nothing installed, and every shipped tool
+uses it. Move one bundle to CPython only when you hit a wall such as needing
+<code>numpy</code>, and test it there: the <code>pyacad</code> library is written to import
+on both.</p>
+</div>
+
+<h2>Beyond the plain button</h2>
+
+<p>The pushbutton is one of twelve bundle kinds. Stacks and pulldowns pack more tools into the
+same ribbon width; toggles, smartbuttons and the two split buttons change how a button
+behaves; nobuttons, urlbuttons and linkbuttons cover commands that are not really your
+scripts. <code>*.dockpane</code> is an AutoCAD palette whose content is WPF from a
+<code>pane.xaml</code>, shown and hidden by a ribbon toggle, and <code>*.slideout</code> moves
+its contents into the flyout under the panel title.</p>
+
+<p>Code can also run without a click. An extension may carry <code>hooks\&lt;event&gt;.py</code>
+scripts that run when one of 20 AutoCAD events fires, from <code>doc-opened</code> to
+<code>system-variable-changed</code>, and a <code>startup.py</code> at its root that runs at
+boot and on every Reload, before the ribbon builds. <a href="hooks.html">Hooks</a> covers
+the events; <a href="anatomy.html">Anatomy of an extension</a> covers
+<code>startup.py</code> and shared <code>*.lib</code> folders.</p>
+
+<h2>How pyACAD loads into AutoCAD</h2>
+
+<p>pyACAD installs as an Autodesk ApplicationPlugins bundle in your own profile, so no
+administrator rights are involved. AutoCAD reads the bundle's manifest at startup and loads
+the one small loader assembly built for its release. The loader finds the runtime, and the
+runtime does everything else.</p>
+
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 760 270" width="760" role="img"
+     aria-label="AutoCAD reads PackageContents.xml, loads the loader for its release year, the loader resolves the runtime folder, and the runtime scans extension roots and builds the ribbon.">
+  <style>
+    .ovl-t   { font: 12px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--ink); font-weight: 600; }
+    .ovl-m   { font: 11px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--muted); }
+    .ovl-mono{ font: 11px Consolas, monospace; fill: var(--ink); }
+    .ovl-num { font: 11px Consolas, monospace; fill: var(--accent); }
+    .ovl-box { fill: var(--paper); stroke: var(--line-strong); stroke-width: 1; }
+    .ovl-arw { stroke: var(--frame); stroke-width: 1.25; fill: none; }
+  </style>
+  <defs>
+    <marker id="ovl-a" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path d="M0 0.6 L6.4 3.5 L0 6.4 z" fill="var(--frame)"/>
+    </marker>
+  </defs>
+
+  <rect class="ovl-box" x="0" y="10" width="360" height="72" rx="4"/>
+  <text class="ovl-num" x="12" y="30">1</text>
+  <text class="ovl-t" x="28" y="30">AutoCAD starts and reads the manifest</text>
+  <text class="ovl-mono" x="28" y="50">pyACAD.bundle\PackageContents.xml</text>
+  <text class="ovl-m" x="28" y="70">one Components block per release, SeriesMin = SeriesMax</text>
+
+  <path class="ovl-arw" d="M180 82 V 104" marker-end="url(#ovl-a)"/>
+
+  <rect class="ovl-box" x="0" y="106" width="360" height="72" rx="4"/>
+  <text class="ovl-num" x="12" y="126">2</text>
+  <text class="ovl-t" x="28" y="126">It loads the loader for its own year</text>
+  <text class="ovl-mono" x="28" y="146">Contents\2026\PyAcad.dll</text>
+  <text class="ovl-m" x="28" y="166">net48 for 2021 to 2024, net8 for 2025 and 2026</text>
+
+  <path class="ovl-arw" d="M360 142 H 396" marker-end="url(#ovl-a)"/>
+
+  <rect class="ovl-box" x="398" y="106" width="362" height="72" rx="4"/>
+  <text class="ovl-num" x="410" y="126">3</text>
+  <text class="ovl-t" x="426" y="126">The loader resolves the runtime</text>
+  <text class="ovl-mono" x="426" y="146">%APPDATA%\pyACAD\2026\runtime</text>
+  <text class="ovl-m" x="426" y="166">PyAcad.Runtime.dll, IronPython, stdlib, pyacadlib</text>
+
+  <path class="ovl-arw" d="M579 178 V 196" marker-end="url(#ovl-a)"/>
+
+  <rect class="ovl-box" x="398" y="198" width="362" height="66" rx="4"/>
+  <text class="ovl-num" x="410" y="218">4</text>
+  <text class="ovl-t" x="426" y="218">The runtime scans and builds</text>
+  <text class="ovl-m" x="426" y="238">extension roots, startup.py, dock panes, commands,</text>
+  <text class="ovl-m" x="426" y="254">ribbon, hooks, context rules, keyboard shortcuts</text>
+</svg>
+</div>
+<figcaption>One bundle serves every installed release: AutoCAD 2024 loads
+<code>Contents\2024</code>, AutoCAD 2026 loads <code>Contents\2026</code>. The loader itself
+stays tiny and references only the AutoCAD API.</figcaption>
+</figure>
+
+<ol>
+  <li><strong>The manifest.</strong> <code>PackageContents.xml</code> holds one
+    <code>Components</code> block per AutoCAD release, each pinned to that release's series
+    (R24.0 for 2021 through R25.1 for 2026) with platform <code>AutoCAD*</code>, so the
+    verticals built on AutoCAD match too. Each entry is marked
+    <code>LoadOnAutoCADStartup</code>, because the ribbon has to build before anyone can type
+    a command.</li>
+  <li><strong>The loader.</strong> <code>Contents\&lt;year&gt;\PyAcad.dll</code> is built
+    separately for each year: against .NET Framework 4.8 for AutoCAD 2021 to 2024 and .NET 8
+    for AutoCAD 2025 and 2026. It defines the four loader commands and the
+    <code>(pyacad ...)</code> LISP function.</li>
+  <li><strong>The runtime.</strong> The loader looks for its runtime folder in this order: the
+    <code>PYACAD_RUNTIME</code> environment variable, a <code>"runtime2026"</code>-style key
+    (named for the year) in <code>config.json</code>, <code>%APPDATA%\pyACAD\&lt;year&gt;\runtime</code>,
+    then <code>%PROGRAMDATA%\pyACAD\&lt;year&gt;\runtime</code>, which counts only when no
+    one but administrators can write to it.</li>
+  <li><strong>The build.</strong> The runtime reads <code>config.json</code>, scans the
+    extension roots, and once AutoCAD's ribbon exists runs each extension's
+    <code>startup.py</code>, builds the dock panes, registers the commands, builds the ribbon
+    tabs, wires hooks and context rules and installs the keyboard hook. Each stage fails on
+    its own: a broken bundle costs only itself, and a toast tells you what went wrong. A
+    workspace switch or CUIx load, which rebuilds AutoCAD's ribbon from the customisation
+    file, is detected and the pyACAD tabs are put back.</li>
+</ol>
+
+<h2>Where everything lives</h2>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>What</th><th>Where</th></tr></thead>
+<tbody>
+<tr><td>Loader, one folder per release</td>
+    <td><code>%APPDATA%\Autodesk\ApplicationPlugins\pyACAD.bundle\Contents\&lt;year&gt;\</code></td></tr>
+<tr><td>Runtime, Python stdlib and the <code>pyacad</code> library</td>
+    <td><code>%APPDATA%\pyACAD\&lt;year&gt;\runtime\</code> (the library is in its
+        <code>pyacadlib\</code> subfolder)</td></tr>
+<tr><td>The shipped extension</td>
+    <td><code>%APPDATA%\pyACAD\extensions\pyACAD.extension\</code></td></tr>
+<tr><td>Your settings</td><td><code>%APPDATA%\pyACAD\config.json</code></td></tr>
+<tr><td>Per-tool settings (<code>pyacad.settings</code>)</td>
+    <td><code>%APPDATA%\pyACAD\settings\&lt;tool&gt;.json</code></td></tr>
+<tr><td>Per-tool data files (<code>pyacad.script</code>)</td>
+    <td><code>%APPDATA%\pyACAD\data\</code></td></tr>
+<tr><td>Logs</td><td><code>%APPDATA%\pyACAD\logs\</code></td></tr>
+<tr><td>The command-line tool</td><td><code>%APPDATA%\pyACAD\cli\pyacad.exe</code>
+    (installed by the setup program)</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Extensions load from every folder listed under <code>"extensions"</code> in
+<code>config.json</code>, in list order, then from two defaults when they exist:
+<code>%APPDATA%\pyACAD\extensions</code>, where the shipped extension lives, and
+<code>%PROGRAMDATA%\pyACAD\extensions</code>, which is how IT deploys extensions to a whole
+machine. The machine-wide folder counts only when no one but administrators can write to it,
+because anything in it runs (hooks and <code>startup.py</code> included) for every user on the
+PC; otherwise it is skipped with a log line. The <strong>Settings</strong> button on the pyACAD
+tab edits the list for you.</p>
+
+<div class="note warn">
+<span class="note-t">Keep your own tools out of pyACAD.extension</span>
+<p>An update replaces <code>pyACAD.extension</code> whole. Put your work in an extension of
+your own: a separate folder, or <code>%APPDATA%\pyACAD\extensions\My pyACAD.extension</code>.
+Tabs and panels with the same name merge across extensions, so a <code>pyACAD.tab</code> in
+your own extension adds to the pyACAD tab. The installer backs up anything it finds added to
+<code>pyACAD.extension</code> and moves what it can into <code>My pyACAD.extension</code>,
+but that is a safety net, not a workflow.</p>
+</div>
+
+<h2>The development loop</h2>
+
+<ol>
+  <li>Create or edit a file inside your extension folder.</li>
+  <li>Click <strong>Reload</strong> on the pyACAD panel, or type <code>PYACADRELOAD</code>.</li>
+  <li>Click your button, or type its command.</li>
+</ol>
+
+<p>Reload rescans every extension root and rebuilds the ribbon without restarting AutoCAD. It
+picks up new and renamed bundles, <code>bundle.yaml</code> changes, new icons and shortcuts,
+re-registers every command, reruns each extension's <code>startup.py</code>, re-reads the hook
+scripts and rebuilds every dock pane. It also re-reads the AutoCAD theme, so light and dark
+icons follow a theme change after a Reload.</p>
+
+<div class="note">
+<span class="note-t">What needs what</span>
+<p>Edits to <code>script.py</code>, and to modules beside it or in the extension's own
+<code>lib\</code> folder, need nothing: those modules are dropped from the cache before every
+run. Edits to the <code>pyacad</code> library or to modules inside a shared
+<code>*.lib</code> folder need a Reload. Adding or removing a whole <code>*.lib</code> folder,
+changing the engine paths in Settings, or replacing the runtime itself needs an AutoCAD
+restart.</p>
+</div>
+
+<h2>What you cannot do</h2>
+
+<ul>
+  <li><strong>No background threads touching the drawing.</strong> The AutoCAD API is not
+    thread-safe. Scripts run on AutoCAD's UI thread and should stay there.</li>
+  <li><strong>One script at a time.</strong> A second run while one is in flight is refused
+    with a <em>still running</em> toast. Long jobs block the UI, so report progress.</li>
+  <li><strong>No custom ribbon controls.</strong> The ribbon vocabulary is the twelve bundle
+    kinds. There are no combo boxes, sliders or galleries; a tool that needs persistent
+    controls gets a <code>*.dockpane</code> instead.</li>
+  <li><strong>No package installer.</strong> Vendor pure-Python dependencies into your
+    extension's <code>lib\</code> folder or a <code>*.lib</code> folder, or use CPython and its
+    own site-packages.</li>
+</ul>
+
+<h2>Where to go next</h2>
+
+<div class="cards">
+  <a href="quickstart.html"><span class="c-t">Your first button</span>
+    <span class="c-d">A working tool, its command and an AutoLISP call in ten minutes.</span></a>
+  <a href="anatomy.html"><span class="c-t">Anatomy of an extension</span>
+    <span class="c-d">Every folder suffix, the ordering rules, and how discovery works.</span></a>
+  <a href="api-reference.html"><span class="c-t">Python API reference</span>
+    <span class="c-d">Every function in the pyacad library, with signatures.</span></a>
+</div>

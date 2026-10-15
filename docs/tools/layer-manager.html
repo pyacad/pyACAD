@@ -1,0 +1,548 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Layer Manager - pyACAD tools</title>
+<meta name="description" content="A docked list of the drawing&#x27;s layers with a filter box. Pick layers to isolate, freeze, turn off, lock, make current, merge or delete them without opening the Layer Propertie">
+<link rel="stylesheet" href="_assets/site.css">
+<link rel="stylesheet" href="_assets/tools.css">
+</head>
+<body data-base="">
+<div class="layout">
+<div class="sidebar">
+  <div class="brand"><a href="index.html"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="26" height="26" aria-hidden="true"><polygon points="157.0,327.8 351.8,327.8 363.1,342.4 363.1,403.3 168.3,403.3 157.0,388.7" fill="#78082A"/><polygon points="157.0,327.8 351.8,327.8 351.8,388.7 157.0,388.7" fill="#B80C40"/><polygon points="51.5,482.0 234.1,157.4 278.7,181.7 290.1,196.3 152.1,496.6 62.8,496.6" fill="#78082A"/><polygon points="51.5,482.0 140.8,482.0 278.7,181.7 234.1,157.4" fill="#E51050"/><polygon points="359.9,482.0 205.7,108.7 217.0,123.3 371.2,496.6" fill="#78082A"/><polygon points="205.7,108.7 201.6,55.9 213.0,70.5 217.0,123.3" fill="#78082A"/><polygon points="201.6,55.9 246.3,15.4 257.6,30.0 213.0,70.5" fill="#78082A"/><polygon points="246.3,15.4 343.7,23.5 355.0,38.1 257.6,30.0" fill="#78082A"/><polygon points="343.7,23.5 388.3,51.9 399.7,66.5 355.0,38.1" fill="#78082A"/><polygon points="388.3,51.9 347.7,76.2 359.1,90.8 399.7,66.5" fill="#78082A"/><polygon points="347.7,76.2 295.0,84.3 306.3,99.0 359.1,90.8" fill="#78082A"/><polygon points="295.0,84.3 449.2,482.0 460.5,496.6 306.3,99.0" fill="#78082A"/><polygon points="449.2,482.0 359.9,482.0 371.2,496.6 460.5,496.6" fill="#78082A"/><polygon points="359.9,482.0 205.7,108.7 201.6,55.9 246.3,15.4 343.7,23.5 388.3,51.9 347.7,76.2 295.0,84.3 449.2,482.0" fill="#E51050"/><polygon points="270.6,39.7 311.2,35.7 297.0,51.9" fill="#1F2329"/></svg><span class="brand-name">pyACAD
+    <span class="brand-sub">Tools guide</span></span></a></div>
+  <div class="search-wrap">
+    <svg class="search-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <circle cx="6" cy="6" r="4.2" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M9.2 9.2 12.5 12.5" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round"/></svg>
+    <input id="search" type="search" placeholder="Search the tools" autocomplete="off"
+           spellcheck="false" aria-label="Search the tools guide">
+    <span class="search-kbd">/</span>
+    <div id="search-results" class="search-results"></div>
+  </div>
+  <nav class="pages">
+<div class="grp">pyACAD</div>
+<a href="settings.html"><img class="nav-icon" src="_assets/icons/settings.png" alt="">Settings</a>
+<a href="shortcuts.html"><img class="nav-icon" src="_assets/icons/shortcuts.png" alt="">Shortcuts</a>
+<a href="console.html"><img class="nav-icon" src="_assets/icons/console.png" alt="">Console</a>
+<a href="reload.html"><img class="nav-icon" src="_assets/icons/reload.png" alt="">Reload</a>
+<div class="grp">Data</div>
+<a href="blocks-to-excel.html"><img class="nav-icon" src="_assets/icons/blocks-to-excel.png" alt="">Blocks to Excel</a>
+<a href="excel-to-blocks.html"><img class="nav-icon" src="_assets/icons/excel-to-blocks.png" alt="">Excel to Blocks</a>
+<a href="block-schedule.html"><img class="nav-icon" src="_assets/icons/block-schedule.png" alt="">Block Schedule</a>
+<a href="find-replace-attributes.html"><img class="nav-icon" src="_assets/icons/find-replace-attributes.png" alt="">Find and Replace Attributes</a>
+<div class="grp">Layers</div>
+<a href="layer-manager.html" class="active"><img class="nav-icon" src="_assets/icons/layer-manager.png" alt="">Layer Manager</a>
+<a href="layer-mapper.html"><img class="nav-icon" src="_assets/icons/layer-mapper.png" alt="">Layer Mapper</a>
+<a href="layer-snapshot.html"><img class="nav-icon" src="_assets/icons/layer-snapshot.png" alt="">Layer Snapshot</a>
+<div class="grp">Xrefs</div>
+<a href="xref-manager.html"><img class="nav-icon" src="_assets/icons/xref-manager.png" alt="">Xref Manager</a>
+<a href="xref-repath.html"><img class="nav-icon" src="_assets/icons/xref-repath.png" alt="">Xref Repath</a>
+<div class="grp">Cleanup</div>
+<a href="drawing-cleanup.html"><img class="nav-icon" src="_assets/icons/drawing-cleanup.png" alt="">Drawing Cleanup</a>
+<a href="font-proxy-report.html"><img class="nav-icon" src="_assets/icons/font-proxy-report.png" alt="">Font and Proxy Report</a>
+<div class="grp">Output</div>
+<a href="batch-plot.html"><img class="nav-icon" src="_assets/icons/batch-plot.png" alt="">Batch Plot</a>
+<a href="layout-manager.html"><img class="nav-icon" src="_assets/icons/layout-manager.png" alt="">Layout Manager</a>
+<div class="grp">Takeoff</div>
+<a href="length-takeoff.html"><img class="nav-icon" src="_assets/icons/length-takeoff.png" alt="">Length Takeoff</a>
+<a href="tag-audit.html"><img class="nav-icon" src="_assets/icons/tag-audit.png" alt="">Tag Audit</a>
+<div class="grp">AI (beta)</div>
+<a href="ask-ai.html"><img class="nav-icon" src="_assets/icons/ask-ai.png" alt="">Ask AI</a>
+<a href="ai-settings.html"><img class="nav-icon" src="_assets/icons/ai-settings.png" alt="">AI Settings</a>
+<a href="open-ai-folder.html"><img class="nav-icon" src="_assets/icons/open-ai-folder.png" alt="">Open AI Folder</a>
+</nav>
+  <div class="side-foot">
+    <span>pyACAD 0.1.0</span>
+    <a class="side-link" href="https://docs.pyacad.com/">Authoring guide</a>
+    <button id="theme-toggle" type="button" aria-label="Toggle colour theme">
+      <span>Dark</span></button>
+  </div>
+</div>
+<main class="main">
+<article>
+  <div class="hero"><img class="hero-icon" src="_assets/icons/layer-manager.png" alt=""><div><p class="eyebrow">Layers panel</p><h1>Layer Manager</h1><p class="lead">A docked list of the drawing's layers with a filter box. Pick layers to isolate, freeze, turn off, lock, make current, merge or delete them without opening the Layer Properties Manager.</p></div></div><div class="facts"><div class="fact"><span class="fact-k">On the ribbon</span><span class="fact-v">Dock panel, Layers panel</span></div><div class="fact"><span class="fact-k">Needs</span><span class="fact-v">An open drawing for the list to show anything</span></div><div class="fact"><span class="fact-k">Shortcut</span><span class="fact-v">None (keytip L M)</span></div></div>
+  <h2 id="what-it-does">What it does<a class="anchor" href="#what-it-does" aria-label="Link to this section">#</a></h2>
+<p>Opens an AutoCAD palette titled <strong>Layer Manager</strong> that lists every layer of
+the active drawing, sorted by name, with whether it is current, on, frozen and locked, and
+its colour number. Filter the list, pick one or more layers, and act on them with the
+buttons underneath. It is lighter than the Layer Properties Manager and stays open beside
+the drawing while you work.</p>
+
+
+
+<h2 id="how-to-use-it">How to use it<a class="anchor" href="#how-to-use-it" aria-label="Link to this section">#</a></h2>
+<ol class="steps">
+  <li>Click <strong>Layer Manager</strong> on the ribbon. The button stays pressed while the
+    palette is showing; click it again to hide it. Drag the palette to dock it on the left
+    or right, or leave it floating.</li>
+  <li>Type in the <strong>Filter</strong> box to narrow the list. Plain text matches anywhere
+    in the name, ignoring case. A term with <code>*</code> or <code>?</code> is a wildcard
+    pattern over the whole name (<code>A-*</code> means names starting with A-). Separate
+    several terms with commas: <code>wall, E-*</code>.</li>
+  <li>Pick layers with click, <kbd>Ctrl</kbd>+click and <kbd>Shift</kbd>+click. The status
+    line underneath counts them and names the current layer.</li>
+  <li>Click an action. Each one changes the drawing straight away, shows a toast, and
+    re-reads the list.</li>
+  <li>Double-click a row to make that layer current.</li>
+</ol>
+
+<h2 id="the-buttons">The buttons<a class="anchor" href="#the-buttons" aria-label="Link to this section">#</a></h2>
+<ul>
+  <li><strong>Isolate</strong>: thaws and turns on the selected layers and freezes every other
+    layer. If the current layer is not among them, the first selected layer becomes
+    current.</li>
+  <li><strong>Freeze/Thaw</strong>: freezes the selected layers, or thaws them when every one
+    is already frozen. The current layer cannot be frozen, so it is skipped and the toast
+    says so.</li>
+  <li><strong>On/Off</strong>: turns the selected layers off, or on when every one is already
+    off.</li>
+  <li><strong>Lock/Unlock</strong>: locks the selected layers, or unlocks them when every one
+    is already locked.</li>
+  <li><strong>Set current</strong> (one layer selected): thaws it, turns it on and makes it
+    current.</li>
+  <li><strong>Merge into...</strong>: asks for a target layer name, moves everything on the
+    selected layers onto it, then deletes them. If no layer has that name, it offers to
+    create one (colour 7, Continuous). The toast says how many objects moved.</li>
+  <li><strong>Delete</strong>: asks first, then deletes the selected layers. Layer 0,
+    Defpoints, the current layer, xref layers and layers still in use are kept, and the toast
+    gives the first reason; the rest are in the pyACAD log.</li>
+</ul>
+
+
+
+<h2 id="good-to-know-limits">Good to know / limits<a class="anchor" href="#good-to-know-limits" aria-label="Link to this section">#</a></h2>
+<ul>
+  <li>The list follows the active drawing. It is read again when the palette is shown, when
+    the mouse comes back over it, and when you click <strong>Refresh</strong>, so a change
+    made elsewhere shows up without you asking. Your selection and scroll position are kept
+    when nothing changed.</li>
+  <li>Merge reaches everywhere in the drawing: objects inside block definitions and attributes
+    move too, so every reference of such a block changes, and objects on locked layers are
+    moved as well. If a selected layer cannot be deleted afterwards (layer 0, Defpoints, an
+    xref layer), the merge fails as a whole and nothing changes.</li>
+  <li>Freeze, Isolate and the rest work on the layers themselves, for every viewport. They do
+    not use viewport freeze.</li>
+  <li>The palette acts outside any AutoCAD command. Check how <code>U</code> behaves on a
+    palette action before you rely on it for a large Merge or Delete, or take a
+    <a href="layer-snapshot.html">Layer Snapshot</a> first.</li>
+  <li>The Color column shows the AutoCAD colour number, not a swatch, and is not editable.
+    Neither is any other column: rename layers and change their properties in the Layer
+    Properties Manager or with <a href="layer-mapper.html">Layer Mapper</a>.</li>
+  <li>The palette is not in the Shortcuts editor. Reach it from the keyboard with its keytip:
+    press <kbd>Alt</kbd>, follow the letters the ribbon shows to the pyACAD tab, then
+    <kbd>L</kbd><kbd>M</kbd>.</li>
+  <li>AutoCAD remembers the palette's size, dock side and whether it was showing. A Reload
+    rebuilds it and clears the filter box.</li>
+</ul>
+
+<h2 id="other-uses">Other uses<a class="anchor" href="#other-uses" aria-label="Link to this section">#</a></h2>
+<ul>
+  <li>Focus on one discipline: filter <code>E-*</code>, select all the rows, Isolate.</li>
+  <li>Tidy an imported drawing: filter for its odd prefixes, Merge them into your own layers,
+    then Delete what is left empty.</li>
+  <li>Keep it open as a live readout of which layer is current and what is frozen.</li>
+</ul>
+<h2 id="source">Source<a class="anchor" href="#source" aria-label="Link to this section">#</a></h2>
+<p>The tool's own files, word for word as shipped in <code>Layers.panel/Layer_Manager.dockpane</code>. Every pyACAD tool is an ordinary bundle: copy these into your own extension and change what you like.</p>
+<div class="code src"><div class="code-head"><span><code>script.py</code> <span class="src-note">Runs on a click.</span> <a href="https://github.com/pyacad/pyACAD/blob/main/extensions/pyACAD.extension/pyACAD.tab/Layers.panel/Layer_Manager.dockpane/script.py" rel="noopener">View on GitHub</a></span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-c"># -*- coding: utf-8 -*-</span>
+<span class="tok-s">&quot;&quot;&quot;The Layer Manager palette: the active drawing&#x27;s layers, filtered, with actions.
+
+The list reads the layer table in one transaction (layers.snapshot) and reads it
+again whenever the mouse comes back into the palette, so it follows changes made
+elsewhere without a timer, and re-draws only when something changed so the
+selection and scroll stay put. Every button acts on the selected rows through
+pyacad.layers under a document lock, because a palette click runs outside any
+command, then refreshes the list. A failure toasts its message.
+
+This runs once, when the palette is built; the handlers it wires fire later, so
+they act through `pane`, never through whichever command ran last.
+&quot;&quot;&quot;</span>
+
+__title__ = <span class="tok-s">&#x27;Layer Manager&#x27;</span>
+
+<span class="tok-k">import</span> clr
+
+clr.AddReference(<span class="tok-s">&#x27;PresentationCore&#x27;</span>)
+clr.AddReference(<span class="tok-s">&#x27;PresentationFramework&#x27;</span>)
+clr.AddReference(<span class="tok-s">&#x27;WindowsBase&#x27;</span>)
+clr.AddReference(<span class="tok-s">&#x27;PyAcad.Runtime&#x27;</span>)
+
+<span class="tok-k">from</span> System <span class="tok-k">import</span> String
+<span class="tok-k">from</span> System.Collections.Generic <span class="tok-k">import</span> List
+<span class="tok-k">from</span> System.Windows <span class="tok-k">import</span> Setter, Style
+<span class="tok-k">from</span> System.Windows.Controls <span class="tok-k">import</span> Control, GridViewColumnHeader, ItemsControl
+<span class="tok-k">from</span> System.Windows.Documents <span class="tok-k">import</span> TextElement
+<span class="tok-k">from</span> PyAcad.Runtime.Forms <span class="tok-k">import</span> DesignSystem
+
+<span class="tok-k">from</span> pyacad <span class="tok-k">import</span> doc, forms, layers, script, toast
+
+pane = __pane__
+log = script.get_logger()
+
+root = pane.Find(<span class="tok-s">&#x27;Root&#x27;</span>)
+filter_box = pane.Find(<span class="tok-s">&#x27;Filter&#x27;</span>)
+layer_list = pane.Find(<span class="tok-s">&#x27;LayerList&#x27;</span>)
+status = pane.Find(<span class="tok-s">&#x27;Status&#x27;</span>)
+ACTIONS = (<span class="tok-s">&#x27;Isolate&#x27;</span>, <span class="tok-s">&#x27;FreezeThaw&#x27;</span>, <span class="tok-s">&#x27;OnOff&#x27;</span>, <span class="tok-s">&#x27;LockUnlock&#x27;</span>, <span class="tok-s">&#x27;SetCurrent&#x27;</span>, <span class="tok-s">&#x27;Merge&#x27;</span>, <span class="tok-s">&#x27;Delete&#x27;</span>)
+buttons = dict((name, pane.Find(name)) <span class="tok-k">for</span> name <span class="tok-k">in</span> ACTIONS)
+
+<span class="tok-c"># What the list shows: the last layer read, the current layer, or why there is none.</span>
+view = {<span class="tok-s">&#x27;snapshot&#x27;</span>: {}, <span class="tok-s">&#x27;current&#x27;</span>: <span class="tok-s">&#x27;&#x27;</span>, <span class="tok-s">&#x27;error&#x27;</span>: <span class="tok-k">None</span>}
+
+
+<span class="tok-c"># ---- reading and showing ------------------------------------------------------</span>
+
+<span class="tok-k">def</span> refresh(quiet=<span class="tok-k">False</span>):
+    <span class="tok-s">&quot;&quot;&quot;Reads the active drawing&#x27;s layers and re-draws the list if they changed.
+
+    quiet (mouse-enter and visibility refreshes) keeps the current list when the
+    read fails for a passing reason, such as a command holding the drawing.
+    &quot;&quot;&quot;</span>
+    <span class="tok-k">try</span>:
+        doc.active()
+    <span class="tok-k">except</span> RuntimeError <span class="tok-k">as</span> error:
+        update({}, <span class="tok-s">&#x27;&#x27;</span>, str(error), force=<span class="tok-k">not</span> quiet)
+        <span class="tok-k">return</span>
+    <span class="tok-k">try</span>:
+        <span class="tok-k">with</span> doc.lock():
+            snapshot = layers.snapshot()
+            current = layers.current()
+    <span class="tok-k">except</span> Exception <span class="tok-k">as</span> error:
+        <span class="tok-k">if</span> <span class="tok-k">not</span> quiet:
+            log.warning(<span class="tok-s">&#x27;could not read the layers: %s&#x27;</span> % error)
+            update({}, <span class="tok-s">&#x27;&#x27;</span>, <span class="tok-s">&#x27;Could not read the layers: %s&#x27;</span> % error, force=<span class="tok-k">True</span>)
+        <span class="tok-k">return</span>
+    update(snapshot, current, <span class="tok-k">None</span>, force=<span class="tok-k">not</span> quiet)
+
+
+<span class="tok-k">def</span> update(snapshot, current, error, force=<span class="tok-k">False</span>):
+    same = (snapshot == view[<span class="tok-s">&#x27;snapshot&#x27;</span>] <span class="tok-k">and</span> current == view[<span class="tok-s">&#x27;current&#x27;</span>]
+            <span class="tok-k">and</span> error == view[<span class="tok-s">&#x27;error&#x27;</span>])
+    <span class="tok-k">if</span> same <span class="tok-k">and</span> <span class="tok-k">not</span> force:
+        <span class="tok-k">return</span>
+    view.update(snapshot=snapshot, current=current, error=error)
+    show()
+
+
+<span class="tok-k">def</span> show():
+    <span class="tok-s">&quot;&quot;&quot;Fills the list from the last read, through the filter box, keeping the selection.&quot;&quot;&quot;</span>
+    keep = set(selected())
+    snapshot = view[<span class="tok-s">&#x27;snapshot&#x27;</span>]
+    names = layers.filter_names(sorted(snapshot, key=<span class="tok-k">lambda</span> n: n.lower()), filter_box.Text)
+    rows = List[List[String]]()
+    <span class="tok-k">for</span> name <span class="tok-k">in</span> names:
+        rows.Add(row_for(name, snapshot[name]))
+    layer_list.ItemsSource = rows
+    <span class="tok-k">for</span> row <span class="tok-k">in</span> rows:
+        <span class="tok-k">if</span> row[<span class="tok-n">0</span>] <span class="tok-k">in</span> keep:
+            layer_list.SelectedItems.Add(row)
+    on_selection()
+
+
+<span class="tok-k">def</span> row_for(name, state):
+    <span class="tok-s">&quot;&quot;&quot;The list row: [0] name, [1] current mark, [2] on, [3] frozen, [4] locked, [5] color.&quot;&quot;&quot;</span>
+    row = List[String]()
+    cells = (name,
+             u<span class="tok-s">&#x27;\u2713&#x27;</span> <span class="tok-k">if</span> name.lower() == view[<span class="tok-s">&#x27;current&#x27;</span>].lower() <span class="tok-k">else</span> <span class="tok-s">&#x27;&#x27;</span>,
+             <span class="tok-s">&#x27;No&#x27;</span> <span class="tok-k">if</span> state.get(<span class="tok-s">&#x27;is_off&#x27;</span>) <span class="tok-k">else</span> <span class="tok-s">&#x27;Yes&#x27;</span>,
+             <span class="tok-s">&#x27;Yes&#x27;</span> <span class="tok-k">if</span> state.get(<span class="tok-s">&#x27;is_frozen&#x27;</span>) <span class="tok-k">else</span> <span class="tok-s">&#x27;No&#x27;</span>,
+             <span class="tok-s">&#x27;Yes&#x27;</span> <span class="tok-k">if</span> state.get(<span class="tok-s">&#x27;is_locked&#x27;</span>) <span class="tok-k">else</span> <span class="tok-s">&#x27;No&#x27;</span>,
+             str(state.get(<span class="tok-s">&#x27;color&#x27;</span>, <span class="tok-s">&#x27;&#x27;</span>)))
+    <span class="tok-k">for</span> cell <span class="tok-k">in</span> cells:
+        row.Add(cell)
+    <span class="tok-k">return</span> row
+
+
+<span class="tok-k">def</span> selected():
+    <span class="tok-k">return</span> [str(row[<span class="tok-n">0</span>]) <span class="tok-k">for</span> row <span class="tok-k">in</span> layer_list.SelectedItems]
+
+
+<span class="tok-k">def</span> on_selection(sender=<span class="tok-k">None</span>, args=<span class="tok-k">None</span>):
+    <span class="tok-s">&quot;&quot;&quot;Status line and which buttons apply to the selection.&quot;&quot;&quot;</span>
+    count = layer_list.SelectedItems.Count
+    <span class="tok-k">for</span> name, button <span class="tok-k">in</span> buttons.items():
+        button.IsEnabled = count == <span class="tok-n">1</span> <span class="tok-k">if</span> name == <span class="tok-s">&#x27;SetCurrent&#x27;</span> <span class="tok-k">else</span> count &gt; <span class="tok-n">0</span>
+    <span class="tok-k">if</span> view[<span class="tok-s">&#x27;error&#x27;</span>]:
+        status.Text = view[<span class="tok-s">&#x27;error&#x27;</span>]
+        <span class="tok-k">return</span>
+    total = len(view[<span class="tok-s">&#x27;snapshot&#x27;</span>])
+    shown = layer_list.Items.Count
+    parts = [<span class="tok-s">&#x27;%d layers&#x27;</span> % total <span class="tok-k">if</span> shown == total <span class="tok-k">else</span> <span class="tok-s">&#x27;%d of %d layers&#x27;</span> % (shown, total),
+             <span class="tok-s">&#x27;current: %s&#x27;</span> % view[<span class="tok-s">&#x27;current&#x27;</span>]]
+    <span class="tok-k">if</span> count:
+        parts.append(<span class="tok-s">&#x27;%d selected&#x27;</span> % count)
+    status.Text = u<span class="tok-s">&#x27;  \u00b7  &#x27;</span>.join(parts)
+
+
+<span class="tok-k">def</span> counted(n):
+    n = n <span class="tok-k">if</span> isinstance(n, int) <span class="tok-k">else</span> len(n)
+    <span class="tok-k">return</span> <span class="tok-s">&#x27;%d layer%s&#x27;</span> % (n, <span class="tok-s">&#x27;&#x27;</span> <span class="tok-k">if</span> n == <span class="tok-n">1</span> <span class="tok-k">else</span> <span class="tok-s">&#x27;s&#x27;</span>)
+
+
+<span class="tok-c"># ---- actions ------------------------------------------------------------------</span>
+
+<span class="tok-k">def</span> action(label, work):
+    <span class="tok-s">&quot;&quot;&quot;A click handler running work(selected names), toasting any failure, then
+    re-reading the layers.&quot;&quot;&quot;</span>
+    <span class="tok-k">def</span> handle(sender, args):
+        names = selected()
+        <span class="tok-k">if</span> <span class="tok-k">not</span> names:
+            toast.info(<span class="tok-s">&#x27;Select one or more layers first&#x27;</span>)
+            <span class="tok-k">return</span>
+        <span class="tok-k">try</span>:
+            work(names)
+        <span class="tok-k">except</span> Exception <span class="tok-k">as</span> error:
+            log.error(<span class="tok-s">&#x27;%s failed: %s&#x27;</span> % (label, error))
+            toast.error(<span class="tok-s">&#x27;%s failed&#x27;</span> % label, str(error))
+        refresh()
+    <span class="tok-k">return</span> handle
+
+
+<span class="tok-k">def</span> all_set(names, flag):
+    <span class="tok-s">&quot;&quot;&quot;True when every named layer has flag set, read fresh from the drawing.&quot;&quot;&quot;</span>
+    states = layers.snapshot()
+    <span class="tok-k">return</span> all(states.get(name, {}).get(flag) <span class="tok-k">for</span> name <span class="tok-k">in</span> names)
+
+
+<span class="tok-k">def</span> isolate(names):
+    <span class="tok-k">with</span> doc.lock():
+        frozen = layers.isolate(names)
+    toast.success(<span class="tok-s">&#x27;Isolated %s&#x27;</span> % counted(names), <span class="tok-s">&#x27;%s frozen&#x27;</span> % counted(frozen))
+
+
+<span class="tok-k">def</span> freeze_thaw(names):
+    <span class="tok-k">with</span> doc.lock():
+        <span class="tok-k">if</span> all_set(names, <span class="tok-s">&#x27;is_frozen&#x27;</span>):
+            verb, changed = <span class="tok-s">&#x27;Thawed&#x27;</span>, layers.thaw(names)
+        <span class="tok-k">else</span>:
+            verb, changed = <span class="tok-s">&#x27;Froze&#x27;</span>, layers.freeze(names)
+    detail = <span class="tok-k">None</span>
+    <span class="tok-k">if</span> verb == <span class="tok-s">&#x27;Froze&#x27;</span> <span class="tok-k">and</span> view[<span class="tok-s">&#x27;current&#x27;</span>].lower() <span class="tok-k">in</span> [n.lower() <span class="tok-k">for</span> n <span class="tok-k">in</span> names]:
+        detail = <span class="tok-s">&#x27;The current layer cannot be frozen, so it stays thawed&#x27;</span>
+    toast.success(<span class="tok-s">&#x27;%s %s&#x27;</span> % (verb, counted(changed)), detail)
+
+
+<span class="tok-k">def</span> on_off(names):
+    <span class="tok-k">with</span> doc.lock():
+        <span class="tok-k">if</span> all_set(names, <span class="tok-s">&#x27;is_off&#x27;</span>):
+            verb, changed = <span class="tok-s">&#x27;Turned on&#x27;</span>, layers.turn_on(names)
+        <span class="tok-k">else</span>:
+            verb, changed = <span class="tok-s">&#x27;Turned off&#x27;</span>, layers.turn_off(names)
+    toast.success(<span class="tok-s">&#x27;%s %s&#x27;</span> % (verb, counted(changed)))
+
+
+<span class="tok-k">def</span> lock_unlock(names):
+    <span class="tok-k">with</span> doc.lock():
+        <span class="tok-k">if</span> all_set(names, <span class="tok-s">&#x27;is_locked&#x27;</span>):
+            verb, changed = <span class="tok-s">&#x27;Unlocked&#x27;</span>, layers.unlock(names)
+        <span class="tok-k">else</span>:
+            verb, changed = <span class="tok-s">&#x27;Locked&#x27;</span>, layers.lock(names)
+    toast.success(<span class="tok-s">&#x27;%s %s&#x27;</span> % (verb, counted(changed)))
+
+
+<span class="tok-k">def</span> set_current(names):
+    <span class="tok-k">if</span> len(names) != <span class="tok-n">1</span>:
+        toast.info(<span class="tok-s">&#x27;Select just one layer to make current&#x27;</span>)
+        <span class="tok-k">return</span>
+    <span class="tok-k">with</span> doc.lock():
+        layers.set_current(names[<span class="tok-n">0</span>])
+    toast.success(<span class="tok-s">&#x27;%s is now the current layer&#x27;</span> % names[<span class="tok-n">0</span>])
+
+
+<span class="tok-k">def</span> merge(names):
+    target = forms.ask_string(
+        <span class="tok-s">&#x27;Merge %s into which layer? Everything on them moves there, then they are deleted.&#x27;</span>
+        % counted(names), <span class="tok-s">&#x27;&#x27;</span>, <span class="tok-s">&#x27;Merge layers&#x27;</span>)
+    target = (target <span class="tok-k">or</span> <span class="tok-s">&#x27;&#x27;</span>).strip()
+    <span class="tok-k">if</span> <span class="tok-k">not</span> target:
+        <span class="tok-k">return</span>
+    sources = [n <span class="tok-k">for</span> n <span class="tok-k">in</span> names <span class="tok-k">if</span> n.lower() != target.lower()]
+    <span class="tok-k">if</span> <span class="tok-k">not</span> sources:
+        toast.info(<span class="tok-s">&#x27;Nothing to merge&#x27;</span>, <span class="tok-s">&#x27;The only layer selected is the target&#x27;</span>)
+        <span class="tok-k">return</span>
+    <span class="tok-k">with</span> doc.lock():
+        exists = layers.exists(target)
+    <span class="tok-k">if</span> <span class="tok-k">not</span> exists <span class="tok-k">and</span> <span class="tok-k">not</span> forms.confirm(
+            <span class="tok-s">&#x27;There is no layer named %s. Create it and merge into it?&#x27;</span> % target, <span class="tok-s">&#x27;Merge layers&#x27;</span>):
+        <span class="tok-k">return</span>
+    <span class="tok-k">with</span> doc.lock():
+        <span class="tok-k">if</span> <span class="tok-k">not</span> exists:
+            layers.create(target)
+        moved = layers.merge(sources, target)
+    toast.success(<span class="tok-s">&#x27;Merged %s into %s&#x27;</span> % (counted(sources), target),
+                  <span class="tok-s">&#x27;%d object%s moved&#x27;</span> % (moved, <span class="tok-s">&#x27;&#x27;</span> <span class="tok-k">if</span> moved == <span class="tok-n">1</span> <span class="tok-k">else</span> <span class="tok-s">&#x27;s&#x27;</span>))
+
+
+<span class="tok-k">def</span> delete(names):
+    <span class="tok-k">if</span> <span class="tok-k">not</span> forms.confirm(<span class="tok-s">&#x27;Delete %s?\n\nThe current layer, layer 0, Defpoints, xref layers &#x27;</span>
+                         <span class="tok-s">&#x27;and layers still in use are kept.&#x27;</span> % counted(names), <span class="tok-s">&#x27;Delete layers&#x27;</span>):
+        <span class="tok-k">return</span>
+    deleted, kept = <span class="tok-n">0</span>, []
+    <span class="tok-k">with</span> doc.lock():
+        <span class="tok-k">for</span> name <span class="tok-k">in</span> names:
+            <span class="tok-k">try</span>:
+                layers.delete(name)
+                deleted += <span class="tok-n">1</span>
+            <span class="tok-k">except</span> ValueError <span class="tok-k">as</span> error:
+                kept.append(str(error))
+    <span class="tok-k">for</span> reason <span class="tok-k">in</span> kept:
+        log.info(<span class="tok-s">&#x27;kept: %s&#x27;</span> % reason)
+    <span class="tok-k">if</span> <span class="tok-k">not</span> kept:
+        toast.success(<span class="tok-s">&#x27;Deleted %s&#x27;</span> % counted(deleted))
+    <span class="tok-k">elif</span> deleted:
+        toast.warning(<span class="tok-s">&#x27;Deleted %s, kept %d&#x27;</span> % (counted(deleted), len(kept)), kept[<span class="tok-n">0</span>])
+    <span class="tok-k">else</span>:
+        toast.warning(<span class="tok-s">&#x27;No layers deleted&#x27;</span>, kept[<span class="tok-n">0</span>])
+
+
+<span class="tok-k">def</span> on_double_click(sender, args):
+    <span class="tok-s">&quot;&quot;&quot;Double-clicking a row (not the header) makes that layer current.&quot;&quot;&quot;</span>
+    <span class="tok-k">if</span> ItemsControl.ContainerFromElement(layer_list, args.OriginalSource) <span class="tok-k">is</span> <span class="tok-k">None</span>:
+        <span class="tok-k">return</span>
+    action(<span class="tok-s">&#x27;Set current&#x27;</span>, set_current)(sender, args)
+
+
+<span class="tok-c"># ---- build --------------------------------------------------------------------</span>
+
+<span class="tok-k">def</span> apply_theme():
+    <span class="tok-s">&quot;&quot;&quot;Paper and ink from the host&#x27;s light or dark theme. The column headers keep
+    the default light chrome, so their text stays dark in both.&quot;&quot;&quot;</span>
+    tokens = DesignSystem.Tokens.Current
+    surface = DesignSystem.Brush(tokens.Surface)
+    ink = DesignSystem.Brush(tokens.Ink)
+    line = DesignSystem.Brush(tokens.Line)
+    root.Background = DesignSystem.Brush(tokens.Paper)
+    root.SetValue(TextElement.ForegroundProperty, ink)
+    <span class="tok-k">for</span> box <span class="tok-k">in</span> (filter_box, layer_list):
+        box.Background = surface
+        box.Foreground = ink
+        box.BorderBrush = line
+    filter_box.CaretBrush = ink
+    header = Style(clr.GetClrType(GridViewColumnHeader))
+    header.Setters.Add(Setter(Control.ForegroundProperty,
+                              DesignSystem.Brush(DesignSystem.Tokens.For(<span class="tok-k">False</span>).Ink)))
+    layer_list.View.ColumnHeaderContainerStyle = header
+
+
+<span class="tok-k">def</span> quietly(handler):
+    <span class="tok-s">&quot;&quot;&quot;A handler that logs what it raises: an exception escaping a WPF event
+    inside AutoCAD is far worse than a list that did not update.&quot;&quot;&quot;</span>
+    <span class="tok-k">def</span> handle(sender, args):
+        <span class="tok-k">try</span>:
+            handler(sender, args)
+        <span class="tok-k">except</span> Exception <span class="tok-k">as</span> error:
+            log.error(<span class="tok-s">&#x27;Layer Manager: %s&#x27;</span> % error)
+    <span class="tok-k">return</span> handle
+
+
+<span class="tok-k">try</span>:
+    apply_theme()
+<span class="tok-k">except</span> Exception <span class="tok-k">as</span> error:                      <span class="tok-c"># cosmetic: the palette still works</span>
+    log.warning(<span class="tok-s">&#x27;could not theme the Layer Manager: %s&#x27;</span> % error)
+
+pane.Find(<span class="tok-s">&#x27;Refresh&#x27;</span>).Click += quietly(<span class="tok-k">lambda</span> sender, args: refresh())
+filter_box.TextChanged += quietly(<span class="tok-k">lambda</span> sender, args: show())
+layer_list.SelectionChanged += quietly(on_selection)
+layer_list.MouseDoubleClick += quietly(on_double_click)
+root.MouseEnter += quietly(<span class="tok-k">lambda</span> sender, args: refresh(quiet=<span class="tok-k">True</span>))
+root.IsVisibleChanged += quietly(
+    <span class="tok-k">lambda</span> sender, args: refresh(quiet=<span class="tok-k">True</span>) <span class="tok-k">if</span> root.IsVisible <span class="tok-k">else</span> <span class="tok-k">None</span>)
+
+<span class="tok-k">for</span> name, label, work <span class="tok-k">in</span> ((<span class="tok-s">&#x27;Isolate&#x27;</span>, <span class="tok-s">&#x27;Isolate&#x27;</span>, isolate),
+                          (<span class="tok-s">&#x27;FreezeThaw&#x27;</span>, <span class="tok-s">&#x27;Freeze/Thaw&#x27;</span>, freeze_thaw),
+                          (<span class="tok-s">&#x27;OnOff&#x27;</span>, <span class="tok-s">&#x27;On/Off&#x27;</span>, on_off),
+                          (<span class="tok-s">&#x27;LockUnlock&#x27;</span>, <span class="tok-s">&#x27;Lock/Unlock&#x27;</span>, lock_unlock),
+                          (<span class="tok-s">&#x27;SetCurrent&#x27;</span>, <span class="tok-s">&#x27;Set current&#x27;</span>, set_current),
+                          (<span class="tok-s">&#x27;Merge&#x27;</span>, <span class="tok-s">&#x27;Merge&#x27;</span>, merge),
+                          (<span class="tok-s">&#x27;Delete&#x27;</span>, <span class="tok-s">&#x27;Delete&#x27;</span>, delete)):
+    buttons[name].Click += quietly(action(label, work))
+
+refresh()</code></pre></div>
+<div class="code src"><div class="code-head"><span><code>pane.xaml</code> <span class="src-note">The dock panel&#x27;s content.</span> <a href="https://github.com/pyacad/pyACAD/blob/main/extensions/pyACAD.extension/pyACAD.tab/Layers.panel/Layer_Manager.dockpane/pane.xaml" rel="noopener">View on GitHub</a></span><button class="copy-btn" type="button">Copy</button></div><pre><code>&lt;Grid xmlns=&quot;http://schemas.microsoft.com/winfx/2006/xaml/presentation&quot;
+      xmlns:x=&quot;http://schemas.microsoft.com/winfx/2006/xaml&quot;
+      x:Name=&quot;Root&quot;&gt;
+  &lt;!-- Plain WPF: script.py fills the list, wires every handler and applies the
+       host&#x27;s light or dark colours. Rows are string lists, so the columns bind
+       by index: [0] name, [1] current mark, [2] on, [3] frozen, [4] locked, [5] color. --&gt;
+  &lt;Grid Margin=&quot;8&quot;&gt;
+    &lt;Grid.RowDefinitions&gt;
+      &lt;RowDefinition Height=&quot;Auto&quot; /&gt;
+      &lt;RowDefinition Height=&quot;*&quot; /&gt;
+      &lt;RowDefinition Height=&quot;Auto&quot; /&gt;
+      &lt;RowDefinition Height=&quot;Auto&quot; /&gt;
+    &lt;/Grid.RowDefinitions&gt;
+
+    &lt;DockPanel Grid.Row=&quot;0&quot; Margin=&quot;0,0,0,6&quot; LastChildFill=&quot;True&quot;&gt;
+      &lt;TextBlock DockPanel.Dock=&quot;Left&quot; Text=&quot;Filter&quot; VerticalAlignment=&quot;Center&quot; Margin=&quot;0,0,6,0&quot; /&gt;
+      &lt;Button x:Name=&quot;Refresh&quot; DockPanel.Dock=&quot;Right&quot; Content=&quot;Refresh&quot; Padding=&quot;8,2&quot;
+              Margin=&quot;6,0,0,0&quot; ToolTip=&quot;Read the layers of the active drawing again&quot; /&gt;
+      &lt;TextBox x:Name=&quot;Filter&quot; VerticalContentAlignment=&quot;Center&quot; Padding=&quot;2&quot;
+               ToolTip=&quot;Part of a name, or a pattern such as A-* ; separate several with commas&quot; /&gt;
+    &lt;/DockPanel&gt;
+
+    &lt;ListView x:Name=&quot;LayerList&quot; Grid.Row=&quot;1&quot; SelectionMode=&quot;Extended&quot; MinHeight=&quot;120&quot;
+              ToolTip=&quot;Ctrl or Shift + click picks several layers; double-click makes one current&quot;&gt;
+      &lt;ListView.View&gt;
+        &lt;GridView&gt;
+          &lt;GridViewColumn Header=&quot;&quot; Width=&quot;22&quot; DisplayMemberBinding=&quot;{Binding [1]}&quot; /&gt;
+          &lt;GridViewColumn Header=&quot;Name&quot; Width=&quot;160&quot; DisplayMemberBinding=&quot;{Binding [0]}&quot; /&gt;
+          &lt;GridViewColumn Header=&quot;On&quot; Width=&quot;40&quot; DisplayMemberBinding=&quot;{Binding [2]}&quot; /&gt;
+          &lt;GridViewColumn Header=&quot;Frozen&quot; Width=&quot;52&quot; DisplayMemberBinding=&quot;{Binding [3]}&quot; /&gt;
+          &lt;GridViewColumn Header=&quot;Locked&quot; Width=&quot;52&quot; DisplayMemberBinding=&quot;{Binding [4]}&quot; /&gt;
+          &lt;GridViewColumn Header=&quot;Color&quot; Width=&quot;46&quot; DisplayMemberBinding=&quot;{Binding [5]}&quot; /&gt;
+        &lt;/GridView&gt;
+      &lt;/ListView.View&gt;
+    &lt;/ListView&gt;
+
+    &lt;WrapPanel Grid.Row=&quot;2&quot; Margin=&quot;0,8,0,0&quot;&gt;
+      &lt;WrapPanel.Resources&gt;
+        &lt;Style TargetType=&quot;Button&quot;&gt;
+          &lt;Setter Property=&quot;Margin&quot; Value=&quot;0,0,6,6&quot; /&gt;
+          &lt;Setter Property=&quot;Padding&quot; Value=&quot;8,3&quot; /&gt;
+        &lt;/Style&gt;
+      &lt;/WrapPanel.Resources&gt;
+      &lt;Button x:Name=&quot;Isolate&quot; Content=&quot;Isolate&quot;
+              ToolTip=&quot;Freeze every layer except the selected ones&quot; /&gt;
+      &lt;Button x:Name=&quot;FreezeThaw&quot; Content=&quot;Freeze/Thaw&quot;
+              ToolTip=&quot;Freeze the selected layers, or thaw them when all are frozen&quot; /&gt;
+      &lt;Button x:Name=&quot;OnOff&quot; Content=&quot;On/Off&quot;
+              ToolTip=&quot;Turn the selected layers off, or on when all are off&quot; /&gt;
+      &lt;Button x:Name=&quot;LockUnlock&quot; Content=&quot;Lock/Unlock&quot;
+              ToolTip=&quot;Lock the selected layers, or unlock them when all are locked&quot; /&gt;
+      &lt;Button x:Name=&quot;SetCurrent&quot; Content=&quot;Set current&quot;
+              ToolTip=&quot;Make the selected layer the current one&quot; /&gt;
+      &lt;Button x:Name=&quot;Merge&quot; Content=&quot;Merge into...&quot;
+              ToolTip=&quot;Move everything on the selected layers onto another layer, then delete them&quot; /&gt;
+      &lt;Button x:Name=&quot;Delete&quot; Content=&quot;Delete&quot;
+              ToolTip=&quot;Delete the selected layers; ones still in use are kept&quot; /&gt;
+    &lt;/WrapPanel&gt;
+
+    &lt;TextBlock x:Name=&quot;Status&quot; Grid.Row=&quot;3&quot; Margin=&quot;0,2,0,0&quot; TextWrapping=&quot;Wrap&quot; Opacity=&quot;0.75&quot; /&gt;
+  &lt;/Grid&gt;
+&lt;/Grid&gt;</code></pre></div>
+<div class="code src"><div class="code-head"><span><code>bundle.yaml</code> <span class="src-note">The bundle contract: the keys pyACAD reads for this tool.</span> <a href="https://github.com/pyacad/pyACAD/blob/main/extensions/pyACAD.extension/pyACAD.tab/Layers.panel/Layer_Manager.dockpane/bundle.yaml" rel="noopener">View on GitHub</a></span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-k">title</span>: Layer Manager
+<span class="tok-k">tooltip</span>: A docked list of the drawing&#x27;s layers with a filter box. Pick layers to isolate, freeze, turn off, lock, make current, merge or delete them without opening the Layer Properties Manager.
+<span class="tok-k">keytip</span>: LM</code></pre></div>
+  <div class="pagenav">
+<a href="find-replace-attributes.html"><span class="dir">Previous</span><span class="ttl">Find and Replace Attributes</span></a>
+<a class="next" href="layer-mapper.html"><span class="dir">Next</span><span class="ttl">Layer Mapper</span></a>
+</div>
+</article>
+<aside class="toc"><div class="toc-head">On this page</div>
+<a href="#what-it-does">What it does</a>
+<a href="#how-to-use-it">How to use it</a>
+<a href="#the-buttons">The buttons</a>
+<a href="#good-to-know-limits">Good to know / limits</a>
+<a href="#other-uses">Other uses</a>
+<a href="#source">Source</a>
+</aside>
+</main>
+</div>
+<script src="_assets/search-index.js"></script>
+<script src="_assets/site.js"></script>
+</body>
+</html>

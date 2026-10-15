@@ -1,0 +1,895 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Anatomy of an extension - pyACAD authoring</title>
+<meta name="description" content="The folder levels, how discovery walks them, the files that sit outside a bundle, and the ordering and naming rules that decide what your ribbon looks like.">
+<link rel="stylesheet" href="_assets/site.css">
+</head>
+<body data-base="">
+<div class="layout">
+<div class="sidebar">
+  <div class="brand"><a href="index.html"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="26" height="26" aria-hidden="true"><polygon points="157.0,327.8 351.8,327.8 363.1,342.4 363.1,403.3 168.3,403.3 157.0,388.7" fill="#78082A"/><polygon points="157.0,327.8 351.8,327.8 351.8,388.7 157.0,388.7" fill="#B80C40"/><polygon points="51.5,482.0 234.1,157.4 278.7,181.7 290.1,196.3 152.1,496.6 62.8,496.6" fill="#78082A"/><polygon points="51.5,482.0 140.8,482.0 278.7,181.7 234.1,157.4" fill="#E51050"/><polygon points="359.9,482.0 205.7,108.7 217.0,123.3 371.2,496.6" fill="#78082A"/><polygon points="205.7,108.7 201.6,55.9 213.0,70.5 217.0,123.3" fill="#78082A"/><polygon points="201.6,55.9 246.3,15.4 257.6,30.0 213.0,70.5" fill="#78082A"/><polygon points="246.3,15.4 343.7,23.5 355.0,38.1 257.6,30.0" fill="#78082A"/><polygon points="343.7,23.5 388.3,51.9 399.7,66.5 355.0,38.1" fill="#78082A"/><polygon points="388.3,51.9 347.7,76.2 359.1,90.8 399.7,66.5" fill="#78082A"/><polygon points="347.7,76.2 295.0,84.3 306.3,99.0 359.1,90.8" fill="#78082A"/><polygon points="295.0,84.3 449.2,482.0 460.5,496.6 306.3,99.0" fill="#78082A"/><polygon points="449.2,482.0 359.9,482.0 371.2,496.6 460.5,496.6" fill="#78082A"/><polygon points="359.9,482.0 205.7,108.7 201.6,55.9 246.3,15.4 343.7,23.5 388.3,51.9 347.7,76.2 295.0,84.3 449.2,482.0" fill="#E51050"/><polygon points="270.6,39.7 311.2,35.7 297.0,51.9" fill="#1F2329"/></svg><span class="brand-name">pyACAD
+    <span class="brand-sub">Tool authoring guide</span></span></a></div>
+  <div class="search-wrap">
+    <svg class="search-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <circle cx="6" cy="6" r="4.2" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M9.2 9.2 12.5 12.5" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round"/></svg>
+    <input id="search" type="search" placeholder="Search the docs" autocomplete="off"
+           spellcheck="false" aria-label="Search the documentation">
+    <span class="search-kbd">/</span>
+    <div id="search-results" class="search-results"></div>
+  </div>
+  <nav class="pages">
+<div class="grp">Start</div>
+<a href="overview.html"><span class="num">01</span>How pyACAD works</a>
+<a href="quickstart.html"><span class="num">02</span>Your first button</a>
+<div class="grp">Bundles</div>
+<a href="anatomy.html" class="active"><span class="num">03</span>Anatomy of an extension</a>
+<a href="buttons.html"><span class="num">04</span>Buttons, stacks and pulldowns</a>
+<a href="bundle-yaml.html"><span class="num">05</span>The bundle.yaml reference</a>
+<a href="icons.html"><span class="num">06</span>Icons</a>
+<a href="shortcuts.html"><span class="num">07</span>Shortcuts and keytips</a>
+<a href="click-actions.html"><span class="num">08</span>Click actions and config.py</a>
+<a href="hooks.html"><span class="num">09</span>Hooks</a>
+<div class="grp">Scripts</div>
+<a href="script-environment.html"><span class="num">10</span>The script environment</a>
+<a href="user-interface.html"><span class="num">11</span>Talking to the user</a>
+<a href="settings.html"><span class="num">12</span>Settings and per-tool state</a>
+<a href="commands.html"><span class="num">13</span>AutoCAD commands and AutoLISP</a>
+<a href="command-line.html"><span class="num">14</span>pyacad.exe and headless runs</a>
+<div class="grp">Reference</div>
+<a href="api-reference.html"><span class="num">15</span>Python API reference</a>
+<div class="grp">Practice</div>
+<a href="cookbook.html"><span class="num">16</span>Cookbook</a>
+<a href="ai-assistant.html"><span class="num">17</span>Writing tools with an AI assistant</a>
+<a href="troubleshooting.html"><span class="num">18</span>Troubleshooting</a>
+<a href="style-guide.html"><span class="num">19</span>Style guide for tools</a>
+</nav>
+  <div class="side-foot">
+    <span>pyACAD 0.1.0</span>
+    <button id="theme-toggle" type="button" aria-label="Toggle colour theme">
+      <span>Dark</span></button>
+  </div>
+</div>
+<main class="main">
+<article>
+  <p class="eyebrow">Bundles</p>
+  <h1>Anatomy of an extension</h1>
+  <p class="lead">The folder levels, how discovery walks them, the files that sit outside a bundle, and the ordering and naming rules that decide what your ribbon looks like.</p>
+  <p>An extension is a folder tree with meaningful suffixes. pyACAD reads that tree at startup
+and on every Reload, and builds the ribbon, the AutoCAD commands, the keyboard shortcuts, the
+hooks and the dock panes from it. There is no manifest and no index file. If the folders are
+right the tools exist, and if a tool is missing the folders are wrong.</p>
+
+<p>This page is the reference for that tree: every level, the files that live outside a bundle
+(<code>extension.yaml</code>, <code>lib\</code>, <code>*.lib</code>, <code>hooks\</code>,
+<code>startup.py</code>), the ordering rules, how a folder name becomes a title, how identity
+is derived, and every reason discovery drops something.</p>
+
+<h2 id="the-levels">The levels<a class="anchor" href="#the-levels" aria-label="Link to this section">#</a></h2>
+
+<p>Each level is a folder whose name ends in a fixed suffix. Matching ignores case, so
+<code>Drafting.Panel</code> and <code>Drafting.panel</code> are the same thing, but the suffix
+itself is matched literally.</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Suffix</th><th>Lives in</th><th>Becomes</th><th>May contain</th></tr></thead>
+<tbody>
+<tr><td><code>*.extension</code></td><td>An extension root</td>
+    <td>Nothing visible; it is the unit you ship</td>
+    <td><code>extension.yaml</code>, <code>lib\</code>, <code>hooks\</code>,
+        <code>startup.py</code>, <code>*.tab</code></td></tr>
+<tr><td><code>*.lib</code></td><td>An extension root, beside the <code>*.extension</code> folders</td>
+    <td>Nothing visible; shared Python for every extension</td>
+    <td>Python modules and packages</td></tr>
+<tr><td><code>*.tab</code></td><td><code>*.extension</code></td><td>One ribbon tab</td>
+    <td><code>bundle.yaml</code> (read for <code>layout:</code> only), <code>*.panel</code></td></tr>
+<tr><td><code>*.panel</code></td><td><code>*.tab</code></td><td>One panel on that tab</td>
+    <td><code>bundle.yaml</code> (read for <code>layout:</code> only), bundles</td></tr>
+<tr><td>bundles</td><td><code>*.panel</code> (and some inside other bundles)</td>
+    <td>Buttons, menus, palettes</td>
+    <td>Depends on the kind: see the next table</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Tab and panel captions always come from the folder name: a <code>title:</code> key in a
+tab's or panel's <code>bundle.yaml</code> is not read. Name the folder what the ribbon should
+say (an underscore becomes a space).</p>
+
+<h3 id="the-twelve-bundle-kinds">The twelve bundle kinds<a class="anchor" href="#the-twelve-bundle-kinds" aria-label="Link to this section">#</a></h3>
+
+<p>A panel understands twelve suffixes. <a href="buttons.html">Buttons, stacks and
+pulldowns</a> covers what each one does; this table is about what each one is made of.</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Suffix</th><th>Required</th><th>Optional</th><th>Holds</th></tr></thead>
+<tbody>
+<tr><td><code>*.pushbutton</code></td><td><code>script.py</code></td>
+    <td><code>config.py</code>, <code>bundle.yaml</code>, icons</td><td>nothing</td></tr>
+<tr><td><code>*.stack</code></td><td>2 or 3 usable children</td>
+    <td><code>bundle.yaml</code> (<code>layout:</code> only)</td><td><code>*.pushbutton</code> only</td></tr>
+<tr><td><code>*.pulldown</code></td><td>1 or more usable children</td>
+    <td><code>bundle.yaml</code>, icons</td><td><code>*.pushbutton</code> only</td></tr>
+<tr><td><code>*.splitbutton</code></td><td>1 or more usable children</td>
+    <td><code>bundle.yaml</code>, icons</td><td><code>*.pushbutton</code> only</td></tr>
+<tr><td><code>*.splitpushbutton</code></td><td>1 or more usable children</td>
+    <td><code>bundle.yaml</code>, icons</td><td><code>*.pushbutton</code> only</td></tr>
+<tr><td><code>*.nobutton</code></td><td><code>script.py</code></td>
+    <td><code>config.py</code>, <code>bundle.yaml</code></td><td>nothing</td></tr>
+<tr><td><code>*.toggle</code></td><td><code>script.py</code></td>
+    <td><code>config.py</code>, <code>bundle.yaml</code>, icons including
+        <code>icon.on.png</code> and <code>icon.off.png</code></td><td>nothing</td></tr>
+<tr><td><code>*.smartbutton</code></td><td><code>script.py</code></td>
+    <td><code>config.py</code>, <code>bundle.yaml</code>, icons</td><td>nothing</td></tr>
+<tr><td><code>*.urlbutton</code></td><td><code>bundle.yaml</code> with <code>url:</code></td>
+    <td>icons</td><td>nothing</td></tr>
+<tr><td><code>*.linkbutton</code></td><td><code>bundle.yaml</code> with <code>plugin:</code></td>
+    <td>icons</td><td>nothing</td></tr>
+<tr><td><code>*.dockpane</code></td><td><code>pane.xaml</code></td>
+    <td><code>script.py</code>, <code>bundle.yaml</code>, icons</td><td>nothing</td></tr>
+<tr><td><code>*.slideout</code></td><td>nothing</td>
+    <td><code>bundle.yaml</code> (<code>layout:</code> only)</td>
+    <td>any of the other eleven, one level deep</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note warn">
+<span class="note-t">Only pushbuttons go inside a stack or a menu</span>
+<p>A stack, a pulldown and the two split buttons collect <code>*.pushbutton</code> folders and
+nothing else. A <code>*.toggle</code>, <code>*.smartbutton</code>, <code>*.nobutton</code> or
+nested container inside one is reported as <code>'&lt;dir&gt;' is ignored: a stack holds only
+*.pushbutton folders.</code> (or <em>pulldown</em>, <em>splitbutton</em>,
+<em>splitpushbutton</em>). If you have come from pyRevit, note the exact spellings too:
+<code>*.nobutton</code>, not <code>*.nobundle</code>, and <code>*.toggle</code>, not
+<code>*.togglebutton</code>.</p>
+</div>
+
+<div class="note tip">
+<span class="note-t">A misspelled suffix is reported, not swallowed</span>
+<p>A folder inside a panel whose name contains a dot (not as its first character) is taken
+to be an attempted bundle, so a suffix outside the twelve is logged as <code>'&lt;dir&gt;' is
+not a bundle kind pyACAD knows (check the folder suffix) - skipped.</code> and counted into
+the warning toast shown after the scan: <em>N bundle problems found</em>, quoting the first.
+A folder with no dot in its name, such as <code>assets</code> or <code>__pycache__</code>, is
+an ordinary folder and says nothing; neither does <code>.git</code>.</p>
+</div>
+
+<h2 id="a-complete-extension">A complete extension<a class="anchor" href="#a-complete-extension" aria-label="Link to this section">#</a></h2>
+
+<p>Everything below is either required, optional, or ignored. Nothing is boilerplate.</p>
+
+<div class="code"><div class="code-head"><span>A realistic extension, annotated</span><button class="copy-btn" type="button">Copy</button></div><pre><code>D:\CadTools\                         <span class="tok-c"># an extension root, listed in config.json</span>
+  <span class="tok-f">Shared.lib</span>\                        <span class="tok-c"># optional: a sibling of *.extension, not inside one</span>
+    acme_common\                     <span class="tok-c"># importable from every extension, both engines</span>
+      __init__.py
+  <span class="tok-f">CadTools.extension</span>\
+    <span class="tok-k">extension.yaml</span>                   <span class="tok-c"># optional: name, default engine, tab order</span>
+    <span class="tok-k">startup.py</span>                       <span class="tok-c"># optional: runs at boot and every Reload</span>
+    lib\                             <span class="tok-c"># optional: importable by this extension&#x27;s scripts only</span>
+      cadutil\
+        __init__.py
+        naming.py
+    hooks\                           <span class="tok-c"># optional: one file per event, file name = event name</span>
+      doc-opened.py
+      layer-changed.py
+    <span class="tok-f">CadTools.tab</span>\                    <span class="tok-c"># one ribbon tab, captioned &quot;CadTools&quot;</span>
+      <span class="tok-k">bundle.yaml</span>                    <span class="tok-c"># optional: layout of the panels</span>
+      <span class="tok-f">Drafting.panel</span>\
+        <span class="tok-k">bundle.yaml</span>                  <span class="tok-c"># optional: layout: Count, Rename, Layers, More, Extras</span>
+        <span class="tok-f">Count.pushbutton</span>\            <span class="tok-c"># large button and the command PYCOUNT</span>
+          <span class="tok-k">script.py</span>                  <span class="tok-c"># REQUIRED, or the bundle is dropped</span>
+          <span class="tok-k">config.py</span>                  <span class="tok-c"># optional: Shift+Click, and the command PYCOUNTCFG</span>
+          <span class="tok-k">bundle.yaml</span>                <span class="tok-c"># optional: title, tooltip, command, shortcut, ...</span>
+          <span class="tok-k">icon.png</span>                   <span class="tok-c"># 96x96, light theme, large slot</span>
+          <span class="tok-k">icon.dark.png</span>              <span class="tok-c"># 96x96, dark theme</span>
+          <span class="tok-k">icon.small.png</span>             <span class="tok-c"># 32x32, stacks and menu rows</span>
+          <span class="tok-k">icon.small.dark.png</span>        <span class="tok-c"># 32x32, dark theme</span>
+        <span class="tok-f">Rename.pushbutton</span>\
+          <span class="tok-k">script.py</span>
+        <span class="tok-f">Layers.stack</span>\                <span class="tok-c"># 2 or 3 children; no icon or title of its own</span>
+          <span class="tok-k">bundle.yaml</span>                <span class="tok-c"># optional: layout: Freeze, Thaw</span>
+          <span class="tok-f">Freeze.pushbutton</span>\
+            <span class="tok-k">script.py</span>
+          <span class="tok-f">Thaw.pushbutton</span>\
+            <span class="tok-k">script.py</span>
+        <span class="tok-f">More.pulldown</span>\               <span class="tok-c"># a menu button; has its own yaml and icons</span>
+          <span class="tok-k">bundle.yaml</span>                <span class="tok-c"># title, tooltip, keytip, layout</span>
+          <span class="tok-k">icon.png</span>
+          <span class="tok-f">Purge.pushbutton</span>\
+            <span class="tok-k">script.py</span>
+          <span class="tok-f">Audit.pushbutton</span>\
+            <span class="tok-k">script.py</span>
+        <span class="tok-f">Extras.slideout</span>\             <span class="tok-c"># contents move below the panel break, into the flyout</span>
+          <span class="tok-f">Help.urlbutton</span>\
+            <span class="tok-k">bundle.yaml</span>              <span class="tok-c"># url: https://...</span>
+      <span class="tok-f">Review.panel</span>\
+        <span class="tok-f">Compare.pushbutton</span>\          <span class="tok-c"># no yaml: titled &quot;Compare&quot;, command PYCOMPARE</span>
+          <span class="tok-k">script.py</span></code></pre></div>
+
+<p>That tree produces one tab, <em>CadTools</em>, with two panels. <em>Drafting</em> holds
+four items on its face in the order its <code>layout:</code> list gives (two large buttons, a
+two-row stack and a pulldown), plus a link in the flyout under the panel title.
+<em>Review</em> holds one button and needs no list. The tree also registers eight AutoCAD
+commands: <code>PYCOUNT</code>, <code>PYCOUNTCFG</code>, <code>PYRENAME</code>,
+<code>PYFREEZE</code>, <code>PYTHAW</code>, <code>PYPURGE</code>, <code>PYAUDIT</code> and
+<code>PYCOMPARE</code>. The urlbutton is not a command.</p>
+
+<div class="note trap">
+<span class="note-t">Short titles make generic command names</span>
+<p><code>PYPURGE</code> and <code>PYAUDIT</code> are exactly the names another extension's
+<em>Purge</em> and <em>Audit</em> buttons would derive too. The first bundle in load order
+keeps the name and the second gets no command, with a toast saying so. In anything you
+share, give generic tools a distinctive <code>command:</code> in <code>bundle.yaml</code>.</p>
+</div>
+
+<h2 id="how-discovery-walks-the-disk">How discovery walks the disk<a class="anchor" href="#how-discovery-walks-the-disk" aria-label="Link to this section">#</a></h2>
+
+<p>Discovery is a fixed walk. Every stage looks for one pattern in one folder and ignores
+everything else it finds there, which is why a misplaced folder usually produces no error: it
+was never looked at.</p>
+
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 700 448" width="700" role="img"
+     aria-label="Six discovery stages, each showing the folder pattern scanned and what is ignored at that level.">
+  <style>
+    .an1-t    { font: 12px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--ink); font-weight: 600; }
+    .an1-m    { font: 11px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--muted); }
+    .an1-mono { font: 11.5px Consolas, monospace; fill: var(--ink); }
+    .an1-lbl  { font: 10.5px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--muted);
+                text-transform: uppercase; letter-spacing: .07em; }
+    .an1-box  { fill: var(--paper); stroke: var(--line-strong); stroke-width: 1; }
+    .an1-skip { fill: none; stroke: var(--line); stroke-width: 1; stroke-dasharray: 3 3; }
+    .an1-arw  { stroke: var(--frame); stroke-width: 1.25; fill: none; }
+    .an1-num  { font: 11px Consolas, monospace; fill: var(--accent); }
+  </style>
+  <defs>
+    <marker id="an1-a" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path d="M0 0.6 L6.4 3.5 L0 6.4 z" fill="var(--frame)"/>
+    </marker>
+  </defs>
+
+  <text class="an1-lbl" x="0"   y="14">What is scanned</text>
+  <text class="an1-lbl" x="356" y="14">What is passed over</text>
+
+  <rect class="an1-box"  x="0" y="26" width="330" height="52" rx="4"/>
+  <text class="an1-num"  x="14" y="46">1</text>
+  <text class="an1-t"    x="32" y="46">Extension roots</text>
+  <text class="an1-mono" x="32" y="66">config.json "extensions", then defaults</text>
+  <rect class="an1-skip" x="356" y="26" width="344" height="52" rx="4"/>
+  <text class="an1-m"    x="370" y="46">A root that is missing or unreadable is skipped</text>
+  <text class="an1-m"    x="370" y="64">with a log line; the other roots still load.</text>
+  <path class="an1-arw" d="M165 78 V 96" marker-end="url(#an1-a)"/>
+
+  <rect class="an1-box"  x="0" y="98" width="330" height="52" rx="4"/>
+  <text class="an1-num"  x="14" y="118">2</text>
+  <text class="an1-t"    x="32" y="118">Extensions and libraries</text>
+  <text class="an1-mono" x="32" y="138">*.extension   *.lib</text>
+  <rect class="an1-skip" x="356" y="98" width="344" height="52" rx="4"/>
+  <text class="an1-m"    x="370" y="118">Directly under the root only, never recursive.</text>
+  <text class="an1-m"    x="370" y="136">An extension one folder deeper is invisible.</text>
+  <path class="an1-arw" d="M165 150 V 168" marker-end="url(#an1-a)"/>
+
+  <rect class="an1-box"  x="0" y="170" width="330" height="52" rx="4"/>
+  <text class="an1-num"  x="14" y="190">3</text>
+  <text class="an1-t"    x="32" y="190">Inside an extension</text>
+  <text class="an1-mono" x="32" y="210">extension.yaml lib\ hooks\ startup.py *.tab</text>
+  <rect class="an1-skip" x="356" y="170" width="344" height="52" rx="4"/>
+  <text class="an1-m"    x="370" y="190">Every other file or folder is left alone.</text>
+  <text class="an1-m"    x="370" y="208">A hooks\ file with an unknown event name is logged.</text>
+  <path class="an1-arw" d="M165 222 V 240" marker-end="url(#an1-a)"/>
+
+  <rect class="an1-box"  x="0" y="242" width="330" height="52" rx="4"/>
+  <text class="an1-num"  x="14" y="262">4</text>
+  <text class="an1-t"    x="32" y="262">Panels</text>
+  <text class="an1-mono" x="32" y="282">*.panel</text>
+  <rect class="an1-skip" x="356" y="242" width="344" height="52" rx="4"/>
+  <text class="an1-m"    x="370" y="262">A .panel nested inside another .panel is</text>
+  <text class="an1-m"    x="370" y="280">never reached; panels do not nest.</text>
+  <path class="an1-arw" d="M165 294 V 312" marker-end="url(#an1-a)"/>
+
+  <rect class="an1-box"  x="0" y="314" width="330" height="52" rx="4"/>
+  <text class="an1-num"  x="14" y="334">5</text>
+  <text class="an1-t"    x="32" y="334">Panel items, and slideout contents</text>
+  <text class="an1-mono" x="32" y="354">*.pushbutton  *.stack  ...  *.slideout</text>
+  <rect class="an1-skip" x="356" y="314" width="344" height="52" rx="4"/>
+  <text class="an1-m"    x="370" y="334">All twelve suffixes match here; a dotted folder</text>
+  <text class="an1-m"    x="370" y="352">name that matches none of them is reported.</text>
+  <path class="an1-arw" d="M165 366 V 384" marker-end="url(#an1-a)"/>
+
+  <rect class="an1-box"  x="0" y="386" width="330" height="52" rx="4"/>
+  <text class="an1-num"  x="14" y="406">6</text>
+  <text class="an1-t"    x="32" y="406">Children of a stack, pulldown or split</text>
+  <text class="an1-mono" x="32" y="426">*.pushbutton</text>
+  <rect class="an1-skip" x="356" y="386" width="344" height="52" rx="4"/>
+  <text class="an1-m"    x="370" y="406">Any other bundle-looking folder is reported and</text>
+  <text class="an1-m"    x="370" y="424">ignored. Nesting stops here.</text>
+</svg>
+</div>
+<figcaption>Each stage looks for one pattern in one folder. Anything that does not match is not
+an error, it is simply not part of the walk.</figcaption>
+</figure>
+
+<h2 id="where-roots-come-from">Where roots come from<a class="anchor" href="#where-roots-come-from" aria-label="Link to this section">#</a></h2>
+
+<p>An extension is only found if it sits <strong>directly</strong> inside a scanned root. The
+roots, in load order, are:</p>
+
+<ol>
+  <li>every folder in the <code>"extensions"</code> array of
+    <code>%APPDATA%\pyACAD\config.json</code>, in the order listed (the Settings window and
+    <code>pyacad.exe extensions add</code> both edit this array);</li>
+  <li><code>%APPDATA%\pyACAD\extensions</code>, where the installer puts the shipped
+    extension, if it exists and is not already listed;</li>
+  <li><code>%PROGRAMDATA%\pyACAD\extensions</code>, for extensions deployed to the whole
+    machine, if it exists, is not already listed, and only administrators can write to it.
+    Anything found there runs for every user on the PC, hooks and <code>startup.py</code>
+    included, so a machine-wide folder that ordinary users could write to is skipped with a log
+    line. Listing it in <code>"extensions"</code> loads it regardless.</li>
+</ol>
+
+<p>Inside each root, <code>*.extension</code> folders load in name order, ignoring case. Load
+order matters in two places: which bundle keeps a contested command name, and where a tab
+shared by several extensions sits.</p>
+
+<div class="do-dont">
+<div class="do"><div class="dd-t">Do</div>
+<pre>D:\CadTools\
+  <span class="tok-f">Drafting.extension</span>\
+  <span class="tok-f">Plotting.extension</span>\</pre></div>
+<div class="dont"><div class="dd-t">Don't</div>
+<pre>D:\CadTools\
+  Team\
+    <span class="tok-f">Drafting.extension</span>\    <span class="tok-c"># never found</span>
+  Archive\
+    <span class="tok-f">Plotting.extension</span>\    <span class="tok-c"># never found</span></pre></div>
+</div>
+
+<p>To group extensions in subfolders, register each subfolder as its own root instead.</p>
+
+<h2 id="extension-yaml">extension.yaml<a class="anchor" href="#extension-yaml" aria-label="Link to this section">#</a></h2>
+
+<p>Optional, and it understands exactly three keys. Anything else in the file is ignored.</p>
+
+<div class="code"><div class="code-head"><span>CadTools.extension\extension.yaml</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-k">name</span>: CadTools
+<span class="tok-k">engine</span>: ironpython
+<span class="tok-k">layout</span>:
+  - CadTools
+  - Plotting</code></pre></div>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Key</th><th>Effect</th><th>Default</th></tr></thead>
+<tbody>
+<tr><td><code>name</code></td>
+    <td>The extension's identity. It is not shown on the ribbon; it is half of every tab id the
+        extension creates, the label on its hooks and <code>startup.py</code> in the log, and
+        the key used to spot the same extension loaded from two roots.</td>
+    <td>The folder name with <code>.extension</code> removed</td></tr>
+<tr><td><code>engine</code></td>
+    <td>The default engine for every bundle, hook and <code>startup.py</code> in the
+        extension. A bundle's own <code>engine:</code> still wins.</td>
+    <td><code>ironpython</code></td></tr>
+<tr><td><code>layout</code></td>
+    <td>The order of the extension's tabs, as a block list naming <code>*.tab</code> folders.
+        See <a href="#ordering-panels-and-buttons">Ordering panels and buttons</a>.</td>
+    <td>Tab folders in name order</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Setting <code>engine: cpython</code> here is the clean way to write a whole extension
+against CPython without repeating the key in every <code>bundle.yaml</code>. The extension's
+tab order lives here; the order of the panels on a tab lives in that tab's own
+<code>bundle.yaml</code>.</p>
+
+<h2 id="the-lib-folder-one-extension">The lib folder (one extension)<a class="anchor" href="#the-lib-folder-one-extension" aria-label="Link to this section">#</a></h2>
+
+<p>A folder named <code>lib</code> directly inside the <code>.extension</code> folder is added
+to the module search path of every bundle, hook and <code>startup.py</code> in that extension.
+It is the place for code more than one tool imports: helpers, vendored pure-Python packages.</p>
+
+<div class="code"><div class="code-head"><span>CadTools.extension\CadTools.tab\Drafting.panel\Rename.pushbutton\script.py</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-s">&quot;&quot;&quot;Renames the drawing&#x27;s layers to the office standard.&quot;&quot;&quot;</span>
+<span class="tok-k">from</span> cadutil <span class="tok-k">import</span> naming                 <span class="tok-c"># resolved from CadTools.extension\lib</span>
+<span class="tok-k">from</span> pyacad <span class="tok-k">import</span> layers, toast
+
+renamed = <span class="tok-n">0</span>
+<span class="tok-k">for</span> name <span class="tok-k">in</span> layers.names():
+    wanted = naming.standard(name)
+    <span class="tok-k">if</span> wanted != name <span class="tok-k">and</span> <span class="tok-k">not</span> layers.exists(wanted):
+        layers.rename(name, wanted)
+        renamed += <span class="tok-n">1</span>
+toast.success(<span class="tok-s">&#x27;%d layer(s) renamed&#x27;</span> % renamed)</code></pre></div>
+
+<p>A bundle's module search path is, in order: the Python standard library and the
+<code>pyacad</code> library, every <code>*.lib</code> folder, the bundle's own folder, then
+the extension's <code>lib\</code>. A module beside <code>script.py</code> therefore shadows
+one of the same name in <code>lib\</code>.</p>
+
+<div class="note">
+<span class="note-t">Edits are picked up on the next run</span>
+<p>Before every run, modules loaded from the bundle folder or the extension's
+<code>lib\</code> are dropped from the engine's module cache, so an edit to a helper in
+<code>lib\</code> takes effect the next time any button runs, with no Reload.</p>
+</div>
+
+<div class="note trap">
+<span class="note-t">lib is only special at extension level</span>
+<p>A <code>lib</code> folder inside a <code>.tab</code>, a <code>.panel</code> or a bundle is an
+ordinary folder and is never added to the search path. There is exactly one per extension and
+it lives beside <code>extension.yaml</code>.</p>
+</div>
+
+<h2 id="lib-folders-every-extension-both-engines">*.lib folders (every extension, both engines)<a class="anchor" href="#lib-folders-every-extension-both-engines" aria-label="Link to this section">#</a></h2>
+
+<p>A different thing with a similar name: a folder ending in <code>.lib</code> sitting
+directly in an extension root, beside your <code>*.extension</code> folders rather than inside
+one. The folder itself joins the global module search path shared by
+<strong>every</strong> extension and <strong>both</strong> engines, so the modules and
+packages directly inside it import by name.</p>
+
+<div class="code"><div class="code-head"><span>folders</span><button class="copy-btn" type="button">Copy</button></div><pre><code>D:\CadTools\                         <span class="tok-c"># an extension root</span>
+  <span class="tok-f">Shared.lib</span>\                        <span class="tok-c"># a library folder, not an extension</span>
+    acme_common\
+      __init__.py
+      units.py
+  <span class="tok-f">Drafting.extension</span>\
+    ...
+  <span class="tok-f">Plotting.extension</span>\
+    ...                              <span class="tok-c"># both can &quot;import acme_common&quot;</span></code></pre></div>
+
+<div class="note warn">
+<span class="note-t">Adding or removing a *.lib folder needs a restart</span>
+<p>The set of <code>*.lib</code> folders is fixed into the engine configuration once, at boot.
+A Reload rescans it and, if the set changed, toasts <em>Library extensions changed</em>
+(<em>Added or removed *.lib folders apply after an AutoCAD restart.</em>) and keeps the old
+set. <strong>Edits to files already inside an existing *.lib folder</strong> need only a
+Reload: it drops the cached modules under every known <code>*.lib</code> folder and under the
+<code>pyacad</code> library, so the next run imports your change.</p>
+</div>
+
+<h2 id="hooks">hooks\<a class="anchor" href="#hooks" aria-label="Link to this section">#</a></h2>
+
+<p>A <code>hooks</code> folder directly inside the <code>.extension</code> folder holds event
+scripts. Each file is named for the event it answers, in kebab case, and runs by itself when
+that event fires, with no click.</p>
+
+<div class="code"><div class="code-head"><span>folders</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-f">CadTools.extension</span>\
+  hooks\
+    doc-opened.py            <span class="tok-c"># a drawing was opened</span>
+    layer-changed.py         <span class="tok-c"># a layer was added, renamed, changed or removed</span>
+    command-ended.py         <span class="tok-c"># any AutoCAD command finished</span></code></pre></div>
+
+<p>There are 20 event names: <code>doc-created</code>, <code>doc-opened</code>,
+<code>doc-activated</code>, <code>doc-closing</code>, <code>doc-saved</code>,
+<code>command-will-start</code>, <code>command-ended</code>,
+<code>command-cancelled</code>, <code>command-failed</code>, <code>before-command</code>,
+<code>after-command</code>, <code>selection-changed</code>, <code>object-appended</code>,
+<code>object-modified</code>, <code>object-erased</code>, <code>layer-changed</code>,
+<code>layout-switched</code>, <code>app-init</code>, <code>app-quit</code> and
+<code>system-variable-changed</code>. A <code>.py</code> file in <code>hooks\</code> with any
+other name is logged (<code>Hook '&lt;file&gt;': unknown event '&lt;name&gt;' -
+skipped.</code>, with the valid names listed) and does not run. Hooks run on the extension's
+default engine with the extension's <code>hooks\</code> and <code>lib\</code> folders on the
+search path. <a href="hooks.html">Hooks</a> covers what each event means, debouncing, and
+the rule that disables a hook after repeated failures.</p>
+
+<h2 id="startup-py">startup.py<a class="anchor" href="#startup-py" aria-label="Link to this section">#</a></h2>
+
+<p>A file named exactly <code>startup.py</code> directly inside a <code>.extension</code>
+folder runs once at boot and again on every Reload, before the ribbon is built.</p>
+
+<div class="code"><div class="code-head"><span>CadTools.extension\startup.py</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-s">&quot;&quot;&quot;Checks the shared helpers resolve before anyone clicks a button.&quot;&quot;&quot;</span>
+<span class="tok-k">from</span> pyacad <span class="tok-k">import</span> toast
+
+<span class="tok-k">try</span>:
+    <span class="tok-k">import</span> cadutil
+<span class="tok-k">except</span> ImportError:
+    toast.warning(<span class="tok-s">&#x27;cadutil not found&#x27;</span>, <span class="tok-s">&#x27;Check CadTools.extension\\lib\\cadutil.&#x27;</span>)</code></pre></div>
+
+<p><code>startup.py</code> runs on the extension's default engine with three globals:
+<code>__file__</code>, <code>__pyacad__</code>, and <code>__runner__</code>, which is
+<code>True</code> only when <a href="command-line.html"><code>pyacad run</code></a> starts it.
+Its search path is the extension folder itself, then its <code>lib\</code>, plus the global
+<code>*.lib</code> folders. Printed output goes to the pyACAD log, labelled
+<code>[startup &lt;extension name&gt;]</code>, not to a window: there is no button behind it
+to title a window after.</p>
+
+<div class="note trap">
+<span class="note-t">A failure still lets the buttons load</span>
+<p>An exception in <code>startup.py</code> is logged and toasted (<em>&lt;name&gt; startup.py
+failed</em>), but the extension's ribbon still builds. A broken <code>startup.py</code> costs
+whatever it was meant to set up, not the extension. Every extension's
+<code>startup.py</code> runs, in load order, before any ribbon tab is built.</p>
+</div>
+
+<h2 id="ordering-panels-and-buttons">Ordering panels and buttons<a class="anchor" href="#ordering-panels-and-buttons" aria-label="Link to this section">#</a></h2>
+
+<p>At every level, order comes from a <code>layout:</code> list in the container's own file:
+<code>extension.yaml</code> for the tabs of an extension, and the <code>bundle.yaml</code>
+inside a <code>.tab</code>, <code>.panel</code>, <code>.stack</code>, <code>.pulldown</code>,
+<code>.splitbutton</code>, <code>.splitpushbutton</code> or <code>.slideout</code> for the
+folders inside it. The list names the child folders in the order you want them. There is no
+<code>order:</code> key on the children, and the order you created the folders in is
+irrelevant.</p>
+
+<div class="code"><div class="code-head"><span>Drafting.panel\bundle.yaml</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-k">layout</span>:
+  - Count
+  - Rename
+  - Layers
+  - More
+  - Extras</code></pre></div>
+
+<p>The rules:</p>
+
+<ul>
+  <li>Listed children come first, in list order.</li>
+  <li>Unlisted children follow, in case-insensitive name order, so a folder you forgot to list
+    is never hidden. It just lands after the ones you did list.</li>
+  <li>An entry may name the folder with or without its suffix: <code>Count</code> and
+    <code>Count.pushbutton</code> both match. Matching ignores case, and ignores a legacy
+    <code>NN_</code> prefix on either side.</li>
+  <li>An entry that names no folder in that container is reported in the after-scan toast and
+    the log, and skipped: <code>The layout in '&lt;dir&gt;' names 'Cout', but no such folder is
+    there - ignored.</code></li>
+  <li>An entry listed twice counts once, at its first position.</li>
+</ul>
+
+<p>Inserting a tool at position three is one new line in the list. Nothing gets renamed and
+nothing else moves. A panel does not group by kind: buttons, stacks, pulldowns and the rest
+are all placed by the same list, so a stack sits between two large buttons simply by being
+listed there.</p>
+
+<div class="note">
+<span class="note-t">The older way: a numeric prefix</span>
+<p>Before <code>layout:</code> existed, folders were ordered by name and carried a prefix of
+two or more digits and an underscore, as in <code>01_Count.pushbutton</code>, which sorted the
+folder and was stripped from the title. That still works: without a <code>layout:</code> list
+the folders sort by name, prefix included, and the prefix never reaches the title, the derived
+command name or the bundle key. New extensions should use the list. The shipped extension uses
+no prefixes, and every container in it lists every child.</p>
+</div>
+
+<h2 id="from-folder-name-to-title">From folder name to title<a class="anchor" href="#from-folder-name-to-title" aria-label="Link to this section">#</a></h2>
+
+<p>When a bundle has no <code>title:</code> in its <code>bundle.yaml</code> and its script has
+no <code>__title__</code>, the title is derived from the folder name: strip the suffix, strip a
+leading run of <strong>two or more</strong> digits followed by an underscore, then turn every
+remaining underscore into a space. Tabs and panels always take their caption this way.</p>
+
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 700 246" width="700" role="img"
+     aria-label="Four folder names transformed into titles by stripping a numeric prefix and replacing underscores with spaces.">
+  <style>
+    .an2-t    { font: 12px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--ink); }
+    .an2-m    { font: 11px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--muted); }
+    .an2-mono { font: 12px Consolas, monospace; fill: var(--ink); }
+    .an2-acc  { font: 11.5px Consolas, monospace; fill: var(--accent); }
+    .an2-lbl  { font: 10.5px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--muted);
+                text-transform: uppercase; letter-spacing: .07em; }
+    .an2-box  { fill: var(--paper); stroke: var(--line-strong); stroke-width: 1; }
+    .an2-cut  { stroke: var(--accent); stroke-width: 1.5; }
+    .an2-arw  { stroke: var(--frame); stroke-width: 1.25; fill: none; }
+  </style>
+  <defs>
+    <marker id="an2-a" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path d="M0 0.6 L6.4 3.5 L0 6.4 z" fill="var(--frame)"/>
+    </marker>
+  </defs>
+
+  <rect class="an2-box" x="0" y="10" width="700" height="46" rx="4"/>
+  <text class="an2-mono" x="16" y="30">^\d{2,}_</text>
+  <text class="an2-m"    x="96" y="30">is removed from the front, then every</text>
+  <text class="an2-mono" x="16" y="48">_</text>
+  <text class="an2-m"    x="30" y="48">that survives becomes a space.</text>
+
+  <text class="an2-lbl" x="0"   y="82">Folder name</text>
+  <text class="an2-lbl" x="250" y="82">Title</text>
+  <text class="an2-lbl" x="390" y="82">Command</text>
+  <text class="an2-lbl" x="540" y="82">Why</text>
+
+  <text class="an2-mono" x="0" y="108">01_Count</text>
+  <line class="an2-cut" x1="0" y1="104" x2="19" y2="104"/>
+  <path class="an2-arw" d="M200 104 H 238" marker-end="url(#an2-a)"/>
+  <text class="an2-t"   x="250" y="108">Count</text>
+  <text class="an2-acc" x="390" y="108">PYCOUNT</text>
+  <text class="an2-m"   x="540" y="108">Two digits: a prefix.</text>
+
+  <text class="an2-mono" x="0" y="140">02_Purge_All</text>
+  <line class="an2-cut" x1="0" y1="136" x2="19" y2="136"/>
+  <line class="an2-cut" x1="61" y1="136" x2="68" y2="136"/>
+  <path class="an2-arw" d="M200 136 H 238" marker-end="url(#an2-a)"/>
+  <text class="an2-t"   x="250" y="140">Purge All</text>
+  <text class="an2-acc" x="390" y="140">PYPURGEALL</text>
+  <text class="an2-m"   x="540" y="140">Inner _ is a space.</text>
+
+  <text class="an2-mono" x="0" y="172">1_Keep</text>
+  <path class="an2-arw" d="M200 168 H 238" marker-end="url(#an2-a)"/>
+  <text class="an2-t"   x="250" y="172">1 Keep</text>
+  <text class="an2-acc" x="390" y="172">PY1KEEP</text>
+  <text class="an2-m"   x="540" y="172">One digit is not a</text>
+  <text class="an2-m"   x="540" y="188">prefix, so it stays.</text>
+
+  <text class="an2-mono" x="0" y="212">010_Blocks_to_Excel</text>
+  <line class="an2-cut" x1="0" y1="208" x2="26" y2="208"/>
+  <path class="an2-arw" d="M200 208 H 238" marker-end="url(#an2-a)"/>
+  <text class="an2-t"   x="250" y="212">Blocks to Excel</text>
+  <text class="an2-acc" x="390" y="212">PYBLOCKSTOEXCEL</text>
+  <text class="an2-m"   x="540" y="212">Three digits too.</text>
+
+  <text class="an2-m" x="0" y="240">The command name follows the resolved title, so it never carries the prefix either.</text>
+</svg>
+</div>
+<figcaption>The rule is deliberately two digits or more, so a tool genuinely named
+<code>1_Keep</code> keeps its name. A new extension has no reason to carry a prefix at all:
+order it with <code>layout:</code> and name the folder what the button should say.</figcaption>
+</figure>
+
+<p>The full title precedence for a script bundle, most specific first, is
+<code>title:</code> in <code>bundle.yaml</code>, then a top-level
+<code>__title__ = '...'</code> in <code>script.py</code>, then the folder name. Urlbuttons,
+linkbuttons, dockpanes and the pulldown family have no script to scan, so they go straight
+from <code>title:</code> to the folder name. <a href="bundle-yaml.html">The bundle.yaml
+reference</a> covers every key.</p>
+
+<h2 id="when-a-bundle-does-not-appear">When a bundle does not appear<a class="anchor" href="#when-a-bundle-does-not-appear" aria-label="Link to this section">#</a></h2>
+
+<p>Discovery never throws. It drops what it cannot use and carries on, which keeps one broken
+folder from taking down the whole ribbon. Every drop is written to
+<code>%APPDATA%\pyACAD\logs\pyACAD.log</code>. Some are also counted into the
+<em>N bundle problems found</em> toast after the scan; the rest are in the log only, which is
+the first place to look when a tool is missing and nothing said why.</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Symptom</th><th>Cause</th><th>Log line</th><th>Toast</th></tr></thead>
+<tbody>
+<tr><td>One button missing</td>
+    <td>The folder has no <code>script.py</code></td>
+    <td><code>'&lt;dir&gt;' has no script.py - skipped.</code></td><td>Yes</td></tr>
+<tr><td>One button missing, suffix looks fine to you</td>
+    <td>The suffix is not one of the twelve, for example <code>.pushbuttons</code></td>
+    <td><code>'&lt;dir&gt;' is not a bundle kind pyACAD knows (check the folder suffix) -
+        skipped.</code></td><td>Yes</td></tr>
+<tr><td>A child missing from a stack or menu</td>
+    <td>It is not a <code>*.pushbutton</code></td>
+    <td><code>'&lt;dir&gt;' is ignored: a stack holds only *.pushbutton folders.</code></td>
+    <td>Yes</td></tr>
+<tr><td>A <code>layout:</code> entry has no effect</td>
+    <td>It names a folder that is not there</td>
+    <td><code>The layout in '&lt;dir&gt;' names '&lt;entry&gt;', but no such folder is there -
+        ignored.</code></td><td>Yes</td></tr>
+<tr><td>A whole stack missing</td>
+    <td>It ended up with fewer than 2 or more than 3 usable buttons, often because one child
+        lost its <code>script.py</code></td>
+    <td><code>Stack '&lt;dir&gt;' holds N button(s); a stack needs 2 or 3 - skipped.</code></td>
+    <td>No</td></tr>
+<tr><td>A pulldown or split button missing</td>
+    <td>No child <code>*.pushbutton</code> had a <code>script.py</code></td>
+    <td><code>Pulldown '&lt;dir&gt;' has no usable pushbuttons - skipped.</code></td><td>No</td></tr>
+<tr><td>A urlbutton missing</td><td>No <code>url:</code>, or an empty one</td>
+    <td><code>Urlbutton '&lt;dir&gt;' has no url: in bundle.yaml - skipped.</code></td><td>No</td></tr>
+<tr><td>A linkbutton missing</td><td>No <code>plugin:</code>, or an empty one</td>
+    <td><code>Linkbutton '&lt;dir&gt;' has no plugin: in bundle.yaml - skipped.</code></td><td>No</td></tr>
+<tr><td>A dock pane's toggle missing</td>
+    <td>The folder has no <code>pane.xaml</code></td>
+    <td><code>Dockpane '&lt;dir&gt;' has no pane.xaml - skipped.</code></td><td>No</td></tr>
+<tr><td>A slideout's contents missing</td>
+    <td>The <code>.slideout</code> sits inside another <code>.slideout</code></td>
+    <td><code>Slideout '&lt;dir&gt;' sits inside another slideout - skipped.</code></td><td>No</td></tr>
+<tr><td>A panel missing</td>
+    <td>Every item in it was skipped</td>
+    <td>None for the panel; the item lines above explain it</td><td>No</td></tr>
+<tr><td>A tab missing</td>
+    <td>Every panel in it was skipped</td>
+    <td>None for the tab</td><td>No</td></tr>
+<tr><td>Nothing at all from an extension</td>
+    <td>A misspelled <code>.extension</code>, <code>.tab</code> or <code>.panel</code>, or the
+        extension is not directly inside a scanned root</td>
+    <td>None: the walk never looked at the folder</td><td>No</td></tr>
+<tr><td>A second copy of an extension missing</td>
+    <td>An extension with the same <code>name</code> already loaded from an earlier root</td>
+    <td><code>Extension '&lt;name&gt;' at '&lt;dir&gt;' is already loaded from an earlier
+        root - skipped.</code></td><td>No</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note tip">
+<span class="note-t">Read the counts in the log</span>
+<p>Every build logs <code>Ribbon built: N tab(s), M button(s).</code> and
+<code>Commands registered: N (...)</code> with the names. If either is lower than you expect,
+something above is the reason. <a href="troubleshooting.html">Troubleshooting</a> walks
+through the rest.</p>
+</div>
+
+<h2 id="slideouts">Slideouts<a class="anchor" href="#slideouts" aria-label="Link to this section">#</a></h2>
+
+<p>A <code>*.slideout</code> folder is not a bundle and draws nothing itself. Whatever panel
+items it contains are placed after a panel break, so AutoCAD keeps them in the flyout that
+opens from the panel title (the caption with a small arrow along the bottom of the panel),
+like the native panels that expand. It is where tools that matter least go, without costing
+ribbon width.</p>
+
+<div class="code"><div class="code-head"><span>folders</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-f">Drafting.panel</span>\
+  <span class="tok-k">bundle.yaml</span>                 <span class="tok-c"># layout: Count, Rename</span>
+  <span class="tok-f">Count.pushbutton</span>\           <span class="tok-c"># always visible</span>
+  <span class="tok-f">Rename.pushbutton</span>\          <span class="tok-c"># always visible</span>
+  <span class="tok-f">Extras.slideout</span>\            <span class="tok-c"># everything in here is in the flyout</span>
+    <span class="tok-k">bundle.yaml</span>               <span class="tok-c"># layout: Settings, Help</span>
+    <span class="tok-f">Settings.pushbutton</span>\
+      <span class="tok-k">script.py</span>
+    <span class="tok-f">Help.urlbutton</span>\
+      <span class="tok-k">bundle.yaml</span></code></pre></div>
+
+<ul>
+  <li>A slideout may hold <strong>any</strong> of the other eleven kinds: stacks, pulldowns,
+    toggles, dock panes and the rest.</li>
+  <li>A panel may have more than one <code>.slideout</code>. Their contents join one flyout, in
+    the order the panel's <code>layout:</code> list gives the slideouts; there is only ever one
+    break per panel.</li>
+  <li>The folder name is never shown. Its <code>bundle.yaml</code> is read for a
+    <code>layout:</code> list and nothing else. Where the slideout sits in the panel's own
+    list does not change anything visible, because its contents always render after the
+    break.</li>
+  <li>One level only. A <code>.slideout</code> inside a <code>.slideout</code> is logged and its
+    contents are dropped.</li>
+  <li>A panel whose items are <em>all</em> in a slideout still renders, with an empty face and
+    a full flyout.</li>
+  <li>Bundles in a slideout are ordinary in every other respect. They are commands, they take
+    shortcuts, keytips and <code>context:</code>, and their bundle key keeps the
+    <code>.slideout</code> folder in the path.</li>
+</ul>
+
+<h2 id="names-and-identity">Names and identity<a class="anchor" href="#names-and-identity" aria-label="Link to this section">#</a></h2>
+
+<p>Three identities are derived from the tree, and all three matter once you ship an extension
+to other people.</p>
+
+<h3 id="tab-id-and-merging">Tab id and merging<a class="anchor" href="#tab-id-and-merging" aria-label="Link to this section">#</a></h3>
+
+<p>Every ribbon tab needs a unique id. pyACAD builds one from the extension name and the tab
+folder name, replacing every character that is not a letter or digit with an underscore:
+<code>PYACAD_TAB_</code> followed by <code>&lt;extension name&gt;_&lt;tab folder&gt;</code>
+sanitised. <code>CadTools.extension\CadTools.tab</code> becomes
+<code>PYACAD_TAB_CadTools_CadTools</code>.</p>
+
+<p>Tabs, and panels inside them, also <strong>join by caption</strong> across extensions: a
+<code>pyACAD.tab</code> in your extension adds to the pyACAD tab instead of drawing a second
+one, and a <code>Layers.panel</code> inside it adds your buttons to the end of the shipped
+Layers panel. Matching ignores case. A shared tab sits where the first extension in load
+order put it and keeps that extension's id; inside anything it shares, the shipped
+<code>pyACAD</code> extension's panels and items come first and other extensions follow in load
+order.</p>
+
+<div class="code"><div class="code-head"><span>folders</span><button class="copy-btn" type="button">Copy</button></div><pre><code>%APPDATA%\pyACAD\extensions\
+  <span class="tok-f">pyACAD.extension</span>\                  <span class="tok-c"># the installer&#x27;s; every update replaces it</span>
+  My <span class="tok-f">pyACAD.extension</span>\               <span class="tok-c"># yours; updates never touch it</span>
+    <span class="tok-f">pyACAD.tab</span>\
+      <span class="tok-f">Layers.panel</span>\
+        <span class="tok-f">Layer_Report.pushbutton</span>\     <span class="tok-c"># lands at the end of the pyACAD Layers panel</span>
+      <span class="tok-f">Team.panel</span>\
+        <span class="tok-f">Publish.pushbutton</span>\          <span class="tok-c"># a new panel on the pyACAD tab</span></code></pre></div>
+
+<p>This is why nothing of yours belongs inside <code>pyACAD.extension</code>: the installer
+replaces that folder on every update. It backs up what it finds there and moves bundles and
+panels you added into <code>My pyACAD.extension</code> first, but a file added inside one of
+pyACAD's own bundles, or an edit to one of its files, can only go to the backup.</p>
+
+<h3 id="command-name">Command name<a class="anchor" href="#command-name" aria-label="Link to this section">#</a></h3>
+
+<p>Every pushbutton-shaped bundle (pushbutton, nobutton, toggle, smartbutton, and the
+pushbuttons inside stacks, pulldowns and split buttons) is an AutoCAD command. The name is
+<code>command:</code> from <code>bundle.yaml</code>, or <code>PY</code> plus the resolved
+title's letters and digits uppercased, capped at 64 characters; <code>PYTOOL</code> when the
+title has none. A bundle with <code>config.py</code> also gets the same name plus
+<code>CFG</code>. Names are handed out in load order and the first claim wins; the names
+<code>PYACAD</code>, <code>PYACADRELOAD</code>, <code>PYACADCONSOLE</code>,
+<code>PYACADRUN</code> and <code>PYACADSETTINGS</code> are reserved. A loser, or a name AutoCAD
+already answers to, gets no command, a toast says which, and its button runs the script
+directly. <a href="commands.html">Commands, macros and AutoLISP</a> has the details.</p>
+
+<h3 id="bundle-key">Bundle key<a class="anchor" href="#bundle-key" aria-label="Link to this section">#</a></h3>
+
+<p>Each bundle also carries a stable key: its path relative to the <code>.extension</code>
+folder, with forward slashes, keeping every suffix, with any legacy <code>NN_</code> prefix
+dropped from every segment.</p>
+
+<div class="code"><div class="code-head"><span>text</span><button class="copy-btn" type="button">Copy</button></div><pre><code>pyACAD.tab/Layers.panel/Layer_Snapshot.pushbutton
+pyACAD.tab/AI_(beta).panel/Setup.stack/AI_Settings.pushbutton
+CadTools.tab/Drafting.panel/Extras.slideout/Settings.pushbutton</code></pre></div>
+
+<p>That key is what identifies a bundle wherever pyACAD remembers something about it:</p>
+
+<ul>
+  <li>user shortcut overrides under <code>shortcuts.bindings</code> in
+    <code>config.json</code> (<a href="shortcuts.html">Shortcuts</a>);</li>
+  <li>a toggle's on/off state for the session;</li>
+  <li>a dock pane's palette GUID, which is how AutoCAD remembers where the palette was
+    docked and how big it was.</li>
+</ul>
+
+<p>Renaming a folder, moving it to another panel, or moving it into or out of a slideout
+therefore makes a new key: a user's shortcut override no longer applies, and a dock pane
+forgets its saved position.</p>
+
+<div class="note">
+<span class="note-t">Renumbering is free</span>
+<p><code>pyACAD.tab/02_Layers.panel/01_Layer_Snapshot.pushbutton</code> and
+<code>pyACAD.tab/Layers.panel/Layer_Snapshot.pushbutton</code> are the same key, and a key
+written into <code>config.json</code> with prefixes is normalised the same way on load, so
+adding, changing or removing prefixes never orphans an override. Renaming the folder itself,
+<code>Layer_Snapshot</code> to <code>Layer_States</code>, is still a new key.</p>
+</div>
+
+<div class="note trap">
+<span class="note-t">The key does not include the extension's name</span>
+<p>Two extensions can produce the identical key, for example a
+<code>Tools.tab/Main.panel/Viewer.dockpane</code> in each. A shortcut override would then
+apply to the first matching bundle only, and the two palettes would share one GUID and one
+saved position. Name your tab, panel or bundle folders distinctively enough that the relative
+path is yours alone.</p>
+</div>
+
+<h2 id="what-to-check-when-you-add-a-bundle">What to check when you add a bundle<a class="anchor" href="#what-to-check-when-you-add-a-bundle" aria-label="Link to this section">#</a></h2>
+
+<ul>
+  <li>The extension folder sits <strong>directly</strong> in a registered root.</li>
+  <li>Every suffix is spelled correctly and appears once per folder name.</li>
+  <li>Every <code>.pushbutton</code> (and nobutton, toggle, smartbutton) contains a
+    <code>script.py</code>.</li>
+  <li>Every <code>.stack</code> holds 2 or 3 of them, and nothing but pushbuttons sits in a
+    stack or a menu.</li>
+  <li>Every entry in a <code>layout:</code> list names a folder that exists.</li>
+  <li>The title does not derive a command name some other tool already has.</li>
+  <li>You clicked <strong>Reload</strong> (or typed <code>PYACADRELOAD</code>).</li>
+</ul>
+
+<div class="cards">
+  <a href="buttons.html"><span class="c-t">Buttons, stacks and pulldowns</span>
+    <span class="c-d">What each of the twelve kinds looks like and when to reach for it.</span></a>
+  <a href="bundle-yaml.html"><span class="c-t">bundle.yaml</span>
+    <span class="c-d">Every key, which kinds read it, and the precedence rules.</span></a>
+  <a href="hooks.html"><span class="c-t">Hooks</span>
+    <span class="c-d">Scripts under hooks\ that run themselves when AutoCAD does something.</span></a>
+</div>
+  <div class="pagenav">
+<a href="quickstart.html"><span class="dir">Previous</span><span class="ttl">Your first button</span></a>
+<a class="next" href="buttons.html"><span class="dir">Next</span><span class="ttl">Buttons, stacks and pulldowns</span></a>
+</div>
+</article>
+<aside class="toc"><div class="toc-head">On this page</div>
+<a href="#the-levels">The levels</a>
+<a href="#the-twelve-bundle-kinds" class="h3">The twelve bundle kinds</a>
+<a href="#a-complete-extension">A complete extension</a>
+<a href="#how-discovery-walks-the-disk">How discovery walks the disk</a>
+<a href="#where-roots-come-from">Where roots come from</a>
+<a href="#extension-yaml">extension.yaml</a>
+<a href="#the-lib-folder-one-extension">The lib folder (one extension)</a>
+<a href="#lib-folders-every-extension-both-engines">*.lib folders (every extension, both engines)</a>
+<a href="#hooks">hooks\</a>
+<a href="#startup-py">startup.py</a>
+<a href="#ordering-panels-and-buttons">Ordering panels and buttons</a>
+<a href="#from-folder-name-to-title">From folder name to title</a>
+<a href="#when-a-bundle-does-not-appear">When a bundle does not appear</a>
+<a href="#slideouts">Slideouts</a>
+<a href="#names-and-identity">Names and identity</a>
+<a href="#tab-id-and-merging" class="h3">Tab id and merging</a>
+<a href="#command-name" class="h3">Command name</a>
+<a href="#bundle-key" class="h3">Bundle key</a>
+<a href="#what-to-check-when-you-add-a-bundle">What to check when you add a bundle</a>
+</aside>
+</main>
+</div>
+<script src="_assets/search-index.js"></script>
+<script src="_assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,419 @@
+<!-- title: Click actions and config.py -->
+<!-- eyebrow: Bundles -->
+<!-- lead: One button, three gestures: a click runs the script, Shift+Click runs the bundle's config.py, Alt+Click opens its folder. Every run goes through an AutoCAD command sent to the drawing. -->
+
+<p>Every pyACAD button answers three gestures, and two of them come free. Under all of them
+sits one design decision that shapes everything else on this page: a click does not run your
+script. It sends the tool's <strong>AutoCAD command</strong> to the drawing, and AutoCAD runs
+the script the way it runs any command.</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Gesture</th><th>What happens</th><th>You provide</th></tr></thead>
+<tbody>
+<tr><td>Click</td><td>Sends the tool's command, which runs <code>script.py</code></td>
+    <td><code>script.py</code></td></tr>
+<tr><td><kbd>Shift</kbd>+Click</td>
+    <td>Sends the tool's <code>CFG</code> command, which runs <code>config.py</code></td>
+    <td><code>config.py</code>, optional</td></tr>
+<tr><td><kbd>Alt</kbd>+Click</td>
+    <td>Opens the bundle folder in Explorer with <code>script.py</code> selected</td>
+    <td>Nothing, this is built in</td></tr>
+<tr><td>Keyboard chord</td><td>Sends the tool's command, always the primary one</td>
+    <td><code>shortcut:</code> in <code>bundle.yaml</code></td></tr>
+<tr><td>Typing the command</td><td>Runs <code>script.py</code> (or <code>config.py</code>
+    for the <code>CFG</code> twin)</td><td>Nothing, every tool has one</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>How the modifiers are read</h2>
+
+<p>At the moment a ribbon button is clicked, the runtime reads the keyboard modifier state and
+picks one action. The order of the tests is the whole specification.</p>
+
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 700 300" width="700" role="img"
+     aria-label="Decision order for click modifiers: Ctrl is ignored, Alt opens the folder, Shift sends the config command, otherwise the primary command is sent.">
+  <style>
+    .ca-t   { font: 12px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--ink); }
+    .ca-m   { font: 11px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--muted); }
+    .ca-mono{ font: 11.5px Consolas, monospace; fill: var(--ink); }
+    .ca-lbl { font: 10.5px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--muted);
+              text-transform: uppercase; letter-spacing: .07em; }
+    .ca-box { fill: var(--paper); stroke: var(--line-strong); stroke-width: 1; }
+    .ca-key { fill: var(--paper); stroke: var(--frame); stroke-width: 1.2; }
+    .ca-off { fill: none; stroke: var(--line); stroke-width: 1; stroke-dasharray: 3 3; }
+    .ca-arw { stroke: var(--frame); stroke-width: 1.25; fill: none; }
+    .ca-acc { stroke: var(--accent); stroke-width: 1.6; fill: none; }
+  </style>
+  <defs>
+    <marker id="ca-a" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path d="M0 0.6 L6.4 3.5 L0 6.4 z" fill="var(--frame)"/>
+    </marker>
+  </defs>
+
+  <text class="ca-lbl" x="0" y="16">Modifier state at the click</text>
+
+  <rect class="ca-off" x="0"   y="28" width="56" height="26" rx="4"/>
+  <text class="ca-m"   x="14"  y="45">Ctrl</text>
+  <path class="ca-acc" d="M6 50 L50 32"/>
+  <text class="ca-m"   x="0"   y="70">never read</text>
+
+  <rect class="ca-key" x="72"  y="28" width="60" height="26" rx="4"/>
+  <text class="ca-t"   x="86"  y="45">Shift</text>
+
+  <rect class="ca-key" x="148" y="28" width="52" height="26" rx="4"/>
+  <text class="ca-t"   x="164" y="45">Alt</text>
+
+  <path class="ca-arw" d="M110 60 V 96" marker-end="url(#ca-a)"/>
+
+  <rect class="ca-box" x="20"  y="100" width="180" height="34" rx="4"/>
+  <text class="ca-t"   x="36"  y="122">Is Alt held?</text>
+  <path class="ca-arw" d="M206 117 H 296" marker-end="url(#ca-a)"/>
+  <text class="ca-m"   x="238" y="110">yes</text>
+  <rect class="ca-box" x="302" y="100" width="392" height="34" rx="4"/>
+  <text class="ca-t"   x="318" y="122">Open the bundle folder, with</text>
+  <text class="ca-mono" x="490" y="122">script.py</text>
+  <text class="ca-t"   x="546" y="122">selected</text>
+
+  <path class="ca-arw" d="M110 138 V 158" marker-end="url(#ca-a)"/>
+  <text class="ca-m"   x="118" y="153">no</text>
+
+  <rect class="ca-box" x="20"  y="162" width="180" height="34" rx="4"/>
+  <text class="ca-t"   x="36"  y="184">Is Shift held?</text>
+  <path class="ca-arw" d="M206 179 H 296" marker-end="url(#ca-a)"/>
+  <text class="ca-m"   x="238" y="172">yes</text>
+  <rect class="ca-box" x="302" y="162" width="392" height="34" rx="4"/>
+  <text class="ca-t"   x="318" y="184">Send PYNAMECFG, or toast if there is no</text>
+  <text class="ca-mono" x="590" y="184">config.py</text>
+
+  <path class="ca-arw" d="M110 200 V 220" marker-end="url(#ca-a)"/>
+  <text class="ca-m"   x="118" y="215">no</text>
+
+  <rect class="ca-box" x="20"  y="224" width="180" height="34" rx="4"/>
+  <text class="ca-t"   x="36"  y="246">Otherwise</text>
+  <path class="ca-arw" d="M206 241 H 296" marker-end="url(#ca-a)"/>
+  <rect class="ca-box" x="302" y="224" width="392" height="34" rx="4"/>
+  <text class="ca-t"   x="318" y="246">Send PYNAME, which runs</text>
+  <text class="ca-mono" x="480" y="246">script.py</text>
+
+  <text class="ca-m" x="0" y="284">Alt is tested first, so Alt and Shift together open the
+    folder. Ctrl changes nothing at all.</text>
+</svg>
+</div>
+<figcaption>Three tests in a fixed order. No combination reaches a fourth outcome.</figcaption>
+</figure>
+
+<h3>Alt wins over Shift</h3>
+
+<p>The Alt test comes first, so <kbd>Alt</kbd>+<kbd>Shift</kbd>+Click opens the folder. It
+does not run <code>config.py</code>, and it does not do both.</p>
+
+<h3>Ctrl is deliberately ignored</h3>
+
+<p>Ctrl is not part of the decision. <kbd>Ctrl</kbd>+Click is a plain click. That keeps a
+click made while a Ctrl chord is still physically held identical to a bare click.</p>
+
+<h3>Chords never see the modifiers</h3>
+
+<p>A keyboard chord does not go through these tests at all: it dispatches the primary command
+directly. If it did, the Shift in <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>M</kbd> would open
+<code>config.py</code> instead of running the tool. See
+<a href="shortcuts.html">Shortcuts and keytips</a>.</p>
+
+<h2>A click becomes a command</h2>
+
+<p>Every pushbutton-shaped bundle is registered as an AutoCAD command at boot and on every
+Reload: <code>command:</code> in <code>bundle.yaml</code> names it, otherwise it is
+<code>PY</code> plus the title's letters and digits uppercased (<em>Batch Plot</em> is
+<code>PYBATCHPLOT</code>), and a bundle with a <code>config.py</code> gets a twin with
+<code>CFG</code> on the end (<code>PYBATCHPLOTCFG</code>). The naming rules and name conflicts are
+covered in <a href="commands.html">Commands, macros and AutoLISP</a>.</p>
+
+<p>The click handler only sends that name to the active drawing:</p>
+
+<pre data-lang="text">
+_.PYBATCHPLOT&#8629;
+</pre>
+
+<p>The leading underscore asks for the global (non-localised) command name, and the dot
+bypasses any <code>UNDEFINE</code>, so a user who undefines a name cannot trap a pyACAD tool.
+The string is echoed, so the command line shows what ran, as if it had been typed. AutoCAD
+then starts the command, and only then does pyACAD run the script.</p>
+
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 700 250" width="700" role="img"
+     aria-label="A ribbon click or a chord sends the command string; AutoCAD starts the command, locking the drawing and opening an undo group, and the command callback runs the script.">
+  <style>
+    .cx-t   { font: 12px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--ink); }
+    .cx-m   { font: 11px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--muted); }
+    .cx-lbl { font: 10.5px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--muted);
+              text-transform: uppercase; letter-spacing: .07em; }
+    .cx-box { fill: var(--paper); stroke: var(--line-strong); stroke-width: 1; }
+    .cx-acc { fill: var(--paper); stroke: var(--accent); stroke-width: 1.4; }
+    .cx-arw { stroke: var(--frame); stroke-width: 1.25; fill: none; }
+  </style>
+  <defs>
+    <marker id="cx-a" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path d="M0 0.6 L6.4 3.5 L0 6.4 z" fill="var(--frame)"/>
+    </marker>
+  </defs>
+
+  <text class="cx-lbl" x="16"  y="16">pyACAD, application context</text>
+  <text class="cx-lbl" x="372" y="16">AutoCAD, document context</text>
+
+  <rect class="cx-box" x="16" y="28" width="300" height="40" rx="4"/>
+  <text class="cx-t" x="30" y="52">Ribbon click, or a chord</text>
+
+  <rect class="cx-box" x="16" y="96" width="300" height="52" rx="4"/>
+  <text class="cx-t" x="30" y="118">Send "_.PYNAME" to the active drawing</text>
+  <text class="cx-m" x="30" y="136">no drawing open: toast, nothing runs</text>
+
+  <rect class="cx-box" x="372" y="96" width="312" height="52" rx="4"/>
+  <text class="cx-t" x="386" y="118">AutoCAD starts PYNAME</text>
+  <text class="cx-m" x="386" y="136">locks the drawing, opens the undo group</text>
+
+  <rect class="cx-acc" x="372" y="176" width="312" height="52" rx="4"/>
+  <text class="cx-t" x="386" y="198">pyACAD runs script.py</text>
+  <text class="cx-m" x="386" y="216">pickfirst selection still in place</text>
+
+  <path class="cx-arw" d="M166 70 V 92" marker-end="url(#cx-a)"/>
+  <path class="cx-arw" d="M318 122 H 366" marker-end="url(#cx-a)"/>
+  <path class="cx-arw" d="M528 150 V 172" marker-end="url(#cx-a)"/>
+  <text class="cx-m" x="16" y="246">Typing PYNAME, a CUI macro and (pyacad "PYNAME") from
+    AutoLISP all join at "AutoCAD starts PYNAME".</text>
+</svg>
+</div>
+<figcaption>The click and the typed command meet before your script starts, so a tool behaves
+the same however it was started.</figcaption>
+</figure>
+
+<p>Because the script runs inside a real command:</p>
+
+<ul>
+  <li><strong>The drawing is locked for you.</strong> The command is registered as modal, so
+    AutoCAD holds the document lock for the whole run. A script started this way never needs
+    <code>doc.lock()</code>.</li>
+  <li><strong>One undo step.</strong> AutoCAD opens an undo group around the command, so
+    <kbd>Ctrl</kbd>+<kbd>Z</kbd> (or <code>U</code>) takes back everything the tool did in one
+    step, however many entities it touched. This was checked in AutoCAD 2026.</li>
+  <li><strong>The pickfirst selection survives.</strong> The command uses the pick set, so
+    objects selected before the click are still selected when the script asks for them.</li>
+  <li><strong>One route for everything.</strong> Clicking, a chord, typing the name, a CUI
+    macro, a script file and <code>(pyacad "PYBATCHPLOT")</code> from AutoLISP all arrive at
+    the same command. A click passes no arguments, so <code>__args__</code> is an empty list.</li>
+</ul>
+
+<div class="note">
+<span class="note-t">A click ends a running command first</span>
+<p>When another command is waiting for input, the click sends two Escapes ahead of the name,
+like a CUI macro that starts with <code>^C^C</code>, so the tool never types into that
+command's prompt. At the idle <code>Command:</code> prompt it sends the bare name, so objects
+you selected first stay selected for the tool.</p>
+</div>
+
+<h3>With no drawing open</h3>
+
+<p>A command needs a drawing to run in. When AutoCAD has no document open (every drawing
+closed, the Start tab showing) the send fails, nothing runs, and an information toast says
+<em>Open a drawing first.</em> with the tool's title underneath. Chords behave the same.</p>
+
+<h3>The direct-run fallback</h3>
+
+<p>A bundle can end up without a command: its name was already taken by another pyACAD
+bundle (first wins), AutoCAD already answers to the name (a LISP <code>c:</code> function or
+another add-in's command), or the session has no command system at all. Those bundles are
+reported in a toast at boot or Reload (<em>One command was not registered</em>) and still
+work from the ribbon: the click runs the script directly, inside a document lock taken on the
+active drawing when there is one.</p>
+
+<p>What a direct run does not get is everything the command gave: there is no undo group
+around it, it is not in the command history, and it cannot be typed or called from LISP. Fix
+the conflict with a unique <code>command:</code> in <code>bundle.yaml</code> rather than living
+with the fallback.</p>
+
+<h2>What happens once the script starts</h2>
+
+<p>The same steps run whichever gesture started the tool:</p>
+
+<ol>
+  <li><strong>Host version gate.</strong> A bundle with <code>min_host_version:</code> or
+    <code>max_host_version:</code> outside this AutoCAD's release year warns with a toast such
+    as <em>Requires AutoCAD 2024 or newer (this is 2022).</em> and stops.</li>
+  <li><strong>One script at a time.</strong> If another pyACAD script is still running, the
+    new one is refused with the toast <em>&lt;running tool&gt; is still running</em>,
+    <em>Wait for it to finish, then try again.</em> Long scripts pump the message loop to
+    repaint, and a pump delivers queued clicks; the gate stops a second script starting on
+    top of the first.</li>
+  <li>The <code>before-command</code> hooks run, then the script, then the
+    <code>after-command</code> hooks, even when the script failed. See
+    <a href="hooks.html">Hooks</a>.</li>
+  <li>Output appears lazily: the output window opens on the first <code>print()</code> or
+    <code>pyacad.output</code> call, titled <code>pyACAD - &lt;title&gt;</code>. A script
+    that only toasts never opens one. A traceback goes to that window in the error colour and
+    to the log.</li>
+  <li>Any progress window the script left open is closed, so a crash cannot leave AutoCAD
+    disabled.</li>
+</ol>
+
+<div class="note">
+<span class="note-t">context: only greys the ribbon</span>
+<p>A <code>context:</code> rule in <code>bundle.yaml</code> enables and disables the ribbon
+button. It is not checked when the command is typed, sent by a chord or called from LISP, so
+a script that needs a selection should still check for one and say so.</p>
+</div>
+
+<h2>Alt+Click: the way back to your own code</h2>
+
+<p><kbd>Alt</kbd>+Click starts Explorer with the bundle's <code>script.py</code> selected. It
+runs no Python, needs no drawing, ignores the one-script gate, and works on every
+pushbutton-shaped button, including stack rows and pulldown menu items. It is the fastest
+route from a tool that misbehaves to the file that misbehaves.</p>
+
+<pre data-lang="powershell" data-file="what it runs">
+explorer.exe /select,"D:\CAD\MyTools.extension\MyTools.tab\Blocks.panel\Count.pushbutton\script.py"
+</pre>
+
+<p>It always selects <code>script.py</code>, even when the file you want is
+<code>config.py</code>; the folder is open, so that is one click away. If Explorer cannot be
+started the failure is logged and nothing shows on screen.</p>
+
+<h2>config.py: the secondary action</h2>
+
+<p>A bundle can ship a second script beside <code>script.py</code>, named exactly
+<code>config.py</code>. <kbd>Shift</kbd>+Click sends its command, and typing the
+<code>CFG</code> twin (<code>PYCOUNTCFG</code>) does the same.</p>
+
+<pre data-lang="tree">
+Count.pushbutton\
+  script.py       # click, chord, PYCOUNT
+  config.py       # Shift+Click, PYCOUNTCFG
+  bundle.yaml
+  icon.png
+</pre>
+
+<p>It is not a different kind of bundle. There is no <code>bundle.yaml</code> of its own, no
+title, icon or engine of its own: it is the same tool with a second entry point.</p>
+
+<h3>What differs when config.py runs</h3>
+
+<p>Only <code>__file__</code>, which points at <code>config.py</code>. The engine, the search
+paths, <code>__commandpath__</code>, <code>__title__</code> (still the button's title), the
+output window title and the per-tool settings key are all the primary run's. That last one
+matters: <code>pyacad.script.get_config</code> in <code>config.py</code> and in
+<code>script.py</code> read and write the same file, so a config script that saves options is
+read back by the tool with no shared constant needed.</p>
+
+<h3>The convention</h3>
+
+<p>Nothing forces <code>config.py</code> to be a settings dialog, but that is what users
+expect from a Shift+Click, and it is what the shipped tools do. Read the current values,
+present them, write them back, and say what happened.</p>
+
+<pre data-lang="python" data-file="Count.pushbutton\config.py">
+"""Options for Count Blocks."""
+from pyacad import forms, script, toast
+
+DEFAULTS = {'warn_above': 1000}
+
+values = script.get_config(DEFAULTS)
+limit = forms.ask_number('Warn when more block references than:',
+                         default=values['warn_above'], min_value=1, title=__title__)
+if limit is not None:                      # None means Cancel: change nothing, say nothing
+    values['warn_above'] = int(limit)
+    script.save_config(values)
+    toast.success('Saved', 'Warning above %d references.' % values['warn_above'])
+</pre>
+
+<p>The primary script reads the same values back:</p>
+
+<pre data-lang="python" data-file="Count.pushbutton\script.py">
+"""Counts the block references in the drawing, every layout included."""
+from pyacad import blocks, script, toast
+
+DEFAULTS = {'warn_above': 1000}
+
+values = script.get_config(DEFAULTS)
+count = sum(blocks.counts().values())
+if count > values['warn_above']:
+    toast.warning('%d block references' % count, 'That is more than you asked to be warned about.')
+else:
+    toast.success('%d block references' % count)
+</pre>
+
+<p>The shipped tools use <code>config.py</code> for exactly this. Drawing Cleanup's
+<code>config.py</code>, for instance, calls <code>pyacad.script.reset_config</code> so the
+next run opens with the default steps ticked again.</p>
+
+<h3>When there is no config.py</h3>
+
+<p><kbd>Shift</kbd>+Click on a bundle without one shows an information toast: <em>Shift+Click
+action not defined for this tool.</em> Nothing runs.</p>
+
+<div class="note warn">
+<span class="note-t">A new config.py needs a Reload</span>
+<p>Whether a bundle has a <code>config.py</code> is decided when the ribbon and the commands
+are built. Adding the file to a loaded bundle does nothing (and registers no
+<code>CFG</code> command) until you press <strong>Reload</strong>. Editing an existing
+<code>config.py</code> needs no Reload: it is read fresh on every run.</p>
+</div>
+
+<p>A bundle with a <code>config.py</code> can show a marker after its caption so users know
+Shift+Click does something. It is off by default; <code>ribbon.showConfigMarker</code> in
+<code>config.json</code> turns it on (see <a href="settings.html">Settings</a>). Mention
+Shift+Click in your tooltip either way: nothing else on the button says it.</p>
+
+<h2>Other button kinds</h2>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Kind</th><th>Click</th><th>Modifiers</th></tr></thead>
+<tbody>
+<tr><td><code>*.toggle</code></td>
+    <td>Sends its command like a pushbutton. Flipping the state is the script's job,
+    with <code>pyacad.script.set_toggle_state</code>.</td>
+    <td>Same rules as a pushbutton.</td></tr>
+<tr><td><code>*.smartbutton</code></td>
+    <td>Sends its command; the script sees <code>__selfinit__</code> False and no
+    <code>__button__</code>.</td>
+    <td>Same rules as a pushbutton.</td></tr>
+<tr><td><code>*.pulldown</code></td>
+    <td>Opens the menu; each item is a pushbutton.</td>
+    <td>Per item.</td></tr>
+<tr><td><code>*.splitbutton</code></td>
+    <td>The header re-runs the item last picked this session (the first item until one
+    is).</td>
+    <td>Same rules, applied to that item.</td></tr>
+<tr><td><code>*.splitpushbutton</code></td>
+    <td>The header always runs the first item.</td>
+    <td>Same rules, applied to the first item.</td></tr>
+<tr><td><code>*.urlbutton</code></td>
+    <td>Opens its <code>url:</code> in the default browser; a failure toasts
+    <em>Could not open URL</em>.</td>
+    <td>Ignored.</td></tr>
+<tr><td><code>*.linkbutton</code></td>
+    <td>Sends its <code>plugin:</code> value as a command, the same way a pushbutton sends its
+    own, so it can start a native, LISP or other add-in command. No drawing: the
+    <em>Open a drawing first.</em> toast.</td>
+    <td>Ignored.</td></tr>
+<tr><td><code>*.dockpane</code></td>
+    <td>Shows or hides the palette. The button stays pressed while the palette is visible,
+    and follows it when the palette is closed from its own title bar. No Python runs on the
+    click: the pane's <code>script.py</code> runs when the palette is built, at boot and on
+    every Reload.</td>
+    <td>Ignored.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="cards">
+  <a href="commands.html"><span class="c-t">Commands, macros and AutoLISP</span>
+    <span class="c-d">Command names, CFG twins, arguments and results.</span></a>
+  <a href="script-environment.html"><span class="c-t">The script environment</span>
+    <span class="c-d">The injected globals, search paths and module reloading.</span></a>
+  <a href="settings.html"><span class="c-t">Settings and per-tool state</span>
+    <span class="c-d">Options that config.py writes and script.py reads.</span></a>
+</div>

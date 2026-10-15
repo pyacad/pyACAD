@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Your first button - pyACAD authoring</title>
+<meta name="description" content="Build a working AutoCAD tool from an empty folder, then run it from the ribbon, from the command line and from AutoLISP.">
+<link rel="stylesheet" href="_assets/site.css">
+</head>
+<body data-base="">
+<div class="layout">
+<div class="sidebar">
+  <div class="brand"><a href="index.html"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="26" height="26" aria-hidden="true"><polygon points="157.0,327.8 351.8,327.8 363.1,342.4 363.1,403.3 168.3,403.3 157.0,388.7" fill="#78082A"/><polygon points="157.0,327.8 351.8,327.8 351.8,388.7 157.0,388.7" fill="#B80C40"/><polygon points="51.5,482.0 234.1,157.4 278.7,181.7 290.1,196.3 152.1,496.6 62.8,496.6" fill="#78082A"/><polygon points="51.5,482.0 140.8,482.0 278.7,181.7 234.1,157.4" fill="#E51050"/><polygon points="359.9,482.0 205.7,108.7 217.0,123.3 371.2,496.6" fill="#78082A"/><polygon points="205.7,108.7 201.6,55.9 213.0,70.5 217.0,123.3" fill="#78082A"/><polygon points="201.6,55.9 246.3,15.4 257.6,30.0 213.0,70.5" fill="#78082A"/><polygon points="246.3,15.4 343.7,23.5 355.0,38.1 257.6,30.0" fill="#78082A"/><polygon points="343.7,23.5 388.3,51.9 399.7,66.5 355.0,38.1" fill="#78082A"/><polygon points="388.3,51.9 347.7,76.2 359.1,90.8 399.7,66.5" fill="#78082A"/><polygon points="347.7,76.2 295.0,84.3 306.3,99.0 359.1,90.8" fill="#78082A"/><polygon points="295.0,84.3 449.2,482.0 460.5,496.6 306.3,99.0" fill="#78082A"/><polygon points="449.2,482.0 359.9,482.0 371.2,496.6 460.5,496.6" fill="#78082A"/><polygon points="359.9,482.0 205.7,108.7 201.6,55.9 246.3,15.4 343.7,23.5 388.3,51.9 347.7,76.2 295.0,84.3 449.2,482.0" fill="#E51050"/><polygon points="270.6,39.7 311.2,35.7 297.0,51.9" fill="#1F2329"/></svg><span class="brand-name">pyACAD
+    <span class="brand-sub">Tool authoring guide</span></span></a></div>
+  <div class="search-wrap">
+    <svg class="search-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <circle cx="6" cy="6" r="4.2" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M9.2 9.2 12.5 12.5" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round"/></svg>
+    <input id="search" type="search" placeholder="Search the docs" autocomplete="off"
+           spellcheck="false" aria-label="Search the documentation">
+    <span class="search-kbd">/</span>
+    <div id="search-results" class="search-results"></div>
+  </div>
+  <nav class="pages">
+<div class="grp">Start</div>
+<a href="overview.html"><span class="num">01</span>How pyACAD works</a>
+<a href="quickstart.html" class="active"><span class="num">02</span>Your first button</a>
+<div class="grp">Bundles</div>
+<a href="anatomy.html"><span class="num">03</span>Anatomy of an extension</a>
+<a href="buttons.html"><span class="num">04</span>Buttons, stacks and pulldowns</a>
+<a href="bundle-yaml.html"><span class="num">05</span>The bundle.yaml reference</a>
+<a href="icons.html"><span class="num">06</span>Icons</a>
+<a href="shortcuts.html"><span class="num">07</span>Shortcuts and keytips</a>
+<a href="click-actions.html"><span class="num">08</span>Click actions and config.py</a>
+<a href="hooks.html"><span class="num">09</span>Hooks</a>
+<div class="grp">Scripts</div>
+<a href="script-environment.html"><span class="num">10</span>The script environment</a>
+<a href="user-interface.html"><span class="num">11</span>Talking to the user</a>
+<a href="settings.html"><span class="num">12</span>Settings and per-tool state</a>
+<a href="commands.html"><span class="num">13</span>AutoCAD commands and AutoLISP</a>
+<a href="command-line.html"><span class="num">14</span>pyacad.exe and headless runs</a>
+<div class="grp">Reference</div>
+<a href="api-reference.html"><span class="num">15</span>Python API reference</a>
+<div class="grp">Practice</div>
+<a href="cookbook.html"><span class="num">16</span>Cookbook</a>
+<a href="ai-assistant.html"><span class="num">17</span>Writing tools with an AI assistant</a>
+<a href="troubleshooting.html"><span class="num">18</span>Troubleshooting</a>
+<a href="style-guide.html"><span class="num">19</span>Style guide for tools</a>
+</nav>
+  <div class="side-foot">
+    <span>pyACAD 0.1.0</span>
+    <button id="theme-toggle" type="button" aria-label="Toggle colour theme">
+      <span>Dark</span></button>
+  </div>
+</div>
+<main class="main">
+<article>
+  <p class="eyebrow">Start</p>
+  <h1>Your first button</h1>
+  <p class="lead">Build a working AutoCAD tool from an empty folder, then run it from the ribbon, from the command line and from AutoLISP.</p>
+  <p>This page builds one real tool end to end. Every later page goes deeper on one part of what
+happens here, so it is worth typing along rather than skimming.</p>
+
+<p>The tool counts objects: the ones you have selected, or everything in model space. Small,
+but it exercises the whole path: discovery, metadata, the command it becomes, the
+<code>pyacad</code> library, arguments in and a result out.</p>
+
+<h2 id="before-you-start">Before you start<a class="anchor" href="#before-you-start" aria-label="Link to this section">#</a></h2>
+
+<p>You need AutoCAD 2021 to 2026 with pyACAD installed: a <strong>pyACAD</strong> tab on the
+ribbon tells you it loaded. You also need a folder that pyACAD scans for extensions. You have
+two choices.</p>
+
+<p><strong>The quick way:</strong> use the folder the installer already scans,
+<code>%APPDATA%\pyACAD\extensions</code>. Anything you put there loads with no further
+setup. Put your work in a folder of its own beside <code>pyACAD.extension</code>, never inside
+it: updates replace <code>pyACAD.extension</code> whole.</p>
+
+<p><strong>The tidy way:</strong> keep your tools in a folder you own, for example
+<code>D:\CadTools</code>, and tell pyACAD about it. This guide assumes that folder. Create it,
+then register it one of three ways:</p>
+
+<ul>
+  <li><strong>Settings window.</strong> Click <strong>Settings</strong> on the pyACAD panel.
+    Under <em>Where extensions are loaded from</em>, click <strong>Add</strong>, pick
+    <code>D:\CadTools</code>, then <strong>Save</strong>. Answer yes when it offers to reload
+    pyACAD.</li>
+  <li><strong>config.json.</strong> Add the folder to the <code>"extensions"</code> array in
+    <code>%APPDATA%\pyACAD\config.json</code>. Backslashes are doubled in JSON.</li>
+  <li><strong>Command line.</strong> From a terminal:
+    <code>%APPDATA%\pyACAD\cli\pyacad.exe extensions add D:\CadTools</code>, then
+    <code>... extensions list</code> to confirm.</li>
+</ul>
+
+<div class="code"><div class="code-head"><span>%APPDATA%\pyACAD\config.json</span><button class="copy-btn" type="button">Copy</button></div><pre><code>{
+  <span class="tok-f">&quot;extensions&quot;</span>: [
+    <span class="tok-s">&quot;D:\\CadTools&quot;</span>
+  ]
+}</code></pre></div>
+
+<p>The folders listed there are scanned first, in order; the installer's
+<code>%APPDATA%\pyACAD\extensions</code> is still scanned after them, so the pyACAD tab does
+not go anywhere. If <code>config.json</code> already has other keys, add
+<code>"extensions"</code> beside them rather than replacing the file.</p>
+
+<h2 id="step-1-create-the-folders">Step 1: create the folders<a class="anchor" href="#step-1-create-the-folders" aria-label="Link to this section">#</a></h2>
+
+<p>Four nested folders, and the suffixes are what matter. The names before the suffixes are
+yours and become the labels you see.</p>
+
+<div class="code"><div class="code-head"><span>D:\CadTools</span><button class="copy-btn" type="button">Copy</button></div><pre><code>D:\CadTools\
+  <span class="tok-f">CadTools.extension</span>\
+    <span class="tok-f">CadTools.tab</span>\
+      <span class="tok-f">Drafting.panel</span>\
+        <span class="tok-f">Count.pushbutton</span>\
+          <span class="tok-k">script.py</span></code></pre></div>
+
+<p>Create them in Explorer or in one line of PowerShell:</p>
+
+<div class="code"><div class="code-head"><span>powershell</span><button class="copy-btn" type="button">Copy</button></div><pre><code>New-Item -ItemType Directory -Force `
+  D:\CadTools\CadTools.extension\CadTools.tab\Drafting.panel\Count.pushbutton</code></pre></div>
+
+<div class="note warn">
+<span class="note-t">Watch the suffixes</span>
+<p><code>.extension</code>, <code>.tab</code>, <code>.panel</code> and
+<code>.pushbutton</code> are matched literally, ignoring case: <code>Count.PushButton</code>
+works, <code>Count.pushbuttons</code> does not. A misspelled bundle suffix inside a panel is
+reported in a toast after the scan. A misspelled <code>.extension</code>, <code>.tab</code> or
+<code>.panel</code> is the silent one: the scan only looks for those exact patterns, so a
+wrong one is never looked at.</p>
+</div>
+
+<h2 id="step-2-write-the-script">Step 2: write the script<a class="anchor" href="#step-2-write-the-script" aria-label="Link to this section">#</a></h2>
+
+<p>Create <code>script.py</code> inside <code>Count.pushbutton</code>:</p>
+
+<div class="code"><div class="code-head"><span>Count.pushbutton\script.py</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-s">&quot;&quot;&quot;Counts the selected objects, or everything in model space.&quot;&quot;&quot;</span>
+<span class="tok-k">from</span> pyacad <span class="tok-k">import</span> sel, toast
+
+picked = sel.current()                    <span class="tok-c"># the pickfirst set, as a list of handles</span>
+<span class="tok-k">if</span> picked:
+    toast.success(<span class="tok-s">&#x27;%d object(s) selected&#x27;</span> % len(picked))
+<span class="tok-k">else</span>:
+    every = sel.get(space=<span class="tok-s">&#x27;model&#x27;</span>)
+    toast.info(<span class="tok-s">&#x27;Nothing selected&#x27;</span>, <span class="tok-s">&#x27;%d object(s) in model space.&#x27;</span> % len(every))</code></pre></div>
+
+<p>Three things are already decided that you did not configure:</p>
+
+<ul>
+  <li>The <strong>button label</strong> is <em>Count</em>, from the folder name.</li>
+  <li>The <strong>tooltip</strong> is the module docstring on the first line.</li>
+  <li>The <strong>engine</strong> is IronPython, the default.</li>
+</ul>
+
+<p>And one more, which is the important one: the button is also the AutoCAD command
+<code>PYCOUNT</code>, named from its title.</p>
+
+<h2 id="step-3-load-it">Step 3: load it<a class="anchor" href="#step-3-load-it" aria-label="Link to this section">#</a></h2>
+
+<p>If AutoCAD is not running, start it. If it is, click <strong>Reload</strong> on the pyACAD
+panel or type <code>PYACADRELOAD</code>. A new <strong>CadTools</strong> tab appears with a
+<strong>Drafting</strong> panel and a <strong>Count</strong> button on it.</p>
+
+<p>Open a drawing, select a few objects and click <strong>Count</strong>. A toast appears in
+the corner of the AutoCAD window with the count. Press <kbd>Esc</kbd> to clear the selection
+and click again: now it counts model space. Watch the command line as you click, and you will
+see <code>_.PYCOUNT</code> echoed there: the button sent its command, exactly as an Autodesk
+button does.</p>
+
+<div class="note trap">
+<span class="note-t">Nothing appeared</span>
+<p>Look for a warning toast reading <em>N bundle problems found</em>. pyACAD shows one after
+any scan that had to skip something, quoting the first problem; the rest are in
+<code>%APPDATA%\pyACAD\logs\pyACAD.log</code>. The usual causes are a typo in a bundle
+suffix or a missing <code>script.py</code>. A root that is not registered, or an extension
+folder one level too deep inside it, produces no toast and no log line at all, because the scan
+never reaches it. <a href="troubleshooting.html">Troubleshooting</a> covers the rest.</p>
+</div>
+
+<h2 id="step-4-give-it-a-proper-title">Step 4: give it a proper title<a class="anchor" href="#step-4-give-it-a-proper-title" aria-label="Link to this section">#</a></h2>
+
+<p>The folder name is a poor title once you want spaces, and the docstring is a poor tooltip
+once you want more than a sentence. Add a <code>bundle.yaml</code> beside the script:</p>
+
+<div class="code"><div class="code-head"><span>Count.pushbutton\bundle.yaml</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-k">title</span>: Count Objects
+<span class="tok-k">tooltip</span>: Counts the selected objects, or every object in model space when nothing is selected.
+<span class="tok-k">context</span>: doc</code></pre></div>
+
+<p>Click Reload. The button now reads <em>Count Objects</em>, the tooltip is yours, and
+<code>context: doc</code> greys the button out while no drawing is open. Because the title
+changed, so did the command: it is now <code>PYCOUNTOBJECTS</code>, the title's letters and
+digits uppercased behind <code>PY</code>. The old <code>PYCOUNT</code> is gone after the
+Reload.</p>
+
+<p>Title and tooltip resolve in a fixed order, most specific first:</p>
+
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 700 150" width="700" role="img"
+     aria-label="Title resolution order: bundle.yaml, then the script, then the folder name. The command name follows the resolved title unless command: is set.">
+  <style>
+    .qs-t   { font: 12px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--ink); }
+    .qs-m   { font: 11px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--muted); }
+    .qs-mono{ font: 11.5px Consolas, monospace; fill: var(--ink); }
+    .qs-acc { font: 11.5px Consolas, monospace; fill: var(--accent); }
+    .qs-box { fill: var(--paper); stroke: var(--line-strong); stroke-width: 1; }
+  </style>
+  <defs>
+    <marker id="qs-a" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path d="M0 0.6 L6.4 3.5 L0 6.4 z" fill="var(--frame)"/>
+    </marker>
+  </defs>
+
+  <rect class="qs-box" x="0" y="24" width="180" height="52" rx="4"/>
+  <text class="qs-mono" x="14" y="46">bundle.yaml</text>
+  <text class="qs-m"    x="14" y="64">title: / tooltip:</text>
+
+  <path d="M186 50 H 236" stroke="var(--frame)" stroke-width="1.25" marker-end="url(#qs-a)"/>
+  <text class="qs-m" x="192" y="42">if absent</text>
+
+  <rect class="qs-box" x="242" y="24" width="190" height="52" rx="4"/>
+  <text class="qs-mono" x="256" y="46">script.py</text>
+  <text class="qs-m"    x="256" y="64">__title__ / docstring</text>
+
+  <path d="M438 50 H 488" stroke="var(--frame)" stroke-width="1.25" marker-end="url(#qs-a)"/>
+  <text class="qs-m" x="444" y="42">if absent</text>
+
+  <rect class="qs-box" x="494" y="24" width="196" height="52" rx="4"/>
+  <text class="qs-mono" x="508" y="46">Count.pushbutton</text>
+  <text class="qs-m"    x="508" y="64">folder name (title only)</text>
+
+  <text class="qs-m" x="0" y="106">The command is PY plus the resolved title's letters and digits, uppercased:</text>
+  <text class="qs-acc" x="0" y="126">Count Objects  &#8594;  PYCOUNTOBJECTS</text>
+  <text class="qs-m" x="300" y="126">unless bundle.yaml sets command:</text>
+</svg>
+</div>
+<figcaption>A tooltip has no third fallback: with no yaml tooltip and no docstring, the button
+simply has none.</figcaption>
+</figure>
+
+<p>If you want a command name that does not move when the title does, set it yourself with
+<code>command: PYCOUNTOBJ</code>. That value is used as written (uppercased, with anything but
+letters, digits, <code>_</code> and <code>-</code> dropped); no <code>PY</code> is added, so
+pick a name nothing else in AutoCAD uses. <a href="bundle-yaml.html">The bundle.yaml
+reference</a> lists every key.</p>
+
+<h2 id="step-5-add-an-icon">Step 5: add an icon<a class="anchor" href="#step-5-add-an-icon" aria-label="Link to this section">#</a></h2>
+
+<p>Without an icon the button renders as text only. Drop a 96&times;96 PNG named
+<code>icon.png</code> into the bundle folder and Reload.</p>
+
+<div class="code"><div class="code-head"><span>folders</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-f">Count.pushbutton</span>\
+  <span class="tok-k">script.py</span>
+  <span class="tok-k">bundle.yaml</span>
+  <span class="tok-k">icon.png</span>            <span class="tok-c"># 96x96, large buttons</span>
+  <span class="tok-k">icon.dark.png</span>       <span class="tok-c"># 96x96, dark theme</span>
+  <span class="tok-k">icon.small.png</span>      <span class="tok-c"># 32x32, stacks and menu rows</span>
+  <span class="tok-k">icon.small.dark.png</span> <span class="tok-c"># 32x32, dark theme</span></code></pre></div>
+
+<p>Only <code>icon.png</code> is needed; the other three fall back to it. Supplying all four is
+what makes a tool look native in both themes and at both sizes. <a href="icons.html">Icons</a>
+covers the drawing rules.</p>
+
+<h2 id="step-6-type-it">Step 6: type it<a class="anchor" href="#step-6-type-it" aria-label="Link to this section">#</a></h2>
+
+<p>Clear the selection, click in the drawing, type <code>PYCOUNTOBJECTS</code> and press
+<kbd>Enter</kbd>. The same toast appears. This is not a second way of running the tool; it is
+the only way, and the button is a shortcut to it. That also means the command works anywhere
+AutoCAD takes a command:</p>
+
+<ul>
+  <li>a CUI macro on a tool palette or a menu: <code>^C^C_PYCOUNTOBJECTS</code>;</li>
+  <li>a line in a <code>.scr</code> script file;</li>
+  <li>AutoLISP's <code>(command "PYCOUNTOBJECTS")</code>, although the bridge below is better
+    when you want an answer back.</li>
+</ul>
+
+<p>Select some objects first and type the command: the selection is still there when the
+script reads it, because pyACAD registers its commands with AutoCAD's pickfirst flag.</p>
+
+<h2 id="step-7-take-an-argument-and-return-a-value">Step 7: take an argument and return a value<a class="anchor" href="#step-7-take-an-argument-and-return-a-value" aria-label="Link to this section">#</a></h2>
+
+<p>A click passes no arguments. The loader's <code>PYACAD</code> command and the
+<code>(pyacad ...)</code> LISP function do: everything after the tool's name arrives in the
+script as the list <code>__args__</code>, and whatever the script leaves in
+<code>__result__</code> goes back to the caller. Extend the script so an optional layer
+pattern narrows the count:</p>
+
+<div class="code"><div class="code-head"><span>Count.pushbutton\script.py</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-s">&quot;&quot;&quot;Counts the selected objects, or everything in model space.&quot;&quot;&quot;</span>
+<span class="tok-k">from</span> pyacad <span class="tok-k">import</span> script, sel, toast
+
+args = script.get_args()                  <span class="tok-c"># [] from a click; [&#x27;E-*&#x27;] from (pyacad ...)</span>
+layer = str(args[<span class="tok-n">0</span>]) <span class="tok-k">if</span> args <span class="tok-k">else</span> <span class="tok-k">None</span>    <span class="tok-c"># a layer name, wildcards allowed</span>
+
+picked = [] <span class="tok-k">if</span> layer <span class="tok-k">else</span> sel.current()   <span class="tok-c"># an argument means: ignore the selection</span>
+<span class="tok-k">if</span> picked:
+    toast.success(<span class="tok-s">&#x27;%d object(s) selected&#x27;</span> % len(picked))
+    __result__ = len(picked)
+<span class="tok-k">else</span>:
+    found = sel.get(layer=layer, space=<span class="tok-s">&#x27;model&#x27;</span>)
+    where = (<span class="tok-s">&#x27;on layers &#x27;</span> + layer) <span class="tok-k">if</span> layer <span class="tok-k">else</span> <span class="tok-s">&#x27;in model space&#x27;</span>
+    toast.info(<span class="tok-s">&#x27;%d object(s) %s&#x27;</span> % (len(found), where))
+    __result__ = len(found)</code></pre></div>
+
+<p>No Reload is needed for an edit to <code>script.py</code>; the next run reads the new file.
+Try it from the command line with <code>PYACAD</code>, which prompts for a command (with or
+without the <code>PY</code>) and its arguments on one line:</p>
+
+<div class="code"><div class="code-head"><span>AutoCAD command line</span><button class="copy-btn" type="button">Copy</button></div><pre><code>Command: PYACAD
+Script path or pyACAD command: COUNTOBJECTS E-*</code></pre></div>
+
+<p>Arguments typed at that prompt arrive as strings, split on spaces; wrap one in double quotes
+to keep a space inside it.</p>
+
+<h2 id="step-8-call-it-from-autolisp">Step 8: call it from AutoLISP<a class="anchor" href="#step-8-call-it-from-autolisp" aria-label="Link to this section">#</a></h2>
+
+<p>The loader defines one LISP function, <code>pyacad</code>. Its first argument is a command
+name (or a <code>.py</code> path), the rest become <code>__args__</code>, and its return value
+is the script's <code>__result__</code>. Type this at the command line:</p>
+
+<div class="code"><div class="code-head"><span>AutoCAD command line</span><button class="copy-btn" type="button">Copy</button></div><pre><code>Command: (setq n (pyacad &quot;PYCOUNTOBJECTS&quot; &quot;E-*&quot;))
+42
+Command: (princ (strcat &quot;\nElectrical objects: &quot; (itoa n)))
+Electrical objects: 42</code></pre></div>
+
+<p>An integer comes back as a LISP integer, a float as a real, a string as a string, a list as a
+list and a dictionary as an association list of two-element lists. A script that sets no
+<code>__result__</code>, or fails, returns <code>nil</code>, and a failure is written to the
+log. That is enough to wire pyACAD tools into existing LISP routines without rewriting them.
+<a href="commands.html">Commands, macros and AutoLISP</a> has the full conversion table.</p>
+
+<div class="note">
+<span class="note-t">The bridge runs the bundle by name</span>
+<p><code>PYACAD</code> and <code>(pyacad ...)</code> look the bundle up in pyACAD's command
+table and run it directly, rather than sending the command, because that is the only way to
+hand it arguments and get a value back. The lookup ignores case and accepts the name with or
+without <code>PY</code>.</p>
+</div>
+
+<h2 id="what-you-have-built">What you have built<a class="anchor" href="#what-you-have-built" aria-label="Link to this section">#</a></h2>
+
+<div class="code"><div class="code-head"><span>folders</span><button class="copy-btn" type="button">Copy</button></div><pre><code>D:\CadTools\                     <span class="tok-c"># a registered extension root</span>
+  <span class="tok-f">CadTools.extension</span>\
+    <span class="tok-f">CadTools.tab</span>\                <span class="tok-c"># the CadTools ribbon tab</span>
+      <span class="tok-f">Drafting.panel</span>\            <span class="tok-c"># the Drafting panel</span>
+        <span class="tok-f">Count.pushbutton</span>\        <span class="tok-c"># the button, and the command PYCOUNTOBJECTS</span>
+          <span class="tok-k">script.py</span>              <span class="tok-c"># what runs</span>
+          <span class="tok-k">bundle.yaml</span>            <span class="tok-c"># title, tooltip, context</span>
+          <span class="tok-k">icon.png</span>               <span class="tok-c"># 96x96</span></code></pre></div>
+
+<p>That is a complete pyACAD tool: clickable, typeable, scriptable and callable from LISP,
+with no compile step and no restart. From here, <kbd>Shift</kbd>+Click can run a
+<code>config.py</code> beside the script for the tool's options (and gets its own
+<code>PYCOUNTOBJECTSCFG</code> command), and <code>shortcut:</code> in
+<code>bundle.yaml</code> binds a keyboard chord.</p>
+
+<div class="cards">
+  <a href="anatomy.html"><span class="c-t">Anatomy of an extension</span>
+    <span class="c-d">Ordering, libraries, startup scripts and how discovery really works.</span></a>
+  <a href="buttons.html"><span class="c-t">Buttons, stacks and pulldowns</span>
+    <span class="c-d">The other eleven bundle kinds, from toggles to dock panes.</span></a>
+  <a href="click-actions.html"><span class="c-t">Click actions</span>
+    <span class="c-d">Shift+Click, Alt+Click and config.py.</span></a>
+  <a href="commands.html"><span class="c-t">Commands, macros and AutoLISP</span>
+    <span class="c-d">Naming rules, name collisions, and the LISP bridge in depth.</span></a>
+</div>
+  <div class="pagenav">
+<a href="overview.html"><span class="dir">Previous</span><span class="ttl">How pyACAD works</span></a>
+<a class="next" href="anatomy.html"><span class="dir">Next</span><span class="ttl">Anatomy of an extension</span></a>
+</div>
+</article>
+<aside class="toc"><div class="toc-head">On this page</div>
+<a href="#before-you-start">Before you start</a>
+<a href="#step-1-create-the-folders">Step 1: create the folders</a>
+<a href="#step-2-write-the-script">Step 2: write the script</a>
+<a href="#step-3-load-it">Step 3: load it</a>
+<a href="#step-4-give-it-a-proper-title">Step 4: give it a proper title</a>
+<a href="#step-5-add-an-icon">Step 5: add an icon</a>
+<a href="#step-6-type-it">Step 6: type it</a>
+<a href="#step-7-take-an-argument-and-return-a-value">Step 7: take an argument and return a value</a>
+<a href="#step-8-call-it-from-autolisp">Step 8: call it from AutoLISP</a>
+<a href="#what-you-have-built">What you have built</a>
+</aside>
+</main>
+</div>
+<script src="_assets/search-index.js"></script>
+<script src="_assets/site.js"></script>
+</body>
+</html>

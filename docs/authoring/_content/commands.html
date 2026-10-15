@@ -1,0 +1,502 @@
+<!-- title: AutoCAD commands and AutoLISP -->
+<!-- eyebrow: Scripts -->
+<!-- lead: Every tool is an AutoCAD command, so it can be clicked, typed, put in a macro or a script file, or called from AutoLISP with arguments and a return value. -->
+
+<p>A pyACAD button is not just a ribbon button. At boot, and again on every Reload, the
+runtime registers one AutoCAD command per pushbutton-shaped bundle through AutoCAD's runtime
+command API. The ribbon itself uses that command: a click sends the command name to the
+drawing, exactly as if you had typed it. So there is one road into every tool, and everything
+AutoCAD can do with a command (the command line, macros, <code>.scr</code> files, tool
+palettes, menus, AutoLISP) works with yours.</p>
+
+<p>This page covers how the names are chosen, what happens when one is taken, how a tool runs
+as a command, the <code>(pyacad ...)</code> AutoLISP function with its type conversions, the
+<code>pyacad.lisp</code> module for going the other way, and the commands the loader itself
+defines.</p>
+
+<h2>Which bundles get a command</h2>
+
+<p>Every bundle that has a <code>script.py</code> and behaves like a button:</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Bundle kind</th><th>Command</th></tr></thead>
+<tbody>
+<tr><td><code>*.pushbutton</code>, including those inside a <code>*.stack</code>, a
+    <code>*.pulldown</code>, a <code>*.splitbutton</code>, a <code>*.splitpushbutton</code> or
+    a <code>*.slideout</code></td><td>Yes</td></tr>
+<tr><td><code>*.nobutton</code></td><td>Yes. With no ribbon presence, the command (or a
+    keyboard chord) is the only way in.</td></tr>
+<tr><td><code>*.toggle</code>, <code>*.smartbutton</code></td><td>Yes</td></tr>
+<tr><td>A bundle with a <code>config.py</code></td><td>Yes, plus a second command for the
+    <code>config.py</code>, named with <code>CFG</code> on the end</td></tr>
+<tr><td><code>*.urlbutton</code>, <code>*.linkbutton</code>, <code>*.dockpane</code></td>
+    <td>No. They have no <code>script.py</code> to run as a command (a dock pane's script
+    runs once, when its palette is built).</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Because registration happens through the runtime API rather than compiled attributes, a new
+bundle needs a Reload, never an AutoCAD restart. Reload first removes every command it
+registered last time, then registers the new set, so a bundle you deleted stops answering to
+its name at once.</p>
+
+<h2>How a command is named</h2>
+
+<p>Two sources, in this order:</p>
+
+<ol>
+  <li><strong><code>command:</code> in <code>bundle.yaml</code>.</strong> Used as written,
+    uppercased, with everything except letters, digits, <code>_</code> and <code>-</code>
+    removed. No <code>PY</code> is added: <code>command: BLKXL</code> gives
+    <code>BLKXL</code>.</li>
+  <li><strong>The title.</strong> <code>PY</code> followed by the title's letters and digits,
+    uppercased. Spaces, punctuation and everything else are dropped. The title is the resolved
+    one (<code>title:</code> in <code>bundle.yaml</code>, else <code>__title__</code> in the
+    script, else the folder name with underscores read as spaces).</li>
+</ol>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Bundle</th><th>Title</th><th>Command</th></tr></thead>
+<tbody>
+<tr><td><code>Blocks_to_Excel.pushbutton</code></td><td>Blocks to Excel</td><td><code>PYBLOCKSTOEXCEL</code></td></tr>
+<tr><td><code>Font_Proxy_Report.pushbutton</code></td><td>Font and Proxy Report</td><td><code>PYFONTANDPROXYREPORT</code></td></tr>
+<tr><td><code>Drawing_Cleanup.pushbutton</code> with <code>config.py</code></td><td>Drawing Cleanup</td>
+    <td><code>PYDRAWINGCLEANUP</code> and <code>PYDRAWINGCLEANUPCFG</code></td></tr>
+<tr><td><code>Export.pushbutton</code> with <code>command: dwg-export</code></td><td>Export</td><td><code>DWG-EXPORT</code></td></tr>
+<tr><td>A title with no letters or digits at all</td><td>...</td><td><code>PYTOOL</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Names are capped at 64 characters. The <code>config.py</code> twin is always the primary
+name with <code>CFG</code> appended, so a <code>command:</code> override renames both.</p>
+
+<div class="note warn">
+<span class="note-t">A derived name follows the title</span>
+<p>Retitle a bundle and its command is renamed with it, which silently breaks every macro,
+script and LISP routine that typed the old name. If anything outside the ribbon calls your
+tool, give it a <code>command:</code> in <code>bundle.yaml</code> so the title is free to
+change.</p>
+</div>
+
+<pre data-lang="yaml" data-file="Blocks_to_Excel.pushbutton\bundle.yaml">
+title: Blocks to Excel
+command: BLOCKSTOXL
+tooltip: Exports every block reference to an Excel workbook.
+</pre>
+
+<h3>The shipped commands</h3>
+
+<p>None of the shipped bundles sets <code>command:</code>, so every one is derived:</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Panel</th><th>Commands</th></tr></thead>
+<tbody>
+<tr><td>pyACAD</td><td><code>PYSETTINGS</code>, <code>PYSHORTCUTS</code>, <code>PYCONSOLE</code>, <code>PYRELOAD</code></td></tr>
+<tr><td>AI (beta)</td><td><code>PYAISETTINGS</code>, <code>PYOPENAIFOLDER</code> (Ask AI is a dock pane, so it has none)</td></tr>
+<tr><td>Cleanup</td><td><code>PYDRAWINGCLEANUP</code>, <code>PYDRAWINGCLEANUPCFG</code>, <code>PYFONTANDPROXYREPORT</code></td></tr>
+<tr><td>Data</td><td><code>PYBLOCKSCHEDULE</code>, <code>PYBLOCKSTOEXCEL</code>, <code>PYEXCELTOBLOCKS</code>, <code>PYFINDANDREPLACEATTRIBUTES</code></td></tr>
+<tr><td>Layers</td><td><code>PYLAYERMAPPER</code>, <code>PYLAYERSNAPSHOT</code>, <code>PYLAYERSNAPSHOTCFG</code> (Layer Manager is a dock pane)</td></tr>
+<tr><td>Output</td><td><code>PYBATCHPLOT</code>, <code>PYLAYOUTMANAGER</code></td></tr>
+<tr><td>Takeoff</td><td><code>PYLENGTHTAKEOFF</code>, <code>PYTAGAUDIT</code></td></tr>
+<tr><td>Xrefs</td><td><code>PYXREFMANAGER</code>, <code>PYXREFREPATH</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<h2>When a name is taken</h2>
+
+<p>Bundles are named in load order: extension roots in the order <code>config.json</code>
+lists them, extensions within a root by folder name, then tabs, panels and items in ribbon
+order. <strong>The first bundle to ask for a name gets it.</strong> Three things can stop a
+bundle getting its command:</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Cause</th><th>What you see</th></tr></thead>
+<tbody>
+<tr><td>An earlier bundle already took the name</td>
+    <td><code>Command PYEXPORT is already taken, so '&lt;bundle key&gt;' has no command. Give it a
+    different command: in bundle.yaml.</code></td></tr>
+<tr><td>The name is one of the loader's own: <code>PYACAD</code>, <code>PYACADRELOAD</code>,
+    <code>PYACADCONSOLE</code>, <code>PYACADRUN</code> or <code>PYACADSETTINGS</code></td>
+    <td>The same message. A bundle titled "Acad Reload" derives <code>PYACADRELOAD</code> and
+    loses.</td></tr>
+<tr><td>AutoCAD already answers to the name: a native command, an AutoLISP
+    <code>C:</code> function, another add-in</td>
+    <td><code>Command LINE belongs to something else in AutoCAD, so '&lt;bundle key&gt;' is
+    ribbon-only. Set command: in bundle.yaml.</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Each problem is written to the log, and a warning toast follows the boot or Reload:
+<em>One command was not registered</em> (or <em>N commands were not registered</em>) with the
+first message as its detail. A <code>config.py</code> twin that collides is reported the same
+way and only the twin is lost.</p>
+
+<p>A bundle without a command still works from the ribbon and from its keyboard chord: the
+click runs the script directly under a document lock instead of sending a command. What it
+loses is everything on this page: it cannot be typed, scripted or called from AutoLISP, and it
+gets no automatic undo group.</p>
+
+<h2>Aliases</h2>
+
+<p>A full name like <code>PYBLOCKSTOEXCEL</code> is easy to find and hard to type forty times
+a day. <code>alias: BX</code> in <code>bundle.yaml</code> registers <code>BX</code> as a second
+command for the same tool (see <a href="bundle-yaml.html#alias-short-names-to-type">alias</a>).
+Users set their own in <code>config.json</code>:</p>
+
+<pre data-lang="json" data-file="%APPDATA%\pyACAD\config.json">
+{
+  "aliases": {
+    "pyACAD.tab/Data.panel/Blocks_to_Excel.pushbutton": "BXL",
+    "pyACAD.tab/Data.panel/Excel_to_Blocks.pushbutton": null
+  }
+}
+</pre>
+
+<p>A string replaces the bundle's aliases; <code>null</code> or <code>""</code> drops them.
+Changes land on the next Reload. Aliases are handed out after every full command name, first
+claim wins, and the tool's tooltip ends with what it answers to:
+<code>Command: PYBLOCKSTOEXCEL (alias BXL)</code>.</p>
+
+<p>pyACAD reads <code>acad.pgp</code> from the support path at boot and on Reload, and never
+writes to it. An alias is left out when:</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Cause</th><th>What happens</th></tr></thead>
+<tbody>
+<tr><td>An earlier bundle, or any tool's full command name, already has it</td>
+    <td>Reported like a taken command name.</td></tr>
+<tr><td><code>acad.pgp</code> defines it, for example <code>CO</code></td>
+    <td>Left out; <code>CO</code> still runs COPY.</td></tr>
+<tr><td>AutoCAD already answers to it: a native command, a loaded LISP <code>C:</code>
+    function, another add-in</td>
+    <td>Left out; the existing command still runs.</td></tr>
+<tr><td>A drawing's LISP defines <code>C:</code> with the same name after pyACAD loaded</td>
+    <td>Typing it runs that LISP command, not the tool.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>When the alias came from the bundle, a left-out alias only goes to the log. When it came
+from the user's own <code>config.json</code>, it is toasted, since they asked for it. Either way
+the full command name and the button keep working.</p>
+
+<h2>How a tool runs as a command</h2>
+
+<p>The commands are registered with the <code>Modal</code> and <code>UsePickSet</code> flags,
+in a command group named <code>PYACAD</code>. That gives every tool the same footing as a
+native AutoCAD command:</p>
+
+<ul>
+  <li><strong>Document context.</strong> AutoCAD locks the drawing before your script's first
+    line, so a script started as a command never needs <code>pyacad.doc.lock()</code>.</li>
+  <li><strong>One undo step.</strong> AutoCAD opens an undo group around the command, so a
+    single <kbd>U</kbd> or <kbd>Ctrl</kbd>+<kbd>Z</kbd> takes back everything the tool did,
+    however many transactions it used.</li>
+  <li><strong>The pickfirst set survives.</strong> Objects selected before the command starts
+    are still selected inside it, so <code>pyacad.sel.current()</code> sees them.</li>
+  <li><strong>Not transparent.</strong> A pyACAD command cannot run in the middle of another
+    command (<code>'PYNAME</code>).</li>
+</ul>
+
+<h3>Ribbon clicks and chords</h3>
+
+<p>A click, or a keyboard chord, does not run the script itself. It sends
+<code>_.PYNAME</code> and Enter to the active drawing, with echo on, so the command line shows
+what ran exactly as a typed command would. The underscore asks for the global name, so a
+localised AutoCAD still finds it; the dot bypasses any <code>UNDEFINE</code>, so a redefined
+name never traps a pyACAD tool.</p>
+
+<p>Shift+Click sends the <code>CFG</code> twin. Alt+Click opens the bundle folder in Explorer
+and sends nothing. A chord always sends the primary command, never the twin.</p>
+
+<p>With no drawing open there is nothing to send to: the click shows an <em>Open a drawing
+first.</em> toast and nothing runs.</p>
+
+<div class="note">
+<span class="note-t">A click is typed text</span>
+<p>Because the click goes through the command line, it behaves like typing the name. Finish
+or cancel (<kbd>Esc</kbd>) whatever command is active before you click a pyACAD tool, as you
+would before typing one.</p>
+</div>
+
+<h3>Typing it, macros and script files</h3>
+
+<p>Type the name at the command line, or use it anywhere AutoCAD takes a command. In a CUI
+macro or a tool palette command string:</p>
+
+<pre data-lang="text">
+^C^C_.PYBLOCKSTOEXCEL
+</pre>
+
+<p>In a <code>.scr</code> script, one command per line:</p>
+
+<pre data-lang="text" data-file="export.scr">
+_.PYDRAWINGCLEANUP
+_.PYBLOCKSTOEXCEL
+_.QSAVE
+</pre>
+
+<p>A command typed this way receives no arguments: <code>__args__</code> is an empty list,
+exactly as for a click. To hand a tool arguments, use <a href="#the-pyacad-command">PYACAD</a>
+or <a href="#calling-a-tool-from-autolisp">AutoLISP</a>.</p>
+
+<h3>Link buttons</h3>
+
+<p>The reverse direction needs no code. A <code>*.linkbutton</code> with
+<code>plugin: QSAVE</code> in its <code>bundle.yaml</code> sends that command name to the
+drawing as <code>_.QSAVE</code>, the same way a pyACAD button sends its own, so it can start a
+native command or another add-in's. See <a href="buttons.html">Buttons, stacks and pulldowns</a>.</p>
+
+<h2>The loader's own commands</h2>
+
+<p>The loader defines five commands statically, so they exist even when the runtime failed to
+build a ribbon. They are the way in when nothing else works.</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Command</th><th>Does</th></tr></thead>
+<tbody>
+<tr><td><code>PYACAD</code></td><td>Runs a <code>.py</code> file by path, or a bundle by its
+    command name, with optional arguments. See below.</td></tr>
+<tr><td><code>PYACADRELOAD</code></td><td>Rescans the extension folders and rebuilds the
+    ribbon, commands, hooks, dock panes and shortcuts. The same as the Reload button, which
+    is the <code>PYRELOAD</code> bundle; this one works when the ribbon does not.</td></tr>
+<tr><td><code>PYACADCONSOLE</code></td><td>A diagnostic message box: the IronPython version,
+    the AutoCAD version and how many extensions loaded. It runs even when no extension
+    loaded. It is not the interactive console, which is the Console button
+    (<code>PYCONSOLE</code>).</td></tr>
+<tr><td><code>PYACADRUN</code></td><td>Internal: the entry point <a href="command-line.html">pyacad
+    run</a> uses inside AutoCAD Core Console. It takes the path of a request file the command
+    line wrote; there is no reason to type it.</td></tr>
+<tr><td><code>(pyacad ...)</code></td><td>Not a command but an AutoLISP function, defined by
+    the loader. See <a href="#calling-a-tool-from-autolisp">below</a>.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p><code>PYACADSETTINGS</code> is reserved (no bundle may take it) but is not defined by
+anything: the Settings window is the <code>PYSETTINGS</code> bundle.</p>
+
+<h3>The PYACAD command</h3>
+
+<p><code>PYACAD</code> prompts <code>Script path or pyACAD command:</code> and reads the whole
+line, spaces included, up to Enter. The first word is the target and the rest are arguments.
+Double quotes group words with spaces and are removed.</p>
+
+<pre data-lang="text">
+Command: PYACAD
+Script path or pyACAD command: "C:\Tools\renumber.py" A-DOOR 100 "two words"
+</pre>
+
+<p>The script sees <code>__args__</code> as <code>['A-DOOR', '100', 'two words']</code>.
+Arguments from the command line are always strings; convert them yourself.</p>
+
+<p>How the target is resolved:</p>
+
+<ol>
+  <li>If it ends in <code>.py</code>, or names a file that exists, it is run as a file. The
+    file's folder becomes its bundle folder and search path, its file name without
+    <code>.py</code> its <code>__title__</code>. It always runs on IronPython, since there is
+    no <code>bundle.yaml</code> to say otherwise, and nothing in the ribbon changes.</li>
+  <li>Otherwise it is looked up as a registered pyACAD command, first as typed and then with
+    <code>PY</code> in front. <code>PYACAD blockstoexcel</code> and <code>PYACAD
+    PYBLOCKSTOEXCEL</code> both run Blocks to Excel. A <code>CFG</code> twin name runs the
+    bundle's <code>config.py</code> (without arguments).</li>
+  <li>Otherwise <code>No script file or pyACAD command named '...'.</code></li>
+</ol>
+
+<p>When the run fails, the reason (or the traceback) is printed on the command line after
+<code>pyACAD:</code>, as well as in the output window and the log. <code>PYACAD</code> is itself
+a modal command with <code>UsePickSet</code>, so everything under
+<a href="#how-a-tool-runs-as-a-command">How a tool runs as a command</a> applies to what it
+runs, including the single undo step.</p>
+
+<p>In a macro, end the line with a semicolon (Enter), since <code>PYACAD</code> accepts
+spaces as part of its input:</p>
+
+<pre data-lang="text">
+^C^C_.PYACAD "C:\Tools\renumber.py" A-DOOR 100;
+</pre>
+
+<h2>Calling a tool from AutoLISP</h2>
+
+<p>The loader defines an AutoLISP function, <code>pyacad</code>:</p>
+
+<pre data-lang="text">
+(pyacad "PYNAME" arg1 arg2 ...)
+(pyacad "C:\\Tools\\renumber.py" arg1 arg2 ...)
+</pre>
+
+<p>The first argument names the target, resolved exactly as for
+<a href="#the-pyacad-command">PYACAD</a>: a <code>.py</code> path or an existing file runs as a
+file, anything else is a command name with or without its <code>PY</code>. The remaining
+arguments become <code>__args__</code>, keeping their LISP types. Whatever the script assigns to
+<code>__result__</code> is converted back to LISP data and returned.</p>
+
+<pre data-lang="python" data-file="Layer_Count.pushbutton\script.py">
+"""Counts the entities on a layer. From AutoLISP it returns the count."""
+from pyacad import script, sel, toast
+
+args = script.get_args()
+layer = args[0] if args else '0'
+handles = sel.get(layer=layer)
+
+__result__ = {'layer': layer, 'count': len(handles)}
+
+if not args:                      # clicked or typed: tell the user
+    toast.info('%d entities on layer %s' % (len(handles), layer))
+</pre>
+
+<pre data-lang="text" data-file="layercount.lsp">
+(defun c:wallcount ( / r)
+  (setq r (pyacad "PYLAYERCOUNT" "A-WALL"))
+  (princ (strcat "\n" (cadr (assoc "layer" r)) ": "
+                 (itoa (cadr (assoc "count" r)))))
+  (princ))
+</pre>
+
+<p>Here <code>(pyacad "PYLAYERCOUNT" "A-WALL")</code> returns
+<code>(("layer" "A-WALL") ("count" 12))</code>.</p>
+
+<p><code>script.get_args()</code> (or <code>lisp.args()</code>, the same thing) returns a plain
+Python list. The raw <code>__args__</code> global is a .NET list, which indexes and iterates
+like one but is not a Python <code>list</code>.</p>
+
+<h3>LISP to Python: what arrives in __args__</h3>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>AutoLISP value</th><th>In <code>__args__</code></th></tr></thead>
+<tbody>
+<tr><td>String</td><td><code>str</code></td></tr>
+<tr><td>Integer</td><td><code>int</code></td></tr>
+<tr><td>Real</td><td><code>float</code></td></tr>
+<tr><td><code>nil</code></td><td><code>None</code></td></tr>
+<tr><td><code>T</code></td><td><code>True</code></td></tr>
+<tr><td>A list</td><td>A nested list (a .NET list, even inside the list
+    <code>get_args()</code> returns)</td></tr>
+<tr><td>Anything else, such as an entity name or a point AutoCAD passes as a point</td>
+    <td>The raw .NET value AutoCAD handed over (an <code>ObjectId</code>, a
+    <code>Point3d</code>), not converted</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note warn">
+<span class="note-t">Pass handles and numbers, not entity names and points</span>
+<p>Entity names and points are not converted, and dotted pairs are not supported. The
+reliable shapes are strings, numbers and plain lists: pass a handle with
+<code>(cdr (assoc 5 (entget e)))</code> rather than the entity name, and the coordinates
+of a point as separate reals.</p>
+</div>
+
+<h3>Python to LISP: what __result__ becomes</h3>
+
+<p><code>__result__</code> is serialised with <code>json.dumps</code> in the script's own
+interpreter and then converted:</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th><code>__result__</code></th><th>Returned to LISP</th></tr></thead>
+<tbody>
+<tr><td>Not set</td><td><code>nil</code></td></tr>
+<tr><td><code>None</code>, <code>False</code></td><td><code>nil</code></td></tr>
+<tr><td><code>True</code></td><td><code>T</code></td></tr>
+<tr><td><code>str</code></td><td>String</td></tr>
+<tr><td><code>int</code> that fits in 32 bits</td><td>Integer</td></tr>
+<tr><td>Any larger <code>int</code></td><td>Real</td></tr>
+<tr><td><code>float</code></td><td>Real</td></tr>
+<tr><td><code>list</code> or <code>tuple</code></td><td>A list, nested lists kept</td></tr>
+<tr><td><code>dict</code></td><td>An association list of two-element lists,
+    <code>(("key" value) ...)</code>: read it with <code>(cadr (assoc "key" r))</code>, not
+    <code>cdr</code></td></tr>
+<tr><td>Anything <code>json</code> refuses: a set, an <code>ObjectId</code>, a
+    <code>Point3d</code>, <code>float('nan')</code></td><td><code>nil</code>, and a log line
+    <code>Script global '__result__' was not captured</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<p>A single value comes back bare; a list or a dict comes back as a list. A point is a tuple:
+<code>__result__ = (x, y, z)</code> returns a list of three reals, which AutoLISP accepts
+wherever it takes a point.</p>
+
+<p><code>(pyacad ...)</code> returns <code>nil</code> when the script fails, when the target is
+not found, when another pyACAD script is already running, or when the bundle is blocked by
+<code>min_host_version</code> or <code>max_host_version</code>. The reason goes to the log as
+<code>(pyacad "...") failed: ...</code>, so a <code>nil</code> you did not expect is worth a
+look at <code>%APPDATA%\pyACAD\logs\pyACAD.log</code>. A <code>CFG</code> twin always returns
+<code>nil</code>.</p>
+
+<h2>Calling AutoLISP from Python</h2>
+
+<p><code>pyacad.lisp</code> goes the other way.</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Function</th><th>Does</th></tr></thead>
+<tbody>
+<tr><td><code>lisp.call(function, *args)</code></td><td>Calls an AutoLISP function and returns
+    its result as Python values. It goes through <code>acedInvoke</code>, so it reaches only
+    functions LISP has exposed: commands defined as <code>C:NAME</code> and functions
+    registered with <code>(vl-acad-defun 'name)</code>.</td></tr>
+<tr><td><code>lisp.evaluate(expression)</code></td><td>Queues an expression on the command
+    line (wrapping it in parentheses if needed). It runs after your script returns, so the
+    result is not available; it returns <code>None</code>.</td></tr>
+<tr><td><code>lisp.args()</code></td><td>The arguments of the <code>(pyacad ...)</code> call
+    that ran this script, as a Python list. The same as <code>script.get_args()</code>.</td></tr>
+<tr><td><code>lisp.encode(value)</code>, <code>lisp.decode(pairs)</code></td><td>The pure
+    conversion between Python values and (type code, value) pairs, usable outside
+    AutoCAD.</td></tr>
+</tbody>
+</table>
+</div>
+
+<pre data-lang="python">
+from pyacad import lisp, toast
+
+# (defun c:stamp () ...) loaded from acaddoc.lsp
+lisp.call('c:stamp')
+
+# (vl-acad-defun 'acme-next-number) exposes a plain function
+number = lisp.call('acme-next-number', 'DOOR')
+toast.info('Next door number: %s' % number)
+
+# fire and forget: runs after this script ends
+lisp.evaluate('(setvar "OSMODE" 0)')
+</pre>
+
+<p>What <code>lisp.call</code> hands back: strings, integers and reals as themselves,
+<code>nil</code> as <code>None</code>, <code>T</code> as <code>True</code>, lists as lists, a
+point as an <code>(x, y, z)</code> or <code>(x, y)</code> tuple, and an entity name as its
+handle, a hex string. One value comes back bare; several come back as a list. When it sends
+arguments it uses the same encoding as <code>__result__</code>.</p>
+
+<p>Python functions cannot be registered as AutoLISP functions at run time. A script is
+reachable from LISP only as a bundle or a file, through <code>(pyacad ...)</code>. To queue a
+whole command line rather than a LISP expression, use <code>doc.send_command(text)</code>.</p>
+
+<h2>Scripts, commands and pyacad run</h2>
+
+<p>Inside <a href="command-line.html"><code>pyacad run</code></a>, which drives AutoCAD Core
+Console, no bundle commands are registered (Core Console has no command host for them and no
+ribbon). A headless script cannot call a bundle by name; import the shared code from a
+<code>*.lib</code> folder instead.</p>
+
+<div class="cards">
+  <a href="script-environment.html"><span class="c-t">The script environment</span>
+    <span class="c-d">Every global a script gets, the engines, and document context.</span></a>
+  <a href="command-line.html"><span class="c-t">pyacad.exe and headless runs</span>
+    <span class="c-d">Run a script over a list of drawings in Core Console.</span></a>
+  <a href="bundle-yaml.html"><span class="c-t">The bundle.yaml reference</span>
+    <span class="c-d">command:, title: and every other key.</span></a>
+</div>

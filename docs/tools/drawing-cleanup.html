@@ -1,0 +1,366 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Drawing Cleanup - pyACAD tools</title>
+<meta name="description" content="Purge, audit, delete zero-length and duplicate geometry and zoom extents in one run, from a checklist that remembers your last choice.">
+<link rel="stylesheet" href="_assets/site.css">
+<link rel="stylesheet" href="_assets/tools.css">
+</head>
+<body data-base="">
+<div class="layout">
+<div class="sidebar">
+  <div class="brand"><a href="index.html"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="26" height="26" aria-hidden="true"><polygon points="157.0,327.8 351.8,327.8 363.1,342.4 363.1,403.3 168.3,403.3 157.0,388.7" fill="#78082A"/><polygon points="157.0,327.8 351.8,327.8 351.8,388.7 157.0,388.7" fill="#B80C40"/><polygon points="51.5,482.0 234.1,157.4 278.7,181.7 290.1,196.3 152.1,496.6 62.8,496.6" fill="#78082A"/><polygon points="51.5,482.0 140.8,482.0 278.7,181.7 234.1,157.4" fill="#E51050"/><polygon points="359.9,482.0 205.7,108.7 217.0,123.3 371.2,496.6" fill="#78082A"/><polygon points="205.7,108.7 201.6,55.9 213.0,70.5 217.0,123.3" fill="#78082A"/><polygon points="201.6,55.9 246.3,15.4 257.6,30.0 213.0,70.5" fill="#78082A"/><polygon points="246.3,15.4 343.7,23.5 355.0,38.1 257.6,30.0" fill="#78082A"/><polygon points="343.7,23.5 388.3,51.9 399.7,66.5 355.0,38.1" fill="#78082A"/><polygon points="388.3,51.9 347.7,76.2 359.1,90.8 399.7,66.5" fill="#78082A"/><polygon points="347.7,76.2 295.0,84.3 306.3,99.0 359.1,90.8" fill="#78082A"/><polygon points="295.0,84.3 449.2,482.0 460.5,496.6 306.3,99.0" fill="#78082A"/><polygon points="449.2,482.0 359.9,482.0 371.2,496.6 460.5,496.6" fill="#78082A"/><polygon points="359.9,482.0 205.7,108.7 201.6,55.9 246.3,15.4 343.7,23.5 388.3,51.9 347.7,76.2 295.0,84.3 449.2,482.0" fill="#E51050"/><polygon points="270.6,39.7 311.2,35.7 297.0,51.9" fill="#1F2329"/></svg><span class="brand-name">pyACAD
+    <span class="brand-sub">Tools guide</span></span></a></div>
+  <div class="search-wrap">
+    <svg class="search-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <circle cx="6" cy="6" r="4.2" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M9.2 9.2 12.5 12.5" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round"/></svg>
+    <input id="search" type="search" placeholder="Search the tools" autocomplete="off"
+           spellcheck="false" aria-label="Search the tools guide">
+    <span class="search-kbd">/</span>
+    <div id="search-results" class="search-results"></div>
+  </div>
+  <nav class="pages">
+<div class="grp">pyACAD</div>
+<a href="settings.html"><img class="nav-icon" src="_assets/icons/settings.png" alt="">Settings</a>
+<a href="shortcuts.html"><img class="nav-icon" src="_assets/icons/shortcuts.png" alt="">Shortcuts</a>
+<a href="console.html"><img class="nav-icon" src="_assets/icons/console.png" alt="">Console</a>
+<a href="reload.html"><img class="nav-icon" src="_assets/icons/reload.png" alt="">Reload</a>
+<div class="grp">Data</div>
+<a href="blocks-to-excel.html"><img class="nav-icon" src="_assets/icons/blocks-to-excel.png" alt="">Blocks to Excel</a>
+<a href="excel-to-blocks.html"><img class="nav-icon" src="_assets/icons/excel-to-blocks.png" alt="">Excel to Blocks</a>
+<a href="block-schedule.html"><img class="nav-icon" src="_assets/icons/block-schedule.png" alt="">Block Schedule</a>
+<a href="find-replace-attributes.html"><img class="nav-icon" src="_assets/icons/find-replace-attributes.png" alt="">Find and Replace Attributes</a>
+<div class="grp">Layers</div>
+<a href="layer-manager.html"><img class="nav-icon" src="_assets/icons/layer-manager.png" alt="">Layer Manager</a>
+<a href="layer-mapper.html"><img class="nav-icon" src="_assets/icons/layer-mapper.png" alt="">Layer Mapper</a>
+<a href="layer-snapshot.html"><img class="nav-icon" src="_assets/icons/layer-snapshot.png" alt="">Layer Snapshot</a>
+<div class="grp">Xrefs</div>
+<a href="xref-manager.html"><img class="nav-icon" src="_assets/icons/xref-manager.png" alt="">Xref Manager</a>
+<a href="xref-repath.html"><img class="nav-icon" src="_assets/icons/xref-repath.png" alt="">Xref Repath</a>
+<div class="grp">Cleanup</div>
+<a href="drawing-cleanup.html" class="active"><img class="nav-icon" src="_assets/icons/drawing-cleanup.png" alt="">Drawing Cleanup</a>
+<a href="font-proxy-report.html"><img class="nav-icon" src="_assets/icons/font-proxy-report.png" alt="">Font and Proxy Report</a>
+<div class="grp">Output</div>
+<a href="batch-plot.html"><img class="nav-icon" src="_assets/icons/batch-plot.png" alt="">Batch Plot</a>
+<a href="layout-manager.html"><img class="nav-icon" src="_assets/icons/layout-manager.png" alt="">Layout Manager</a>
+<div class="grp">Takeoff</div>
+<a href="length-takeoff.html"><img class="nav-icon" src="_assets/icons/length-takeoff.png" alt="">Length Takeoff</a>
+<a href="tag-audit.html"><img class="nav-icon" src="_assets/icons/tag-audit.png" alt="">Tag Audit</a>
+<div class="grp">AI (beta)</div>
+<a href="ask-ai.html"><img class="nav-icon" src="_assets/icons/ask-ai.png" alt="">Ask AI</a>
+<a href="ai-settings.html"><img class="nav-icon" src="_assets/icons/ai-settings.png" alt="">AI Settings</a>
+<a href="open-ai-folder.html"><img class="nav-icon" src="_assets/icons/open-ai-folder.png" alt="">Open AI Folder</a>
+</nav>
+  <div class="side-foot">
+    <span>pyACAD 0.1.0</span>
+    <a class="side-link" href="https://docs.pyacad.com/">Authoring guide</a>
+    <button id="theme-toggle" type="button" aria-label="Toggle colour theme">
+      <span>Dark</span></button>
+  </div>
+</div>
+<main class="main">
+<article>
+  <div class="hero"><img class="hero-icon" src="_assets/icons/drawing-cleanup.png" alt=""><div><p class="eyebrow">Cleanup panel</p><h1>Drawing Cleanup</h1><p class="lead">Purge, audit, delete zero-length and duplicate geometry and zoom extents in one run, from a checklist that remembers your last choice.</p></div></div><div class="facts"><div class="fact"><span class="fact-k">On the ribbon</span><span class="fact-v">Button, Cleanup panel</span></div><div class="fact"><span class="fact-k">Needs</span><span class="fact-v">An open drawing (the button is greyed without one)</span></div><div class="fact"><span class="fact-k">Command</span><span class="fact-v"><code>PYDRAWINGCLEANUP</code>, <code>PYDRAWINGCLEANUPCFG</code> for Shift+Click</span></div><div class="fact"><span class="fact-k">Alias</span><span class="fact-v"><code>DCU</code></span></div><div class="fact"><span class="fact-k">Shift+Click</span><span class="fact-v">Resets the checklist to its default ticks</span></div></div>
+  <h2 id="what-it-does">What it does<a class="anchor" href="#what-it-does" aria-label="Link to this section">#</a></h2>
+<p>Opens a checklist of six steps, runs the ticked ones in order, and reports what each one
+did. The checklist opens with whatever you ticked last time.</p>
+<div class="table-scroll"><table>
+  <thead><tr><th>Step</th><th>Ticked at first</th><th>What it does</th></tr></thead>
+  <tbody>
+    <tr><td>Purge everything unused</td><td>Yes</td>
+      <td>Erases unreferenced blocks, layers, linetypes, text styles, dimension styles,
+        registered applications, multiline styles, table styles and multileader styles. It
+        repeats until a pass finds nothing, so a block that was only used inside another
+        unused block goes too.</td></tr>
+    <tr><td>Audit the drawing and fix errors</td><td>Yes</td>
+      <td>Queues <code>AUDIT</code> with fix set to Yes.</td></tr>
+    <tr><td>Delete zero-length lines and polylines</td><td>Yes</td>
+      <td>Erases lines and lightweight polylines with no length, in model space and every
+        layout.</td></tr>
+    <tr><td>Delete duplicate entities</td><td>Yes</td>
+      <td>Finds entities of the same type, on the same layer and in the same space, with the
+        same geometry, and erases every copy but the first.</td></tr>
+    <tr><td>Set every entity colour to ByLayer</td><td>No</td>
+      <td>Sets the colour of every entity in model space and the layouts, and of the
+        attributes on block references, to ByLayer.</td></tr>
+    <tr><td>Zoom extents</td><td>Yes</td>
+      <td>Queues <code>ZOOM Extents</code>.</td></tr>
+  </tbody>
+</table></div>
+
+
+
+<h2 id="how-to-use-it">How to use it<a class="anchor" href="#how-to-use-it" aria-label="Link to this section">#</a></h2>
+<ol class="steps">
+  <li>Click <strong>Drawing Cleanup</strong>, or type <code>PYDRAWINGCLEANUP</code>.</li>
+  <li>Tick the steps you want and click OK. The choice is remembered for next time (an empty
+    checklist is not).</li>
+  <li>If a ticked step erases something (purge, zero-length, duplicates), the tool says
+    exactly what it will delete and asks you to continue.</li>
+  <li>A progress window follows the steps. <strong>Cancel</strong> stops the step that is
+    running and skips the rest; whatever already finished stays done.</li>
+  <li>A report window lists one line per step, for example:
+<pre><code>Purge: 14 unused items removed
+Audit: queued; it runs when this tool finishes and reports on the command line
+Zero-length: 3 entities deleted
+Duplicates: 12 extra copies deleted (9 groups), 2 skipped on locked layers
+Zoom extents: queued</code></pre>
+    <strong>Copy</strong> puts the report on the clipboard. A toast sums it up, such as
+    "14 purged, 3 zero-length deleted, 12 duplicates deleted".</li>
+  <li>When the tool closes, AUDIT runs and prints its findings on the command line, then the
+    view zooms to extents.</li>
+</ol>
+
+
+
+<h2 id="limitations">Limitations<a class="anchor" href="#limitations" aria-label="Link to this section">#</a></h2>
+<ul>
+  <li>AUDIT and ZOOM do not run in checklist order: they are queued as commands of their own
+    and run after every other step has finished. Their results are on the command line, not
+    in the report.</li>
+  <li>Duplicates are judged by type, layer and geometry only. Colour, linetype, lineweight,
+    text style and text rotation are not compared, so two lines in the same place on the
+    same layer are duplicates even if one is red and dashed. Polylines are compared by their
+    vertices and whether they are closed, not by arc segments or widths. Only lines, circles,
+    arcs, lightweight polylines, text, mtext and block references are checked; a block
+    reference's attribute values are part of its match, so two tags on one point with
+    different values are both kept.</li>
+  <li>Zero-length covers lines and lightweight polylines only, not old-style 2D or 3D
+    polylines.</li>
+  <li>Entities on locked layers are never erased or recoloured: the report counts them as
+    skipped. Purge is not affected by layer locks.</li>
+  <li>Geometry inside block definitions is not checked for duplicates or zero length, and
+    ByLayer does not change the colours inside block definitions. Viewports keep their
+    colour.</li>
+  <li>Purge does not cover materials, visual styles, plot styles, groups or empty text. Use
+    AutoCAD's PURGE for those.</li>
+</ul>
+
+<h2 id="good-to-know">Good to know<a class="anchor" href="#good-to-know" aria-label="Link to this section">#</a></h2>
+<p>Every edit the tool makes itself happens inside its own command, so <code>U</code> takes
+it back. AUDIT and ZOOM are separate commands that run after it, so they come off the undo
+stack first: undo those two, then the cleanup itself.</p>
+<p>The remembered checklist is stored in
+<code>%APPDATA%\pyACAD\settings\cfg_pyacad_tab_cleanup_panel_drawing_cleanup_pushbutton.json</code>.
+<kbd>Shift</kbd>+Click (or <code>PYDRAWINGCLEANUPCFG</code>) deletes it, so the next run
+opens with the default ticks again: everything but ByLayer colour.</p>
+
+<h2 id="other-uses">Other uses<a class="anchor" href="#other-uses" aria-label="Link to this section">#</a></h2>
+<ul>
+  <li>Before you issue a drawing, or before it goes to someone as an xref background.</li>
+  <li>Tick only <strong>Set every entity colour to ByLayer</strong> to make a consultant's
+    background follow your layer colours.</li>
+  <li>Tick only <strong>Delete duplicate entities</strong> after a careless copy and paste
+    in place.</li>
+</ul>
+<h2 id="source">Source<a class="anchor" href="#source" aria-label="Link to this section">#</a></h2>
+<p>The tool's own files, word for word as shipped in <code>Cleanup.panel/Drawing_Cleanup.pushbutton</code>. Every pyACAD tool is an ordinary bundle: copy these into your own extension and change what you like.</p>
+<div class="code src"><div class="code-head"><span><code>script.py</code> <span class="src-note">Runs on a click.</span> <a href="https://github.com/pyacad/pyACAD/blob/main/extensions/pyACAD.extension/pyACAD.tab/Cleanup.panel/Drawing_Cleanup.pushbutton/script.py" rel="noopener">View on GitHub</a></span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-c"># -*- coding: utf-8 -*-</span>
+<span class="tok-s">&quot;&quot;&quot;Drawing hygiene in one run: purge, audit, zero-length and duplicate
+geometry, ByLayer colour if asked, zoom extents.
+
+A checklist picks the steps and remembers the last choice (Shift+Click
+forgets it). Steps that erase something are confirmed first. Every edit this
+tool makes itself happens inside its own command, so Undo takes it back.
+AUDIT and ZOOM are queued as commands of their own and run once the tool
+finishes, so AUDIT&#x27;s findings are on the command line rather than in the
+report. Entities on locked layers are never touched.
+&quot;&quot;&quot;</span>
+
+<span class="tok-k">from</span> pyacad <span class="tok-k">import</span> audit, doc, forms, script, toast
+
+__title__ = <span class="tok-s">&#x27;Drawing Cleanup&#x27;</span>
+
+TITLE = <span class="tok-s">&#x27;Drawing Cleanup&#x27;</span>
+DEFAULTS = {<span class="tok-s">&#x27;steps&#x27;</span>: <span class="tok-k">None</span>}          <span class="tok-c"># None: nothing remembered yet, so tick the defaults</span>
+
+WHAT_IT_ERASES = {
+    <span class="tok-s">&#x27;purge&#x27;</span>: <span class="tok-s">&#x27;purge unused blocks, layers, linetypes and styles&#x27;</span>,
+    <span class="tok-s">&#x27;zero_length&#x27;</span>: <span class="tok-s">&#x27;delete zero-length lines and polylines&#x27;</span>,
+    <span class="tok-s">&#x27;duplicates&#x27;</span>: <span class="tok-s">&#x27;delete duplicate entities, keeping one of each&#x27;</span>,
+}
+
+
+<span class="tok-k">def</span> has_drawing():
+    <span class="tok-k">try</span>:
+        doc.active()
+    <span class="tok-k">except</span> RuntimeError:
+        <span class="tok-k">return</span> <span class="tok-k">False</span>
+    <span class="tok-k">return</span> <span class="tok-k">True</span>
+
+
+<span class="tok-k">def</span> choose_steps():
+    <span class="tok-s">&quot;&quot;&quot;The ticked steps in run order, or None when the checklist was cancelled.&quot;&quot;&quot;</span>
+    saved = script.get_config(DEFAULTS)
+    picked = forms.select_from_list(
+        [(label, key) <span class="tok-k">for</span> key, label, _ <span class="tok-k">in</span> audit.STEPS],
+        title=TITLE, multiselect=<span class="tok-k">True</span>,
+        prompt=<span class="tok-s">&#x27;Tick the steps to run. They run top to bottom.&#x27;</span>,
+        checked=audit.cleanup_plan(saved[<span class="tok-s">&#x27;steps&#x27;</span>]))
+    <span class="tok-k">if</span> picked <span class="tok-k">is</span> <span class="tok-k">None</span>:
+        <span class="tok-k">return</span> <span class="tok-k">None</span>
+    plan = audit.cleanup_plan(picked)
+    <span class="tok-k">if</span> plan:
+        <span class="tok-c"># An empty checklist is not worth remembering: the next run would</span>
+        <span class="tok-c"># open with nothing ticked.</span>
+        script.save_config({<span class="tok-s">&#x27;steps&#x27;</span>: plan})
+    <span class="tok-k">return</span> plan
+
+
+<span class="tok-k">def</span> confirmed(plan):
+    <span class="tok-s">&quot;&quot;&quot;Asks before anything is erased; True to go ahead.&quot;&quot;&quot;</span>
+    erasing = [WHAT_IT_ERASES[step] <span class="tok-k">for</span> step <span class="tok-k">in</span> audit.deleting_steps(plan)]
+    <span class="tok-k">if</span> <span class="tok-k">not</span> erasing:
+        <span class="tok-k">return</span> <span class="tok-k">True</span>
+    <span class="tok-k">if</span> len(erasing) &gt; <span class="tok-n">1</span>:
+        what = <span class="tok-s">&#x27;, &#x27;</span>.join(erasing[:-<span class="tok-n">1</span>]) + <span class="tok-s">&#x27; and &#x27;</span> + erasing[-<span class="tok-n">1</span>]
+    <span class="tok-k">else</span>:
+        what = erasing[<span class="tok-n">0</span>]
+    <span class="tok-k">return</span> forms.confirm(
+        <span class="tok-s">&#x27;This will %s.\n\nEntities on locked layers are left alone, and Undo &#x27;</span>
+        <span class="tok-s">&#x27;takes the changes back.\n\nContinue?&#x27;</span> % what, TITLE)
+
+
+<span class="tok-k">class</span> Watch(object):
+    <span class="tok-s">&quot;&quot;&quot;Progress and cancel callbacks for one step&#x27;s share of the bar.&quot;&quot;&quot;</span>
+
+    <span class="tok-k">def</span> __init__(<span class="tok-k">self</span>, bar, start, share):
+        <span class="tok-k">self</span>.bar = bar
+        <span class="tok-k">self</span>.start = start
+        <span class="tok-k">self</span>.share = share
+        <span class="tok-k">self</span>.stopped = <span class="tok-k">False</span>
+
+    <span class="tok-k">def</span> progress(<span class="tok-k">self</span>, done, total):
+        <span class="tok-k">if</span> <span class="tok-k">not</span> <span class="tok-k">self</span>.bar.update(<span class="tok-k">self</span>.start + <span class="tok-k">self</span>.share * float(done) / max(total, <span class="tok-n">1</span>)):
+            <span class="tok-k">self</span>.stopped = <span class="tok-k">True</span>
+
+    <span class="tok-k">def</span> cancelled(<span class="tok-k">self</span>):
+        <span class="tok-k">return</span> <span class="tok-k">self</span>.stopped
+
+
+<span class="tok-k">def</span> run_step(step, watch):
+    <span class="tok-s">&quot;&quot;&quot;Runs one step; returns its result for audit.format_report().&quot;&quot;&quot;</span>
+    <span class="tok-k">if</span> step == <span class="tok-s">&#x27;purge&#x27;</span>:
+        <span class="tok-k">return</span> audit.purge(all=<span class="tok-k">True</span>)
+    <span class="tok-k">if</span> step == <span class="tok-s">&#x27;audit&#x27;</span>:
+        audit.audit(fix=<span class="tok-k">True</span>)
+        <span class="tok-k">return</span> <span class="tok-k">None</span>                                     <span class="tok-c"># queued</span>
+    <span class="tok-k">if</span> step == <span class="tok-s">&#x27;zero_length&#x27;</span>:
+        handles = audit.zero_length(watch.progress, watch.cancelled)
+        <span class="tok-k">if</span> watch.stopped:
+            <span class="tok-k">return</span> {<span class="tok-s">&#x27;cancelled&#x27;</span>: <span class="tok-k">True</span>}
+        erased, skipped = audit.erase(handles)
+        <span class="tok-k">return</span> {<span class="tok-s">&#x27;count&#x27;</span>: erased, <span class="tok-s">&#x27;skipped&#x27;</span>: skipped}
+    <span class="tok-k">if</span> step == <span class="tok-s">&#x27;duplicates&#x27;</span>:
+        groups = audit.duplicates(progress=watch.progress, cancelled=watch.cancelled)
+        <span class="tok-k">if</span> watch.stopped:
+            <span class="tok-k">return</span> {<span class="tok-s">&#x27;cancelled&#x27;</span>: <span class="tok-k">True</span>}
+        erased, skipped = audit.erase(audit.duplicate_extras(groups))
+        <span class="tok-k">return</span> {<span class="tok-s">&#x27;count&#x27;</span>: erased, <span class="tok-s">&#x27;skipped&#x27;</span>: skipped, <span class="tok-s">&#x27;groups&#x27;</span>: len(groups)}
+    <span class="tok-k">if</span> step == <span class="tok-s">&#x27;bylayer&#x27;</span>:
+        changed, skipped = audit.colors_to_bylayer(watch.progress, watch.cancelled)
+        <span class="tok-k">if</span> watch.stopped:
+            <span class="tok-k">return</span> {<span class="tok-s">&#x27;cancelled&#x27;</span>: <span class="tok-k">True</span>}
+        <span class="tok-k">return</span> {<span class="tok-s">&#x27;count&#x27;</span>: changed, <span class="tok-s">&#x27;skipped&#x27;</span>: skipped}
+    <span class="tok-k">if</span> step == <span class="tok-s">&#x27;zoom&#x27;</span>:
+        doc.send_command(<span class="tok-s">&#x27;_.ZOOM _E&#x27;</span>)
+        <span class="tok-k">return</span> <span class="tok-k">None</span>                                     <span class="tok-c"># queued</span>
+    <span class="tok-k">raise</span> ValueError(<span class="tok-s">&#x27;Unknown step %s&#x27;</span> % step)
+
+
+<span class="tok-k">def</span> run_steps(plan):
+    <span class="tok-s">&quot;&quot;&quot;Runs the plan in order; returns [(step, result)]. A failed step is
+    reported and the rest still run; Cancel stops the rest.&quot;&quot;&quot;</span>
+    results = []
+    share = <span class="tok-n">1.0</span> / len(plan)
+    <span class="tok-k">with</span> forms.progress(TITLE, audit.step_label(plan[<span class="tok-n">0</span>])) <span class="tok-k">as</span> bar:
+        <span class="tok-k">for</span> index, step <span class="tok-k">in</span> enumerate(plan):
+            <span class="tok-k">if</span> <span class="tok-k">not</span> bar.update(index * share, audit.step_label(step)):
+                results.extend((rest, {<span class="tok-s">&#x27;not_run&#x27;</span>: <span class="tok-k">True</span>}) <span class="tok-k">for</span> rest <span class="tok-k">in</span> plan[index:])
+                <span class="tok-k">break</span>
+            <span class="tok-k">try</span>:
+                result = run_step(step, Watch(bar, index * share, share))
+            <span class="tok-k">except</span> Exception <span class="tok-k">as</span> error:
+                script.get_logger().error(<span class="tok-s">&#x27;%s step failed: %s&#x27;</span> % (step, error))
+                result = {<span class="tok-s">&#x27;error&#x27;</span>: str(error)}
+            results.append((step, result))
+            <span class="tok-k">if</span> isinstance(result, dict) <span class="tok-k">and</span> result.get(<span class="tok-s">&#x27;cancelled&#x27;</span>):
+                results.extend((rest, {<span class="tok-s">&#x27;not_run&#x27;</span>: <span class="tok-k">True</span>}) <span class="tok-k">for</span> rest <span class="tok-k">in</span> plan[index + <span class="tok-n">1</span>:])
+                <span class="tok-k">break</span>
+    <span class="tok-k">return</span> results
+
+
+<span class="tok-k">def</span> run():
+    <span class="tok-k">if</span> <span class="tok-k">not</span> has_drawing():
+        toast.warning(<span class="tok-s">&#x27;No drawing is open&#x27;</span>, <span class="tok-s">&#x27;Open a drawing, then run Drawing Cleanup&#x27;</span>)
+        <span class="tok-k">return</span>
+
+    plan = choose_steps()
+    <span class="tok-k">if</span> plan <span class="tok-k">is</span> <span class="tok-k">None</span>:
+        <span class="tok-k">return</span>                                          <span class="tok-c"># cancelled: say nothing</span>
+    <span class="tok-k">if</span> <span class="tok-k">not</span> plan:
+        toast.info(<span class="tok-s">&#x27;Nothing to do&#x27;</span>, <span class="tok-s">&#x27;No steps were ticked&#x27;</span>)
+        <span class="tok-k">return</span>
+    <span class="tok-k">if</span> <span class="tok-k">not</span> confirmed(plan):
+        <span class="tok-k">return</span>
+
+    results = run_steps(plan)
+    report = audit.format_report(results)
+    forms.alert(report, TITLE, copy=report)
+
+    line = audit.summary(results)
+    <span class="tok-k">if</span> any(isinstance(result, dict) <span class="tok-k">and</span> result.get(<span class="tok-s">&#x27;error&#x27;</span>) <span class="tok-k">for</span> _, result <span class="tok-k">in</span> results):
+        toast.warning(<span class="tok-s">&#x27;Drawing Cleanup hit a problem&#x27;</span>, line)
+    <span class="tok-k">else</span>:
+        toast.success(<span class="tok-s">&#x27;Drawing cleaned&#x27;</span>, line)
+
+
+<span class="tok-k">if</span> <span class="tok-s">&#x27;__commandpath__&#x27;</span> <span class="tok-k">in</span> globals():
+    run()</code></pre></div>
+<div class="code src"><div class="code-head"><span><code>config.py</code> <span class="src-note">Runs on Shift+Click.</span> <a href="https://github.com/pyacad/pyACAD/blob/main/extensions/pyACAD.extension/pyACAD.tab/Cleanup.panel/Drawing_Cleanup.pushbutton/config.py" rel="noopener">View on GitHub</a></span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-c"># -*- coding: utf-8 -*-</span>
+<span class="tok-s">&quot;&quot;&quot;Shift+Click: forgets the steps Drawing Cleanup remembered, so its next
+run opens with the default steps ticked again (everything but ByLayer
+colour).&quot;&quot;&quot;</span>
+
+<span class="tok-k">from</span> pyacad <span class="tok-k">import</span> script, toast
+
+
+<span class="tok-k">def</span> run():
+    <span class="tok-k">try</span>:
+        script.reset_config()
+    <span class="tok-k">except</span> (IOError, OSError) <span class="tok-k">as</span> error:
+        toast.error(<span class="tok-s">&#x27;Could not reset Drawing Cleanup&#x27;</span>, str(error))
+        <span class="tok-k">return</span>
+    toast.success(<span class="tok-s">&#x27;Drawing Cleanup reset&#x27;</span>, <span class="tok-s">&#x27;The next run opens with the default steps ticked&#x27;</span>)
+
+
+<span class="tok-k">if</span> <span class="tok-s">&#x27;__commandpath__&#x27;</span> <span class="tok-k">in</span> globals():
+    run()</code></pre></div>
+<div class="code src"><div class="code-head"><span><code>bundle.yaml</code> <span class="src-note">The bundle contract: the keys pyACAD reads for this tool.</span> <a href="https://github.com/pyacad/pyACAD/blob/main/extensions/pyACAD.extension/pyACAD.tab/Cleanup.panel/Drawing_Cleanup.pushbutton/bundle.yaml" rel="noopener">View on GitHub</a></span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-k">title</span>: Drawing Cleanup
+<span class="tok-k">tooltip</span>: Purges, audits, deletes zero-length and duplicate geometry and zooms to extents in one run, from a checklist that remembers your last choice. Shift+Click resets the checklist to its defaults.
+<span class="tok-k">context</span>: doc
+<span class="tok-k">keytip</span>: CC
+<span class="tok-k">alias</span>: DCU</code></pre></div>
+  <div class="pagenav">
+<a href="xref-repath.html"><span class="dir">Previous</span><span class="ttl">Xref Repath</span></a>
+<a class="next" href="font-proxy-report.html"><span class="dir">Next</span><span class="ttl">Font and Proxy Report</span></a>
+</div>
+</article>
+<aside class="toc"><div class="toc-head">On this page</div>
+<a href="#what-it-does">What it does</a>
+<a href="#how-to-use-it">How to use it</a>
+<a href="#limitations">Limitations</a>
+<a href="#good-to-know">Good to know</a>
+<a href="#other-uses">Other uses</a>
+<a href="#source">Source</a>
+</aside>
+</main>
+</div>
+<script src="_assets/search-index.js"></script>
+<script src="_assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,455 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hooks - pyACAD authoring</title>
+<meta name="description" content="Scripts that run themselves when something happens in AutoCAD, plus the startup.py every extension may carry.">
+<link rel="stylesheet" href="_assets/site.css">
+</head>
+<body data-base="">
+<div class="layout">
+<div class="sidebar">
+  <div class="brand"><a href="index.html"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="26" height="26" aria-hidden="true"><polygon points="157.0,327.8 351.8,327.8 363.1,342.4 363.1,403.3 168.3,403.3 157.0,388.7" fill="#78082A"/><polygon points="157.0,327.8 351.8,327.8 351.8,388.7 157.0,388.7" fill="#B80C40"/><polygon points="51.5,482.0 234.1,157.4 278.7,181.7 290.1,196.3 152.1,496.6 62.8,496.6" fill="#78082A"/><polygon points="51.5,482.0 140.8,482.0 278.7,181.7 234.1,157.4" fill="#E51050"/><polygon points="359.9,482.0 205.7,108.7 217.0,123.3 371.2,496.6" fill="#78082A"/><polygon points="205.7,108.7 201.6,55.9 213.0,70.5 217.0,123.3" fill="#78082A"/><polygon points="201.6,55.9 246.3,15.4 257.6,30.0 213.0,70.5" fill="#78082A"/><polygon points="246.3,15.4 343.7,23.5 355.0,38.1 257.6,30.0" fill="#78082A"/><polygon points="343.7,23.5 388.3,51.9 399.7,66.5 355.0,38.1" fill="#78082A"/><polygon points="388.3,51.9 347.7,76.2 359.1,90.8 399.7,66.5" fill="#78082A"/><polygon points="347.7,76.2 295.0,84.3 306.3,99.0 359.1,90.8" fill="#78082A"/><polygon points="295.0,84.3 449.2,482.0 460.5,496.6 306.3,99.0" fill="#78082A"/><polygon points="449.2,482.0 359.9,482.0 371.2,496.6 460.5,496.6" fill="#78082A"/><polygon points="359.9,482.0 205.7,108.7 201.6,55.9 246.3,15.4 343.7,23.5 388.3,51.9 347.7,76.2 295.0,84.3 449.2,482.0" fill="#E51050"/><polygon points="270.6,39.7 311.2,35.7 297.0,51.9" fill="#1F2329"/></svg><span class="brand-name">pyACAD
+    <span class="brand-sub">Tool authoring guide</span></span></a></div>
+  <div class="search-wrap">
+    <svg class="search-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <circle cx="6" cy="6" r="4.2" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M9.2 9.2 12.5 12.5" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round"/></svg>
+    <input id="search" type="search" placeholder="Search the docs" autocomplete="off"
+           spellcheck="false" aria-label="Search the documentation">
+    <span class="search-kbd">/</span>
+    <div id="search-results" class="search-results"></div>
+  </div>
+  <nav class="pages">
+<div class="grp">Start</div>
+<a href="overview.html"><span class="num">01</span>How pyACAD works</a>
+<a href="quickstart.html"><span class="num">02</span>Your first button</a>
+<div class="grp">Bundles</div>
+<a href="anatomy.html"><span class="num">03</span>Anatomy of an extension</a>
+<a href="buttons.html"><span class="num">04</span>Buttons, stacks and pulldowns</a>
+<a href="bundle-yaml.html"><span class="num">05</span>The bundle.yaml reference</a>
+<a href="icons.html"><span class="num">06</span>Icons</a>
+<a href="shortcuts.html"><span class="num">07</span>Shortcuts and keytips</a>
+<a href="click-actions.html"><span class="num">08</span>Click actions and config.py</a>
+<a href="hooks.html" class="active"><span class="num">09</span>Hooks</a>
+<div class="grp">Scripts</div>
+<a href="script-environment.html"><span class="num">10</span>The script environment</a>
+<a href="user-interface.html"><span class="num">11</span>Talking to the user</a>
+<a href="settings.html"><span class="num">12</span>Settings and per-tool state</a>
+<a href="commands.html"><span class="num">13</span>AutoCAD commands and AutoLISP</a>
+<a href="command-line.html"><span class="num">14</span>pyacad.exe and headless runs</a>
+<div class="grp">Reference</div>
+<a href="api-reference.html"><span class="num">15</span>Python API reference</a>
+<div class="grp">Practice</div>
+<a href="cookbook.html"><span class="num">16</span>Cookbook</a>
+<a href="ai-assistant.html"><span class="num">17</span>Writing tools with an AI assistant</a>
+<a href="troubleshooting.html"><span class="num">18</span>Troubleshooting</a>
+<a href="style-guide.html"><span class="num">19</span>Style guide for tools</a>
+</nav>
+  <div class="side-foot">
+    <span>pyACAD 0.1.0</span>
+    <button id="theme-toggle" type="button" aria-label="Toggle colour theme">
+      <span>Dark</span></button>
+  </div>
+</div>
+<main class="main">
+<article>
+  <p class="eyebrow">Bundles</p>
+  <h1>Hooks</h1>
+  <p class="lead">Scripts that run themselves when something happens in AutoCAD, plus the startup.py every extension may carry.</p>
+  <p>Every tool covered so far runs because someone clicked it or typed its command. A hook
+runs because a drawing opened, the current layer changed, or AutoCAD is shutting down. It
+lives in a <code>hooks</code> folder at the root of an extension, is named after the event it
+answers, and needs no <code>bundle.yaml</code>, icon or ribbon presence.</p>
+
+<div class="code"><div class="code-head"><span>folders</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-f">MyTools.extension</span>\
+  <span class="tok-k">extension.yaml</span>
+  <span class="tok-k">startup.py</span>                <span class="tok-c"># runs at boot and on every Reload</span>
+  hooks\
+    doc-opened.py           <span class="tok-c"># runs every time a drawing is opened from disk</span>
+    layer-changed.py        <span class="tok-c"># runs when the current layer changes</span>
+  <span class="tok-f">MyTools.tab</span>\</code></pre></div>
+
+<p>The file name, minus <code>.py</code>, must be one of the twenty event names below
+(case does not matter). Any other <code>.py</code> file in <code>hooks</code> is skipped at
+load time with a log line that lists the valid names:</p>
+
+<div class="code"><div class="code-head"><span>%APPDATA%\pyACAD\logs\pyACAD.log</span><button class="copy-btn" type="button">Copy</button></div><pre><code>Hook &#x27;D:\CAD\MyTools.extension\hooks\doc-open.py&#x27;: unknown event &#x27;doc-open&#x27; - skipped. Valid names: doc-created, doc-opened, ...</code></pre></div>
+
+<h2 id="the-twenty-events">The twenty events<a class="anchor" href="#the-twenty-events" aria-label="Link to this section">#</a></h2>
+
+<p>Every event has one AutoCAD (or pyACAD) source, listed here exactly as the runtime wires
+it. "Every open drawing" means pyACAD subscribes to each drawing as it arrives, so an event in
+a drawing that is not in front still fires.</p>
+
+<h3 id="drawings">Drawings<a class="anchor" href="#drawings" aria-label="Link to this section">#</a></h3>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>File name</th><th>Fires when</th><th>Source</th></tr></thead>
+<tbody>
+<tr><td><code>doc-created.py</code></td>
+    <td>A new, never-saved drawing is created (<code>NEW</code>, <code>QNEW</code>, the
+    <kbd>+</kbd> on the drawing tabs).</td>
+    <td><code>DocumentCreated</code> for a drawing that is not named</td></tr>
+<tr><td><code>doc-opened.py</code></td>
+    <td>A drawing is opened from a file.</td>
+    <td><code>DocumentCreated</code> for a named drawing</td></tr>
+<tr><td><code>doc-activated.py</code></td>
+    <td>A drawing becomes the active one: switching drawing tabs, and after a drawing is
+    created or opened.</td>
+    <td><code>DocumentActivated</code></td></tr>
+<tr><td><code>doc-closing.py</code></td>
+    <td>A drawing is about to close.</td>
+    <td><code>DocumentToBeDestroyed</code></td></tr>
+<tr><td><code>doc-saved.py</code></td>
+    <td>A save of any open drawing completes (<code>SAVE</code>, <code>QSAVE</code>,
+    <code>SAVEAS</code>).</td>
+    <td>The drawing database's <code>SaveComplete</code></td></tr>
+<tr><td><code>layout-switched.py</code></td>
+    <td>The Model tab or a layout tab is switched to.</td>
+    <td>The drawing's <code>LayoutSwitched</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The drawing that is open when pyACAD boots is already there before hooks are wired, so it
+raises none of these. Only drawings created, opened or switched to afterwards do.</p>
+
+<h3 id="commands">Commands<a class="anchor" href="#commands" aria-label="Link to this section">#</a></h3>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>File name</th><th>Fires when</th><th>Source</th></tr></thead>
+<tbody>
+<tr><td><code>command-will-start.py</code></td>
+    <td>Any AutoCAD command is about to start, in any open drawing.</td>
+    <td>The drawing's <code>CommandWillStart</code></td></tr>
+<tr><td><code>command-ended.py</code></td><td>Any command finished normally.</td>
+    <td><code>CommandEnded</code></td></tr>
+<tr><td><code>command-cancelled.py</code></td><td>Any command was cancelled.</td>
+    <td><code>CommandCancelled</code></td></tr>
+<tr><td><code>command-failed.py</code></td><td>Any command failed.</td>
+    <td><code>CommandFailed</code></td></tr>
+<tr><td><code>before-command.py</code></td>
+    <td>A pyACAD script is about to run: a click, a chord, a typed <code>PY</code> command,
+    a Shift+Click config run, <code>PYACAD</code> or <code>(pyacad ...)</code> from LISP.</td>
+    <td>pyACAD itself</td></tr>
+<tr><td><code>after-command.py</code></td>
+    <td>That pyACAD script has finished, whether it succeeded or raised.</td>
+    <td>pyACAD itself</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The four <code>command-*</code> events are AutoCAD's and cover every command, native ones
+(<code>LINE</code>, <code>ZOOM</code>, <code>QSAVE</code>) and pyACAD's own <code>PY</code>
+commands alike. They do not say which command it was. <code>before-command</code> and
+<code>after-command</code> are pyACAD's, wrap only pyACAD script runs, and do say which tool:
+see <a href="#what-a-hook-receives">What a hook receives</a>. A run refused before it starts
+(another script still running, or the host version gate) raises neither.</p>
+
+<h3 id="selection-objects-and-layers">Selection, objects and layers<a class="anchor" href="#selection-objects-and-layers" aria-label="Link to this section">#</a></h3>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>File name</th><th>Fires when</th><th>Source</th></tr></thead>
+<tbody>
+<tr><td><code>selection-changed.py</code></td>
+    <td>The pickfirst selection (the grips you see) changes. Debounced.</td>
+    <td>The drawing's <code>ImpliedSelectionChanged</code></td></tr>
+<tr><td><code>object-appended.py</code></td>
+    <td>An object is added to any open drawing's database.</td>
+    <td>The database's <code>ObjectAppended</code></td></tr>
+<tr><td><code>object-modified.py</code></td>
+    <td>An object in any open drawing's database is modified. Debounced.</td>
+    <td>The database's <code>ObjectModified</code></td></tr>
+<tr><td><code>object-erased.py</code></td>
+    <td>An object is erased, or un-erased (by <code>UNDO</code>, say): AutoCAD raises the
+    same event for both and pyACAD does not tell them apart.</td>
+    <td>The database's <code>ObjectErased</code></td></tr>
+<tr><td><code>layer-changed.py</code></td>
+    <td>The <em>current</em> layer changes, that is the <code>CLAYER</code> system variable.</td>
+    <td><code>SystemVariableChanged</code> for <code>CLAYER</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note trap">
+<span class="note-t">layer-changed is CLAYER only</span>
+<p>It fires when a different layer is made current, and for nothing else. Creating, renaming,
+deleting, freezing, locking or recolouring a layer does not fire it (those edits surface, if
+anywhere, as <code>object-modified</code> or <code>object-appended</code> on the layer table
+record). <code>CLAYER</code> changes are routed here instead of to
+<code>system-variable-changed</code>, so a <code>system-variable-changed</code> hook never sees
+them.</p>
+</div>
+
+<h3 id="the-application">The application<a class="anchor" href="#the-application" aria-label="Link to this section">#</a></h3>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>File name</th><th>Fires when</th><th>Source</th></tr></thead>
+<tbody>
+<tr><td><code>app-init.py</code></td>
+    <td>pyACAD has finished starting (once AutoCAD's ribbon is ready), and again after every
+    <strong>Reload</strong>, once the Reload command has finished.</td>
+    <td>pyACAD itself</td></tr>
+<tr><td><code>app-quit.py</code></td><td>AutoCAD begins to quit.</td>
+    <td><code>Application.BeginQuit</code></td></tr>
+<tr><td><code>system-variable-changed.py</code></td>
+    <td>Any system variable other than <code>CLAYER</code> changes value. Debounced.</td>
+    <td><code>Application.SystemVariableChanged</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="note warn">
+<span class="note-t">system-variable-changed does not say which variable</span>
+<p>AutoCAD changes system variables constantly while you work (the last point, the current
+command, view state), so this hook is debounced and fires once things settle. The event
+carries no variable name, so a hook that cares about one variable has to read it and compare
+with what it saw last time (keep that in <code>pyacad.script.set_envvar</code>).</p>
+</div>
+
+<h2 id="what-a-hook-receives">What a hook receives<a class="anchor" href="#what-a-hook-receives" aria-label="Link to this section">#</a></h2>
+
+<p>A hook is an ordinary script run with four globals:</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Global</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td><code>__event__</code></td>
+    <td>A dict with two keys: <code>'name'</code>, the event name
+    (<code>'doc-saved'</code>), and <code>'command'</code>, the bundle key of the pyACAD tool
+    for <code>before-command</code> and <code>after-command</code>
+    (<code>'pyACAD.tab/Output.panel/Batch_Plot.pushbutton'</code>), else
+    <code>None</code>.</td></tr>
+<tr><td><code>__file__</code></td><td>The hook script's own path.</td></tr>
+<tr><td><code>__pyacad__</code></td><td>The runtime host object, as in any script.</td></tr>
+<tr><td><code>__runner__</code></td>
+    <td><code>True</code> only when the hook fires inside a <code>pyacad run</code>
+    session.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>That is all. <code>__event__</code> never names the drawing, the object, the command or the
+variable involved: a hook finds out what it needs from the drawing itself. A run of a
+<code>.py</code> file through <code>PYACAD</code> has no bundle, so its
+<code>'command'</code> is <code>None</code>.</p>
+
+<div class="note warn">
+<span class="note-t">No command context</span>
+<p>A hook is not a command. It has no <code>__commandpath__</code>, <code>__title__</code> or
+<code>__args__</code>, and <code>pyacad.script</code> calls that ask "which command am I?"
+(<code>get_config</code>, <code>get_bundle_file</code>, <code>store_data</code>,
+<code>get_toggle_state</code>) answer for whichever tool ran <em>last</em>. Store a hook's
+own options with <code>pyacad.settings</code> under a key you choose. The one exception is
+<code>pyacad.script.get_logger</code>, whose lines are labelled
+<code>hook &lt;extension&gt;:&lt;event&gt;</code>.</p>
+</div>
+
+<h2 id="examples">Examples<a class="anchor" href="#examples" aria-label="Link to this section">#</a></h2>
+
+<div class="code"><div class="code-head"><span>hooks\layer-changed.py</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-s">&quot;&quot;&quot;Says which layer is now current.&quot;&quot;&quot;</span>
+<span class="tok-k">from</span> pyacad <span class="tok-k">import</span> doc, toast
+
+toast.info(<span class="tok-s">&#x27;Current layer: %s&#x27;</span> % doc.sysvar(<span class="tok-s">&#x27;CLAYER&#x27;</span>))</code></pre></div>
+
+<div class="code"><div class="code-head"><span>hooks\after-command.py</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-s">&quot;&quot;&quot;Logs every pyACAD tool that finishes, for a usage tally.&quot;&quot;&quot;</span>
+<span class="tok-k">from</span> pyacad <span class="tok-k">import</span> script
+
+script.get_logger().info(<span class="tok-s">&#x27;finished %s&#x27;</span> % __event__[<span class="tok-s">&#x27;command&#x27;</span>])</code></pre></div>
+
+<p>A hook runs from an AutoCAD event handler, outside any command, so the drawing is
+<strong>not</strong> locked for it. Reading is fine; anything that writes to the drawing goes
+inside <code>doc.lock()</code>:</p>
+
+<div class="code"><div class="code-head"><span>hooks\doc-activated.py</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-s">&quot;&quot;&quot;Gives the drawing in front a NOTES layer when it has none.&quot;&quot;&quot;</span>
+<span class="tok-k">from</span> pyacad <span class="tok-k">import</span> doc, layers
+
+<span class="tok-k">if</span> <span class="tok-k">not</span> layers.exists(<span class="tok-s">&#x27;NOTES&#x27;</span>):
+    <span class="tok-k">with</span> doc.lock():
+        layers.create(<span class="tok-s">&#x27;NOTES&#x27;</span>, color=<span class="tok-n">2</span>)</code></pre></div>
+
+<p>That example also shows why to choose events carefully: it edits every drawing you switch
+to, which marks each one as changed. A hook that only reports is always the safer default.</p>
+
+<div class="note">
+<span class="note-t">doc-opened and doc-created do not name the new drawing</span>
+<p>Both fire from <code>DocumentCreated</code>, and nothing in <code>__event__</code> says which
+drawing that was. Code that works on "the active drawing" should hang off
+<code>doc-activated</code>, which fires once the new drawing is in front.</p>
+</div>
+
+<h2 id="debouncing">Debouncing<a class="anchor" href="#debouncing" aria-label="Link to this section">#</a></h2>
+
+<p>Three events can fire many times for one user action, so they are debounced:</p>
+
+<ul>
+  <li><code>selection-changed</code></li>
+  <li><code>object-modified</code></li>
+  <li><code>system-variable-changed</code></li>
+</ul>
+
+<p>Each occurrence restarts a 250 ms timer, and the hooks run once, 250 ms after the last
+occurrence of the burst. A window-select that changes the pickfirst set a hundred times runs
+<code>selection-changed.py</code> once. Every other event runs its hooks immediately, once
+per occurrence.</p>
+
+<div class="note trap">
+<span class="note-t">object-appended and object-erased are not debounced</span>
+<p>They run once per object. Pasting a thousand entities, exploding a block or erasing a
+window full of objects runs an <code>object-appended.py</code> or <code>object-erased.py</code>
+hook a thousand times, synchronously, on AutoCAD's UI thread. They are also not limited to
+entities: dictionaries, layer records and other non-graphical objects count.</p>
+</div>
+
+<h3 id="object-events-cost-nothing-unless-asked-for">Object events cost nothing unless asked for<a class="anchor" href="#object-events-cost-nothing-unless-asked-for" aria-label="Link to this section">#</a></h3>
+
+<p>AutoCAD raises the three <code>object-*</code> events for every object, thousands of times
+for one regen or block insert. pyACAD only passes them on when at least one loaded extension
+ships an <code>object-appended.py</code>, <code>object-modified.py</code> or
+<code>object-erased.py</code> hook; otherwise they are dropped at the first line of the
+handler. This is decided at boot and on every Reload, so adding or removing such a hook needs
+a Reload to take effect, like any other hook change.</p>
+
+<h2 id="when-hooks-are-skipped">When hooks are skipped<a class="anchor" href="#when-hooks-are-skipped" aria-label="Link to this section">#</a></h2>
+
+<ul>
+  <li><strong>While a pyACAD script runs.</strong> Long scripts pump the message loop, which
+    can deliver AutoCAD events mid-run. Running a hook's Python on top of the script's would
+    share one engine, so every hook except <code>before-command</code> and
+    <code>after-command</code> is skipped and the log says
+    <code>Hook MyTools:selection-changed skipped: 'Batch Plot' is running.</code> Skipped
+    events are not replayed later. The one exception is <code>app-init</code> after a Reload,
+    which is held until the Reload command finishes and then delivered.</li>
+  <li><strong>While another hook runs.</strong> Only one hook runs at a time, and an event a
+    hook causes directly (it set the current layer, say) starts no hooks. A debounced event
+    a hook caused (it modified an object or changed the selection) is marked as hook-caused
+    when its timer fires, and hooks skip it. So an <code>object-modified</code> hook that edits
+    an object does not loop. Ribbon <code>context:</code> greying still sees every event.</li>
+  <li><strong>After three failures.</strong> See below.</li>
+  <li><strong>With no one at the screen.</strong> In AutoCAD Core Console (where
+    <code>pyacad run</code> works) and in an AutoCAD started through COM automation, the
+    interactive start-up stages are skipped, and hooks are among them, so no hook is wired.
+    For the COM case, <code>"automatedBoot": "full"</code> in <code>config.json</code> brings
+    them back.</li>
+</ul>
+
+<h2 id="three-failures-and-it-is-disabled">Three failures and it is disabled<a class="anchor" href="#three-failures-and-it-is-disabled" aria-label="Link to this section">#</a></h2>
+
+<p>A hook that raises is logged with its traceback. Three failures <em>in a row</em> (a
+success resets the count) disable that hook for the rest of the session, with a warning
+toast:</p>
+
+<div class="code"><div class="code-head"><span>text</span><button class="copy-btn" type="button">Copy</button></div><pre><code>Hook MyTools:doc-saved disabled after 3 failures
+Fix the script, then Reload pyACAD to re-enable it.</code></pre></div>
+
+<p>The hook's identity is <code>&lt;extension name&gt;:&lt;event&gt;</code>, where the
+extension name is <code>name:</code> from <code>extension.yaml</code> or the folder name
+without <code>.extension</code>. <strong>Reload</strong> clears every count and re-enables
+every hook.</p>
+
+<h2 id="the-time-budget">The time budget<a class="anchor" href="#the-time-budget" aria-label="Link to this section">#</a></h2>
+
+<p>Hooks run synchronously on AutoCAD's UI thread: while one runs, AutoCAD is frozen. A hook
+that takes longer than 500 ms gets a line in the log,
+<code>Hook MyTools:doc-saved took 1240ms (soft budget 500ms) - keep hooks fast.</code>, but is
+not stopped. Keep hooks to a few quick reads, a toast or a log line. Put anything slow behind
+a button instead.</p>
+
+<h2 id="where-a-hook-s-output-goes">Where a hook's output goes<a class="anchor" href="#where-a-hook-s-output-goes" aria-label="Link to this section">#</a></h2>
+
+<ul>
+  <li><code>print()</code> goes to <code>%APPDATA%\pyACAD\logs\pyACAD.log</code>, one line
+    each, prefixed with <code>[hook MyTools:doc-saved]</code>. A hook never opens the output
+    window.</li>
+  <li><code>pyacad.toast</code> works and is the right way to tell the user something.</li>
+  <li>Dialogs work, but a modal dialog from an event handler interrupts whatever the user was
+    doing. Avoid them.</li>
+</ul>
+
+<h2 id="engine-and-imports">Engine and imports<a class="anchor" href="#engine-and-imports" aria-label="Link to this section">#</a></h2>
+
+<p>A hook runs on its extension's engine, <code>engine:</code> in <code>extension.yaml</code>
+(IronPython when absent). It can import from its own <code>hooks</code> folder, from the
+extension's <code>lib</code> folder, from <code>pyacad</code> and from any <code>*.lib</code>
+folder beside the extensions. When several extensions ship a hook for the same event, they run
+one after another in extension load order.</p>
+
+<p>Hooks are found when the extension is loaded, so adding, renaming or removing a hook file
+needs a <strong>Reload</strong>. Editing an existing one does not: the file is read on every
+run.</p>
+
+<h2 id="startup-py">startup.py<a class="anchor" href="#startup-py" aria-label="Link to this section">#</a></h2>
+
+<p>An extension may carry one <code>startup.py</code> at its root. It runs with no event and
+no click:</p>
+
+<ul>
+  <li><strong>At boot</strong>, once AutoCAD's ribbon is ready, and <strong>on every
+    Reload</strong>. Write it so running twice in a session is harmless.</li>
+  <li><strong>Before the ribbon is built</strong> (and before hooks are configured and
+    commands registered), for every extension, so anything it sets up is in place before the
+    first button exists.</li>
+  <li><strong>In <code>pyacad run</code></strong>, once before the first script of the run,
+    with <code>__runner__</code> set to <code>True</code>.</li>
+</ul>
+
+<p>It receives <code>__file__</code>, <code>__pyacad__</code> and <code>__runner__</code>,
+runs on the extension's engine, and can import from the extension folder and its
+<code>lib</code> folder. Like a hook it has no command context and no document lock, and
+there may be no drawing open at all. Its <code>print()</code> output goes to the log under
+<code>[startup MyTools]</code>.</p>
+
+<div class="code"><div class="code-head"><span>MyTools.extension\startup.py</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-s">&quot;&quot;&quot;Shares the office standards folder with every MyTools script this session.&quot;&quot;&quot;</span>
+<span class="tok-k">import</span> os
+<span class="tok-k">from</span> pyacad <span class="tok-k">import</span> script
+
+script.set_envvar(<span class="tok-s">&#x27;mytools.standards&#x27;</span>, os.path.join(os.path.dirname(__file__), <span class="tok-s">&#x27;standards&#x27;</span>))</code></pre></div>
+
+<p>If <code>startup.py</code> raises, the traceback goes to the log and a warning toast says
+<em>MyTools startup.py failed</em>, <em>See the log; the extension's buttons still
+loaded.</em> One broken startup script never costs an extension its ribbon.</p>
+
+<div class="cards">
+  <a href="script-environment.html"><span class="c-t">The script environment</span>
+    <span class="c-d">Globals, search paths and engines for every kind of script.</span></a>
+  <a href="settings.html"><span class="c-t">Settings and per-tool state</span>
+    <span class="c-d">Where a hook can keep its own options.</span></a>
+  <a href="troubleshooting.html"><span class="c-t">Troubleshooting</span>
+    <span class="c-d">Reading the log when a hook does not fire.</span></a>
+</div>
+  <div class="pagenav">
+<a href="click-actions.html"><span class="dir">Previous</span><span class="ttl">Click actions and config.py</span></a>
+<a class="next" href="script-environment.html"><span class="dir">Next</span><span class="ttl">The script environment</span></a>
+</div>
+</article>
+<aside class="toc"><div class="toc-head">On this page</div>
+<a href="#the-twenty-events">The twenty events</a>
+<a href="#drawings" class="h3">Drawings</a>
+<a href="#commands" class="h3">Commands</a>
+<a href="#selection-objects-and-layers" class="h3">Selection, objects and layers</a>
+<a href="#the-application" class="h3">The application</a>
+<a href="#what-a-hook-receives">What a hook receives</a>
+<a href="#examples">Examples</a>
+<a href="#debouncing">Debouncing</a>
+<a href="#object-events-cost-nothing-unless-asked-for" class="h3">Object events cost nothing unless asked for</a>
+<a href="#when-hooks-are-skipped">When hooks are skipped</a>
+<a href="#three-failures-and-it-is-disabled">Three failures and it is disabled</a>
+<a href="#the-time-budget">The time budget</a>
+<a href="#where-a-hook-s-output-goes">Where a hook&#x27;s output goes</a>
+<a href="#engine-and-imports">Engine and imports</a>
+<a href="#startup-py">startup.py</a>
+</aside>
+</main>
+</div>
+<script src="_assets/search-index.js"></script>
+<script src="_assets/site.js"></script>
+</body>
+</html>

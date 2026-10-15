@@ -1,0 +1,5 @@
+# The guides live on their own hosts; these paths on the main domain used to fall
+# back to index.html with broken relative assets.
+/authoring/*  https://docs.pyacad.com/:splat   302
+/docs/*       https://docs.pyacad.com/:splat   302
+/tools/*      https://tools.pyacad.com/:splat  302

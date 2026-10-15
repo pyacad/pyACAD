@@ -1,0 +1,337 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tag Audit - pyACAD tools</title>
+<meta name="description" content="Checks one attribute, TAG by default, across the block references in the selection or the drawing, and lists the values used twice, the blanks and the blocks without it.">
+<link rel="stylesheet" href="_assets/site.css">
+<link rel="stylesheet" href="_assets/tools.css">
+</head>
+<body data-base="">
+<div class="layout">
+<div class="sidebar">
+  <div class="brand"><a href="index.html"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="26" height="26" aria-hidden="true"><polygon points="157.0,327.8 351.8,327.8 363.1,342.4 363.1,403.3 168.3,403.3 157.0,388.7" fill="#78082A"/><polygon points="157.0,327.8 351.8,327.8 351.8,388.7 157.0,388.7" fill="#B80C40"/><polygon points="51.5,482.0 234.1,157.4 278.7,181.7 290.1,196.3 152.1,496.6 62.8,496.6" fill="#78082A"/><polygon points="51.5,482.0 140.8,482.0 278.7,181.7 234.1,157.4" fill="#E51050"/><polygon points="359.9,482.0 205.7,108.7 217.0,123.3 371.2,496.6" fill="#78082A"/><polygon points="205.7,108.7 201.6,55.9 213.0,70.5 217.0,123.3" fill="#78082A"/><polygon points="201.6,55.9 246.3,15.4 257.6,30.0 213.0,70.5" fill="#78082A"/><polygon points="246.3,15.4 343.7,23.5 355.0,38.1 257.6,30.0" fill="#78082A"/><polygon points="343.7,23.5 388.3,51.9 399.7,66.5 355.0,38.1" fill="#78082A"/><polygon points="388.3,51.9 347.7,76.2 359.1,90.8 399.7,66.5" fill="#78082A"/><polygon points="347.7,76.2 295.0,84.3 306.3,99.0 359.1,90.8" fill="#78082A"/><polygon points="295.0,84.3 449.2,482.0 460.5,496.6 306.3,99.0" fill="#78082A"/><polygon points="449.2,482.0 359.9,482.0 371.2,496.6 460.5,496.6" fill="#78082A"/><polygon points="359.9,482.0 205.7,108.7 201.6,55.9 246.3,15.4 343.7,23.5 388.3,51.9 347.7,76.2 295.0,84.3 449.2,482.0" fill="#E51050"/><polygon points="270.6,39.7 311.2,35.7 297.0,51.9" fill="#1F2329"/></svg><span class="brand-name">pyACAD
+    <span class="brand-sub">Tools guide</span></span></a></div>
+  <div class="search-wrap">
+    <svg class="search-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <circle cx="6" cy="6" r="4.2" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M9.2 9.2 12.5 12.5" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round"/></svg>
+    <input id="search" type="search" placeholder="Search the tools" autocomplete="off"
+           spellcheck="false" aria-label="Search the tools guide">
+    <span class="search-kbd">/</span>
+    <div id="search-results" class="search-results"></div>
+  </div>
+  <nav class="pages">
+<div class="grp">pyACAD</div>
+<a href="settings.html"><img class="nav-icon" src="_assets/icons/settings.png" alt="">Settings</a>
+<a href="shortcuts.html"><img class="nav-icon" src="_assets/icons/shortcuts.png" alt="">Shortcuts</a>
+<a href="console.html"><img class="nav-icon" src="_assets/icons/console.png" alt="">Console</a>
+<a href="reload.html"><img class="nav-icon" src="_assets/icons/reload.png" alt="">Reload</a>
+<div class="grp">Data</div>
+<a href="blocks-to-excel.html"><img class="nav-icon" src="_assets/icons/blocks-to-excel.png" alt="">Blocks to Excel</a>
+<a href="excel-to-blocks.html"><img class="nav-icon" src="_assets/icons/excel-to-blocks.png" alt="">Excel to Blocks</a>
+<a href="block-schedule.html"><img class="nav-icon" src="_assets/icons/block-schedule.png" alt="">Block Schedule</a>
+<a href="find-replace-attributes.html"><img class="nav-icon" src="_assets/icons/find-replace-attributes.png" alt="">Find and Replace Attributes</a>
+<div class="grp">Layers</div>
+<a href="layer-manager.html"><img class="nav-icon" src="_assets/icons/layer-manager.png" alt="">Layer Manager</a>
+<a href="layer-mapper.html"><img class="nav-icon" src="_assets/icons/layer-mapper.png" alt="">Layer Mapper</a>
+<a href="layer-snapshot.html"><img class="nav-icon" src="_assets/icons/layer-snapshot.png" alt="">Layer Snapshot</a>
+<div class="grp">Xrefs</div>
+<a href="xref-manager.html"><img class="nav-icon" src="_assets/icons/xref-manager.png" alt="">Xref Manager</a>
+<a href="xref-repath.html"><img class="nav-icon" src="_assets/icons/xref-repath.png" alt="">Xref Repath</a>
+<div class="grp">Cleanup</div>
+<a href="drawing-cleanup.html"><img class="nav-icon" src="_assets/icons/drawing-cleanup.png" alt="">Drawing Cleanup</a>
+<a href="font-proxy-report.html"><img class="nav-icon" src="_assets/icons/font-proxy-report.png" alt="">Font and Proxy Report</a>
+<div class="grp">Output</div>
+<a href="batch-plot.html"><img class="nav-icon" src="_assets/icons/batch-plot.png" alt="">Batch Plot</a>
+<a href="layout-manager.html"><img class="nav-icon" src="_assets/icons/layout-manager.png" alt="">Layout Manager</a>
+<div class="grp">Takeoff</div>
+<a href="length-takeoff.html"><img class="nav-icon" src="_assets/icons/length-takeoff.png" alt="">Length Takeoff</a>
+<a href="tag-audit.html" class="active"><img class="nav-icon" src="_assets/icons/tag-audit.png" alt="">Tag Audit</a>
+<div class="grp">AI (beta)</div>
+<a href="ask-ai.html"><img class="nav-icon" src="_assets/icons/ask-ai.png" alt="">Ask AI</a>
+<a href="ai-settings.html"><img class="nav-icon" src="_assets/icons/ai-settings.png" alt="">AI Settings</a>
+<a href="open-ai-folder.html"><img class="nav-icon" src="_assets/icons/open-ai-folder.png" alt="">Open AI Folder</a>
+</nav>
+  <div class="side-foot">
+    <span>pyACAD 0.1.0</span>
+    <a class="side-link" href="https://docs.pyacad.com/">Authoring guide</a>
+    <button id="theme-toggle" type="button" aria-label="Toggle colour theme">
+      <span>Dark</span></button>
+  </div>
+</div>
+<main class="main">
+<article>
+  <div class="hero"><img class="hero-icon" src="_assets/icons/tag-audit.png" alt=""><div><p class="eyebrow">Takeoff panel</p><h1>Tag Audit</h1><p class="lead">Checks one attribute, TAG by default, across the block references in the selection or the drawing, and lists the values used twice, the blanks and the blocks without it.</p></div></div><div class="facts"><div class="fact"><span class="fact-k">On the ribbon</span><span class="fact-v">Button, Takeoff panel</span></div><div class="fact"><span class="fact-k">Needs</span><span class="fact-v">An open drawing with attributed blocks; select first to check only some</span></div><div class="fact"><span class="fact-k">Command</span><span class="fact-v"><code>PYTAGAUDIT</code></span></div><div class="fact"><span class="fact-k">Alias</span><span class="fact-v"><code>TAU</code></span></div></div>
+  <h2 id="what-it-does">What it does<a class="anchor" href="#what-it-does" aria-label="Link to this section">#</a></h2>
+<p>Reads one attribute from every block reference in the selection, or with nothing selected,
+every block reference in model space and every layout. It reports three things:</p>
+<ul>
+  <li><strong>Duplicates</strong>: values two or more blocks share. Values are compared
+    trimmed and ignoring case, so <code>AHU-1</code> and <code>ahu-1 </code> are the same
+    tag.</li>
+  <li><strong>Blanks</strong>: blocks that have the attribute but no value in it (or only
+    spaces).</li>
+  <li><strong>Missing</strong>: blocks that do not have that attribute at all.</li>
+</ul>
+<p>If there is nothing to report, a toast says "Every TAG is filled in and unique" and the
+tool ends.</p>
+
+
+
+<h2 id="how-to-use-it">How to use it<a class="anchor" href="#how-to-use-it" aria-label="Link to this section">#</a></h2>
+<ol class="steps">
+  <li>Select the blocks to check, or select nothing to check the whole drawing.</li>
+  <li>Click <strong>Tag Audit</strong>, or type <code>PYTAGAUDIT</code>.</li>
+  <li>Pick the attribute to audit. The list holds every attribute tag those blocks carry, in
+    the order the drawing holds them. <code>TAG</code> is picked to start with when one of
+    them has it.</li>
+  <li>Read the summary. It names up to eight duplicate values with how many blocks share
+    each (<code>AHU-1  x2</code>), then how many blocks have a blank value and how many lack
+    the attribute, each broken down by block name.</li>
+  <li>Pick what next:
+    <ul>
+      <li><strong>Select them</strong> makes the blocks with a duplicate or blank value the
+        current selection, so you can find and fix them. Blocks that lack the attribute are
+        not selected, since they are usually other kinds of block. This choice is offered only
+        when there are duplicates or blanks.</li>
+      <li><strong>Export to Excel</strong> asks where to save, suggesting
+        <code>&lt;drawing&gt; - Tag Audit.xlsx</code> beside the drawing. An existing file of
+        that name is replaced.</li>
+      <li><strong>Copy report</strong> puts every finding on the clipboard, tab
+        separated.</li>
+    </ul></li>
+</ol>
+
+<h2 id="the-findings-table">The findings table<a class="anchor" href="#the-findings-table" aria-label="Link to this section">#</a></h2>
+<p>The export (sheet <strong>Tag Audit</strong>) and the copy have one row per offending
+block: duplicates first, grouped by value, then blanks, then missing.</p>
+<div class="table-scroll"><table>
+  <thead><tr><th>Column</th><th>Holds</th></tr></thead>
+  <tbody>
+    <tr><td>Issue</td><td><code>Duplicate</code>, <code>Blank</code> or
+      <code>Missing</code></td></tr>
+    <tr><td>Value</td><td>The shared value, for a duplicate; empty otherwise</td></tr>
+    <tr><td>Handle</td><td>The block reference's handle</td></tr>
+    <tr><td>Block</td><td>The block name (a dynamic block's own name, not its anonymous
+      one)</td></tr>
+    <tr><td>Layer</td><td>The block reference's layer</td></tr>
+    <tr><td>Space</td><td><code>Model</code> or the layout's name</td></tr>
+  </tbody>
+</table></div>
+
+<h2 id="limitations">Limitations<a class="anchor" href="#limitations" aria-label="Link to this section">#</a></h2>
+<ul>
+  <li>With nothing selected, every block reference in the drawing counts, and every one
+    without the attribute (title blocks, north arrows, symbols) is listed as missing. Select
+    the equipment first, or ignore the Missing rows, when that list is long.</li>
+  <li>Block references nested inside other blocks, and xref attachments, are not
+    checked.</li>
+  <li>Constant attributes are not read: a block whose tag is a constant attribute is listed
+    as missing it.</li>
+  <li>One attribute per run. To check two, run the tool twice.</li>
+  <li>The tool reports and selects; it does not renumber or fill in values.</li>
+</ul>
+
+<h2 id="other-uses">Other uses<a class="anchor" href="#other-uses" aria-label="Link to this section">#</a></h2>
+<ul>
+  <li>Room numbers, door numbers or panel circuit labels: any attribute that should be
+    unique.</li>
+  <li>Sheet numbers in title blocks. Every layout is checked, so two sheets carrying the same
+    number in one drawing show up as a duplicate.</li>
+  <li>Check that every block of one kind is labelled: select them all with Quick Select, run
+    the audit, and the blanks are the ones still to do.</li>
+</ul>
+<h2 id="source">Source<a class="anchor" href="#source" aria-label="Link to this section">#</a></h2>
+<p>The tool's own files, word for word as shipped in <code>Takeoff.panel/Tag_Audit.pushbutton</code>. Every pyACAD tool is an ordinary bundle: copy these into your own extension and change what you like.</p>
+<div class="code src"><div class="code-head"><span><code>script.py</code> <span class="src-note">Runs on a click.</span> <a href="https://github.com/pyacad/pyACAD/blob/main/extensions/pyACAD.extension/pyACAD.tab/Takeoff.panel/Tag_Audit.pushbutton/script.py" rel="noopener">View on GitHub</a></span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-c"># -*- coding: utf-8 -*-</span>
+<span class="tok-s">&quot;&quot;&quot;Equipment tag audit: duplicate, blank and missing values of one attribute.
+
+Checks the selected block references, or every one in model space and the
+layouts. Pick the attribute (TAG by default, from every tag those blocks
+carry). Values are compared trimmed and ignoring case, so &#x27;AHU-1&#x27; and &#x27;ahu-1 &#x27;
+count as the same tag. The findings can be copied, exported to Excel, or the
+offending blocks selected in the drawing.
+&quot;&quot;&quot;</span>
+
+<span class="tok-k">import</span> os
+
+<span class="tok-k">from</span> pyacad <span class="tok-k">import</span> blocks, forms, script, sel, toast, xl
+
+__title__ = <span class="tok-s">&#x27;Tag Audit&#x27;</span>
+
+TITLE = <span class="tok-s">&#x27;Tag Audit&#x27;</span>
+XLSX = <span class="tok-s">&#x27;Excel workbook (*.xlsx)|*.xlsx&#x27;</span>
+SHOWN = <span class="tok-n">8</span>                       <span class="tok-c"># duplicate values listed before &quot;and N more&quot;</span>
+SELECT = <span class="tok-s">&#x27;Select them&#x27;</span>
+EXPORT = <span class="tok-s">&#x27;Export to Excel&#x27;</span>
+COPY = <span class="tok-s">&#x27;Copy report&#x27;</span>
+CLOSE = <span class="tok-s">&#x27;Close&#x27;</span>
+
+
+<span class="tok-k">def</span> plural(count, word):
+    <span class="tok-k">return</span> <span class="tok-s">&#x27;%d %s%s&#x27;</span> % (count, word, <span class="tok-s">&#x27;&#x27;</span> <span class="tok-k">if</span> count == <span class="tok-n">1</span> <span class="tok-k">else</span> <span class="tok-s">&#x27;s&#x27;</span>)
+
+
+<span class="tok-k">def</span> default_path(drawing, what):
+    <span class="tok-s">&quot;&quot;&quot;&#x27;&lt;drawing&gt; - &lt;what&gt;.xlsx&#x27; beside the drawing; just the name when unsaved.&quot;&quot;&quot;</span>
+    <span class="tok-k">if</span> <span class="tok-k">not</span> drawing <span class="tok-k">or</span> drawing == <span class="tok-s">&#x27;untitled&#x27;</span>:
+        <span class="tok-k">return</span> <span class="tok-s">&#x27;Drawing - %s.xlsx&#x27;</span> % what
+    folder, name = os.path.split(drawing)
+    <span class="tok-k">return</span> os.path.join(folder, <span class="tok-s">&#x27;%s - %s.xlsx&#x27;</span> % (os.path.splitext(name)[<span class="tok-n">0</span>], what))
+
+
+<span class="tok-k">def</span> write_workbook(path, headers, rows, sheet):
+    <span class="tok-s">&quot;&quot;&quot;Writes a fresh workbook; True when it worked. The Save dialog already
+    asked before replacing a file, so an old one is removed rather than merged.&quot;&quot;&quot;</span>
+    <span class="tok-k">try</span>:
+        <span class="tok-k">if</span> os.path.exists(path):
+            os.remove(path)
+        xl.write(path, rows, headers=headers, sheet=sheet)
+    <span class="tok-k">except</span> (IOError, OSError) <span class="tok-k">as</span> error:
+        toast.error(<span class="tok-s">&#x27;Could not write the workbook&#x27;</span>, <span class="tok-s">&#x27;Is it open in Excel? %s&#x27;</span> % error)
+        <span class="tok-k">return</span> <span class="tok-k">False</span>
+    <span class="tok-k">return</span> <span class="tok-k">True</span>
+
+
+<span class="tok-k">def</span> by_block(handles, names, shown=<span class="tok-n">5</span>):
+    <span class="tok-s">&quot;&quot;&quot;&#x27;Door (12), North (1)&#x27;: how many of the handles each block name has,
+    the most common first.&quot;&quot;&quot;</span>
+    counts = {}
+    <span class="tok-k">for</span> handle <span class="tok-k">in</span> handles:
+        counts[names[handle]] = counts.get(names[handle], <span class="tok-n">0</span>) + <span class="tok-n">1</span>
+    order = sorted(counts, key=<span class="tok-k">lambda</span> name: (-counts[name], name.lower()))
+    text = <span class="tok-s">&#x27;, &#x27;</span>.join(<span class="tok-s">&#x27;%s (%d)&#x27;</span> % (name, counts[name]) <span class="tok-k">for</span> name <span class="tok-k">in</span> order[:shown])
+    <span class="tok-k">if</span> len(order) &gt; shown:
+        text += <span class="tok-s">&#x27; and %s&#x27;</span> % plural(len(order) - shown, <span class="tok-s">&#x27;other block&#x27;</span>)
+    <span class="tok-k">return</span> text
+
+
+<span class="tok-k">def</span> summary(audit, tag, refs, scope, names):
+    lines = [<span class="tok-s">&#x27;%s across %s %s:&#x27;</span> % (tag, plural(len(refs), <span class="tok-s">&#x27;block reference&#x27;</span>), scope), <span class="tok-s">&#x27;&#x27;</span>]
+    duplicates = audit[<span class="tok-s">&#x27;duplicates&#x27;</span>]
+    <span class="tok-k">if</span> duplicates:
+        shared = sum(len(handles) <span class="tok-k">for</span> handles <span class="tok-k">in</span> duplicates.values())
+        lines.append(<span class="tok-s">&#x27;%s used more than once, by %s:&#x27;</span>
+                     % (plural(len(duplicates), <span class="tok-s">&#x27;value&#x27;</span>), plural(shared, <span class="tok-s">&#x27;block&#x27;</span>)))
+        order = sorted(duplicates, key=<span class="tok-k">lambda</span> value: value.lower())
+        <span class="tok-k">for</span> value <span class="tok-k">in</span> order[:SHOWN]:
+            lines.append(<span class="tok-s">&#x27;    %s  x%d&#x27;</span> % (value, len(duplicates[value])))
+        <span class="tok-k">if</span> len(order) &gt; SHOWN:
+            lines.append(<span class="tok-s">&#x27;    and %d more&#x27;</span> % (len(order) - SHOWN))
+    <span class="tok-k">else</span>:
+        lines.append(<span class="tok-s">&#x27;No value is used twice.&#x27;</span>)
+    <span class="tok-k">if</span> audit[<span class="tok-s">&#x27;blanks&#x27;</span>]:
+        lines.append(<span class="tok-s">&#x27;%s with a blank %s: %s&#x27;</span> % (plural(len(audit[<span class="tok-s">&#x27;blanks&#x27;</span>]), <span class="tok-s">&#x27;block&#x27;</span>), tag,
+                                                 by_block(audit[<span class="tok-s">&#x27;blanks&#x27;</span>], names)))
+    <span class="tok-k">if</span> audit[<span class="tok-s">&#x27;missing&#x27;</span>]:
+        lines.append(<span class="tok-s">&#x27;%s without a %s attribute: %s&#x27;</span> % (plural(len(audit[<span class="tok-s">&#x27;missing&#x27;</span>]), <span class="tok-s">&#x27;block&#x27;</span>),
+                                                       tag, by_block(audit[<span class="tok-s">&#x27;missing&#x27;</span>], names)))
+    <span class="tok-k">return</span> <span class="tok-s">&#x27;\n&#x27;</span>.join(lines)
+
+
+<span class="tok-k">def</span> findings(audit, by_handle):
+    <span class="tok-s">&quot;&quot;&quot;(headers, rows) of every offending block, for Excel and the clipboard.&quot;&quot;&quot;</span>
+    headers = [<span class="tok-s">&#x27;Issue&#x27;</span>, <span class="tok-s">&#x27;Value&#x27;</span>, <span class="tok-s">&#x27;Handle&#x27;</span>, <span class="tok-s">&#x27;Block&#x27;</span>, <span class="tok-s">&#x27;Layer&#x27;</span>, <span class="tok-s">&#x27;Space&#x27;</span>]
+    rows = []
+
+    <span class="tok-k">def</span> add(issue, value, handle):
+        ref = by_handle[handle]
+        rows.append([issue, value, handle, ref.get(<span class="tok-s">&#x27;name&#x27;</span>, <span class="tok-s">&#x27;&#x27;</span>), ref.get(<span class="tok-s">&#x27;layer&#x27;</span>, <span class="tok-s">&#x27;&#x27;</span>),
+                     ref.get(<span class="tok-s">&#x27;space&#x27;</span>, <span class="tok-s">&#x27;&#x27;</span>)])
+
+    <span class="tok-k">for</span> value <span class="tok-k">in</span> sorted(audit[<span class="tok-s">&#x27;duplicates&#x27;</span>], key=<span class="tok-k">lambda</span> v: v.lower()):
+        <span class="tok-k">for</span> handle <span class="tok-k">in</span> audit[<span class="tok-s">&#x27;duplicates&#x27;</span>][value]:
+            add(<span class="tok-s">&#x27;Duplicate&#x27;</span>, value, handle)
+    <span class="tok-k">for</span> handle <span class="tok-k">in</span> audit[<span class="tok-s">&#x27;blanks&#x27;</span>]:
+        add(<span class="tok-s">&#x27;Blank&#x27;</span>, <span class="tok-s">&#x27;&#x27;</span>, handle)
+    <span class="tok-k">for</span> handle <span class="tok-k">in</span> audit[<span class="tok-s">&#x27;missing&#x27;</span>]:
+        add(<span class="tok-s">&#x27;Missing&#x27;</span>, <span class="tok-s">&#x27;&#x27;</span>, handle)
+    <span class="tok-k">return</span> headers, rows
+
+
+<span class="tok-k">def</span> offenders(audit):
+    <span class="tok-s">&quot;&quot;&quot;Duplicates and blanks: the blocks whose tag needs fixing. Blocks without
+    the attribute are often other kinds of block, so they are not selected.&quot;&quot;&quot;</span>
+    handles = []
+    <span class="tok-k">for</span> value <span class="tok-k">in</span> audit[<span class="tok-s">&#x27;duplicates&#x27;</span>]:
+        handles.extend(audit[<span class="tok-s">&#x27;duplicates&#x27;</span>][value])
+    <span class="tok-k">return</span> handles + audit[<span class="tok-s">&#x27;blanks&#x27;</span>]
+
+
+<span class="tok-k">def</span> run():
+    drawing = script.get_document_path()
+    <span class="tok-k">if</span> drawing <span class="tok-k">is</span> <span class="tok-k">None</span>:
+        toast.warning(<span class="tok-s">&#x27;No drawing is open&#x27;</span>, <span class="tok-s">&#x27;Open a drawing, then run %s&#x27;</span> % TITLE)
+        <span class="tok-k">return</span>
+
+    picked = sel.current()
+    refs = blocks.snapshots(picked <span class="tok-k">if</span> picked <span class="tok-k">else</span> <span class="tok-k">None</span>)
+    scope = <span class="tok-s">&#x27;in the selection&#x27;</span> <span class="tok-k">if</span> picked <span class="tok-k">else</span> <span class="tok-s">&#x27;in the drawing&#x27;</span>
+    <span class="tok-k">if</span> <span class="tok-k">not</span> refs:
+        toast.info(<span class="tok-s">&#x27;No block references %s&#x27;</span> % scope)
+        <span class="tok-k">return</span>
+    tags = blocks.attribute_tags(refs)
+    <span class="tok-k">if</span> <span class="tok-k">not</span> tags:
+        toast.info(<span class="tok-s">&#x27;Nothing to audit&#x27;</span>, <span class="tok-s">&#x27;None of the block references %s has attributes&#x27;</span> % scope)
+        <span class="tok-k">return</span>
+
+    default = [t <span class="tok-k">for</span> t <span class="tok-k">in</span> tags <span class="tok-k">if</span> t.upper() == <span class="tok-s">&#x27;TAG&#x27;</span>][:<span class="tok-n">1</span>]
+    tag = forms.select_from_list(tags, title=TITLE, prompt=<span class="tok-s">&#x27;Audit which attribute?&#x27;</span>,
+                                 checked=default <span class="tok-k">or</span> <span class="tok-k">None</span>)
+    <span class="tok-k">if</span> <span class="tok-k">not</span> tag:
+        <span class="tok-k">return</span>
+    audit = blocks.tag_audit(refs, tag)
+    <span class="tok-k">if</span> <span class="tok-k">not</span> audit[<span class="tok-s">&#x27;duplicates&#x27;</span>] <span class="tok-k">and</span> <span class="tok-k">not</span> audit[<span class="tok-s">&#x27;blanks&#x27;</span>] <span class="tok-k">and</span> <span class="tok-k">not</span> audit[<span class="tok-s">&#x27;missing&#x27;</span>]:
+        toast.success(<span class="tok-s">&#x27;Every %s is filled in and unique&#x27;</span> % tag,
+                      <span class="tok-s">&#x27;%s checked %s&#x27;</span> % (plural(len(refs), <span class="tok-s">&#x27;block reference&#x27;</span>), scope))
+        <span class="tok-k">return</span>
+
+    names = dict((ref[<span class="tok-s">&#x27;handle&#x27;</span>], ref.get(<span class="tok-s">&#x27;name&#x27;</span>, <span class="tok-s">&#x27;&#x27;</span>)) <span class="tok-k">for</span> ref <span class="tok-k">in</span> refs)
+    by_handle = dict((ref[<span class="tok-s">&#x27;handle&#x27;</span>], ref) <span class="tok-k">for</span> ref <span class="tok-k">in</span> refs)
+    headers, rows = findings(audit, by_handle)
+    to_fix = offenders(audit)
+    options = ([SELECT] <span class="tok-k">if</span> to_fix <span class="tok-k">else</span> []) + [EXPORT, COPY, CLOSE]
+    choice = forms.ask_options(summary(audit, tag, refs, scope, names), options, TITLE)
+
+    <span class="tok-k">if</span> choice == SELECT:
+        sel.set_current(to_fix)
+        toast.info(<span class="tok-s">&#x27;%s selected&#x27;</span> % plural(len(to_fix), <span class="tok-s">&#x27;block&#x27;</span>),
+                   <span class="tok-s">&#x27;Duplicate and blank %s values&#x27;</span> % tag)
+    <span class="tok-k">elif</span> choice == EXPORT:
+        path = forms.save_file(XLSX, default_path(drawing, TITLE), <span class="tok-s">&#x27;Export tag audit&#x27;</span>)
+        <span class="tok-k">if</span> path <span class="tok-k">and</span> write_workbook(path, headers, rows, TITLE):
+            toast.success(<span class="tok-s">&#x27;Tag audit exported: %s&#x27;</span> % plural(len(rows), <span class="tok-s">&#x27;finding&#x27;</span>), path)
+    <span class="tok-k">elif</span> choice == COPY:
+        script.clipboard_copy(<span class="tok-s">&#x27;\n&#x27;</span>.join(<span class="tok-s">&#x27;\t&#x27;</span>.join(str(c) <span class="tok-k">for</span> c <span class="tok-k">in</span> row) <span class="tok-k">for</span> row <span class="tok-k">in</span> [headers] + rows))
+        toast.success(<span class="tok-s">&#x27;Tag audit copied&#x27;</span>, plural(len(rows), <span class="tok-s">&#x27;finding&#x27;</span>))
+
+
+<span class="tok-k">if</span> <span class="tok-s">&#x27;__commandpath__&#x27;</span> <span class="tok-k">in</span> globals():
+    run()</code></pre></div>
+<div class="code src"><div class="code-head"><span><code>bundle.yaml</code> <span class="src-note">The bundle contract: the keys pyACAD reads for this tool.</span> <a href="https://github.com/pyacad/pyACAD/blob/main/extensions/pyACAD.extension/pyACAD.tab/Takeoff.panel/Tag_Audit.pushbutton/bundle.yaml" rel="noopener">View on GitHub</a></span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-k">title</span>: Tag Audit
+<span class="tok-k">tooltip</span>: Checks one attribute, TAG by default, across the block references in the selection or the drawing. Lists values used more than once, blank values and blocks without that attribute, and can select them or export the findings to Excel.
+<span class="tok-k">context</span>: doc
+<span class="tok-k">keytip</span>: TT
+<span class="tok-k">alias</span>: TAU</code></pre></div>
+  <div class="pagenav">
+<a href="length-takeoff.html"><span class="dir">Previous</span><span class="ttl">Length Takeoff</span></a>
+<a class="next" href="ask-ai.html"><span class="dir">Next</span><span class="ttl">Ask AI</span></a>
+</div>
+</article>
+<aside class="toc"><div class="toc-head">On this page</div>
+<a href="#what-it-does">What it does</a>
+<a href="#how-to-use-it">How to use it</a>
+<a href="#the-findings-table">The findings table</a>
+<a href="#limitations">Limitations</a>
+<a href="#other-uses">Other uses</a>
+<a href="#source">Source</a>
+</aside>
+</main>
+</div>
+<script src="_assets/search-index.js"></script>
+<script src="_assets/site.js"></script>
+</body>
+</html>

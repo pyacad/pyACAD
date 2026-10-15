@@ -1,0 +1,286 @@
+<p>The first panel is pyACAD itself: the things you set once, and the two developer tools
+that stay useful long after setup. Nothing here touches a drawing. Each button is also an
+AutoCAD command, so you can type it at the command line or put it in a macro.</p>
+
+<section id="settings" title="Settings" kind="Button"
+         bundle="pyACAD.panel/Settings.pushbutton"
+         summary="One window over the parts of pyACAD you are meant to change: theme, ribbon hints, where extensions load from, the engine paths, the AI assistant and updates."
+         needs="Nothing"
+         shortcut="None set (bind one in Shortcuts)">
+
+<h2>What it does</h2>
+<p>pyACAD keeps its configuration in one JSON file, <code>%APPDATA%\pyACAD\config.json</code>.
+Most of that file is maintained by pyACAD itself. Settings is the window over the keys a
+person is meant to change, so nobody has to open the file in a text editor to switch the
+theme or add an extension folder. The command is <code>PYSETTINGS</code>.</p>
+
+<figure data-shot="settings-window" data-wide>
+<figcaption>The pyACAD settings window: Appearance, Shortcuts, extension folders, Engines, the
+AI assistant and Updates, with Save and Cancel and the version line at the bottom.</figcaption>
+</figure>
+
+<h2>How to use it</h2>
+<ol class="steps">
+  <li>Click <strong>Settings</strong> (or type <code>PYSETTINGS</code>). The window opens with
+    the current values. It is taller than most screens allow, so it scrolls.</li>
+  <li><strong>Appearance.</strong> <strong>Theme</strong> is Follow AutoCAD (the default),
+    Light or Dark, and sets the colours of pyACAD's own windows, toasts and icons. Two
+    checkboxes control the hints after button captions: a mark after a tool that has a
+    keyboard shortcut (on by default, a filled dot) and a mark after a tool that has a
+    Shift+Click action (off by default, an upward arrow). The box beside each checkbox is the
+    glyph it draws; leave it empty for the default glyph. The checkbox is the only off
+    switch.</li>
+  <li><strong>Shortcuts.</strong> One checkbox, <strong>Allow shortcuts without Ctrl or
+    Alt</strong>, off by default. Off, every chord must carry Ctrl or Alt. On, a bare letter
+    can be bound, and it then swallows that key everywhere in AutoCAD while the drawing
+    window has focus.</li>
+  <li><strong>Where extensions are loaded from.</strong> Add or remove folders pyACAD scans for
+    <code>*.extension</code> folders. Two locations are scanned whether listed or not:
+    <code>%APPDATA%\pyACAD\extensions</code>, where the installer puts the shipped extension,
+    and <code>%PROGRAMDATA%\pyACAD\extensions</code> when it exists and only administrators can
+    write to it.</li>
+  <li><strong>Engines.</strong> The <code>pyacadlib</code> folder and a CPython executable.
+    Leave both empty to let pyACAD find them. CPython is only used by bundles that declare
+    <code>engine: cpython</code>. A wrong <code>pyacadlib</code> folder stops pyACAD loading
+    at all, so empty is safer than a guess.</li>
+  <li><strong>AI assistant (beta).</strong> The provider, base URL, model, API key (with
+    <strong>Test</strong>) and longest answer the Ask AI panel uses. The
+    <a href="ai-settings.html">AI Settings</a> page covers this section in full.</li>
+  <li><strong>Updates.</strong> Where this pyACAD stands against the latest release, with
+    <strong>Check now</strong>, <strong>Release page</strong> and <strong>Skip this
+    version</strong> (saved at once, without waiting for Save). Two switches, both on by
+    default: check for a new release once a day, and download it and install it when
+    AutoCAD closes.</li>
+  <li>Click <strong>Save</strong>. If an engine path changed, a toast says AutoCAD needs
+    restarting. Otherwise pyACAD asks whether to reload now; Yes rebuilds the ribbon so the
+    changes show straight away, No leaves them for the next Reload.</li>
+</ol>
+
+<h2>Good to know / limits</h2>
+<ul>
+  <li>Which tool holds which chord is not edited here. That is the
+    <a href="shortcuts.html">Shortcuts</a> editor's job.</li>
+  <li>Engine paths take effect only after AutoCAD restarts. A Reload cannot swap a Python
+    engine under a running ribbon. A <code>*.lib</code> folder added inside an extension
+    folder also needs a restart; a new extension folder needs only a Reload.</li>
+  <li>The window rewrites only the keys it shows. Shortcut overrides and the sizes other
+    dialogs remember stay in the file untouched.</li>
+  <li>Cancel, or closing the window, says nothing and changes nothing.</li>
+  <li>The update check is one anonymous request to GitHub a day. A downloaded installer runs
+    only when its SHA-256 matches the release's, and only after AutoCAD has closed.</li>
+  <li>An update replaces <code>pyACAD.extension</code> whole. Anything you added to or edited
+    inside it is first copied to a dated backup, and buttons and panels you added move to
+    <code>My pyACAD.extension</code>, where they keep their place on the pyACAD tab because
+    tabs and panels with the same names merge on the ribbon. Keep your own tools there from
+    the start.</li>
+</ul>
+
+<h2>Other uses</h2>
+<ul>
+  <li>Point pyACAD at a shared network folder of extensions so a whole team gets the same
+    tools, and keep your own experiments in a second, local folder.</li>
+  <li>Turn the Shift+Click arrow on while you learn the tab, then off again once you know
+    which tools carry a second action.</li>
+  <li>Copy the version line at the bottom (which pyACAD, for which AutoCAD, and where its
+    runtime lives) into any bug report. pyACAD writes the same line to
+    <code>%APPDATA%\pyACAD\logs\pyACAD.log</code> at every start.</li>
+</ul>
+
+<p>Every key the window writes is described in the authoring guide's
+<a href="https://docs.pyacad.com/settings.html">config.json reference</a>, which is where to
+look if you would rather edit the file directly.</p>
+</section>
+
+<section id="shortcuts" title="Shortcuts" kind="Button"
+         bundle="pyACAD.panel/Shortcuts.pushbutton"
+         summary="The shortcuts and aliases editor: every pyACAD tool that can carry a chord or an alias, what it has now, and fields to change both."
+         needs="Nothing"
+         shortcut="None set (bind one here)">
+
+<h2>What it does</h2>
+<p>Any pyACAD tool can have a keyboard shortcut and short aliases to type. The shipped tools
+come with no shortcuts bound, so you choose your own, and with an alias each, like
+<code>BX</code> for Blocks to Excel, which you can change. This editor lists every tool that
+can take them, from every loaded extension, grouped by panel and searchable, and lets you set,
+clear or restore each one. Your choices are stored in <code>config.json</code> under
+<code>shortcuts.bindings</code> and <code>aliases</code>; a tool's own defaults (its
+<code>shortcut:</code> and <code>alias:</code> in <code>bundle.yaml</code>) are never touched,
+so a reset always has something to go back to. The command is
+<code>PYSHORTCUTS</code>.</p>
+
+<figure data-shot="shortcuts-editor" data-wide>
+<figcaption>The Shortcuts and Aliases window: tools grouped under their panel names, a chord
+being recorded into one row, an alias typed into another, and a conflict flagged.</figcaption>
+</figure>
+
+<h2>How to use it</h2>
+<ol class="steps">
+  <li>Click <strong>Shortcuts</strong>. Type in the search box to narrow the list: it matches
+    the tool's title, its panel's title, its command, and the chord and aliases it has.</li>
+  <li>Click the field on a row and press the keys you want, for example
+    <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd>. The field shows the chord and the row reads
+    <em>custom</em>. A chord pyACAD cannot use is refused and the field goes back to what it
+    was.</li>
+  <li><kbd>Backspace</kbd> in a field clears the binding, and the row reads
+    <em>disabled</em> if the tool had a default of its own. <kbd>Esc</kbd> leaves the field as
+    it was.</li>
+  <li>A chord already held by a tool earlier in ribbon order is flagged under the later row:
+    <em>conflicts with</em> and the other tool's name. Save stays greyed until every conflict
+    is resolved.</li>
+  <li>Type in the <strong>Alias</strong> field to change a tool's aliases, for example
+    <code>BX</code>, or <code>BX, B2X</code> for two. Clear it to have none. An alias that
+    another tool holds, that is in your <code>acad.pgp</code> (like <code>CO</code> for COPY),
+    or that AutoCAD already has as a command is flagged in red under the row, and Save stays
+    greyed: your existing keystrokes keep their meaning.</li>
+  <li>A customised row of a tool that ships its own default has a small reset arrow that puts
+    the default back. <strong>Restore All Defaults</strong> at the bottom does it for every
+    row at once.</li>
+  <li>Click <strong>Save</strong> (enabled once something changed). pyACAD reloads so the new
+    chords and aliases are live straight away, and a toast confirms it.</li>
+</ol>
+
+<h2>Good to know / limits</h2>
+<ul>
+  <li>A chord always runs the tool's primary action, never its Shift+Click one, and it sends
+    the tool's command exactly as a click does.</li>
+  <li>Chords fire only when the AutoCAD window is in front and the keyboard focus is not in a
+    text box, so typing at the command line or in a palette's filter box is never
+    hijacked.</li>
+  <li>A pyACAD chord wins over an AutoCAD keyboard shortcut on the same keys. Bind
+    <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd> and Save As is gone from the keyboard until you
+    clear it.</li>
+  <li>Unless Settings allows bare keys, a chord must include Ctrl or Alt.</li>
+  <li>Dock panels (Layer Manager, Ask AI) are not listed: they are reached with their keytip
+    (<kbd>Alt</kbd>, then the letters shown on the ribbon).</li>
+  <li>Bindings are keyed by the tool's folder path inside its extension. Moving a tool to
+    another panel drops its override.</li>
+  <li>Saving writes the bindings of the tools that are loaded now. If an extension folder is
+    missing when you save (an unplugged network drive, say), the chords you had given its
+    tools are dropped.</li>
+</ul>
+
+<h2>Other uses</h2>
+<ul>
+  <li>Give the two or three tools you use daily a chord each, so they are a keypress away
+    without leaving the drawing.</li>
+  <li>Find out whether any extension you installed binds a chord you rely on: search for the
+    chord's letter and read the rows.</li>
+</ul>
+</section>
+
+<section id="console" title="Console" kind="Button"
+         bundle="pyACAD.panel/Console.pushbutton"
+         summary="An interactive Python console inside AutoCAD, with the same pyacad library every tool uses."
+         needs="Nothing (a drawing for anything that reads one)"
+         shortcut="None set (bind one in Shortcuts)">
+
+<h2>What it does</h2>
+<p>Opens a window where you type Python and run it inside AutoCAD, in the same process and
+with the same <code>pyacad</code> library the ribbon tools use. It is the fastest way to
+answer "what does this call return on this drawing" before writing it into a tool, and a
+handy calculator for one-off jobs that do not deserve a button. The command is
+<code>PYCONSOLE</code>.</p>
+
+<figure data-shot="console-window" data-wide>
+<figcaption>The pyACAD Console: a short script in the lower pane, its output and the echoed
+value in the pane above, and the Run button.</figcaption>
+</figure>
+
+<h2>How to use it</h2>
+<ol class="steps">
+  <li>Click <strong>Console</strong>. The window floats beside AutoCAD and AutoCAD stays
+    usable while it is open.</li>
+  <li>Type in the lower pane and press <kbd>Ctrl</kbd>+<kbd>Enter</kbd> or click
+    <strong>Run</strong>. What you ran is echoed with <code>&gt;&gt;&gt;</code> in the upper
+    pane, then its printed output. When the input ends in an expression its value is shown,
+    as at any Python prompt. An error shows its traceback; nothing else is affected.</li>
+  <li><kbd>Up</kbd> on the first line and <kbd>Down</kbd> on the last line walk through what
+    you have run in this window. In the middle of a multi-line input they move the caret as
+    usual.</li>
+  <li>Names you assign survive between runs, so you can build up an answer a line at a
+    time.</li>
+</ol>
+
+<div class="code"><pre><code>from pyacad import blocks, doc, ents, layers, sel
+layers.current()                       # the current layer's name
+blocks.counts()                        # {block name: references}
+[ents.type_of(h) for h in sel.current()]   # what is selected, by DXF type</code></pre></div>
+
+<h2>Good to know / limits</h2>
+<ul>
+  <li>The console runs outside any AutoCAD command, so code that changes the drawing must
+    lock it first: wrap it in <code>with doc.lock():</code>. Reading needs no lock.</li>
+  <li>It is a console, not an editor: there is no file and no save, and history lasts as long
+    as the window. Anything worth keeping belongs in a bundle.</li>
+  <li>Code runs on AutoCAD's UI thread, as every tool does. While it runs, Run reads
+    <em>Running</em> and the window shows the wait cursor; a long loop freezes AutoCAD until it
+    finishes.</li>
+  <li>This is the IronPython 3.4 engine. A bundle that needs numpy runs on CPython and cannot
+    be tried here.</li>
+  <li>Each click opens a new window with its own names and history.</li>
+  <li><code>print()</code> output lands in the upper pane. Rich output from
+    <code>pyacad.output</code> opens in its own window titled <em>pyACAD - Console</em>.</li>
+  <li><code>PYACADCONSOLE</code> is a different thing: the loader's diagnostic message box
+    (IronPython version, AutoCAD API version, extensions loaded), there for when the ribbon
+    itself failed to load.</li>
+</ul>
+
+<h2>Other uses</h2>
+<ul>
+  <li>Count something the interface will not: references per block, entities per layer, the
+    layers matching a pattern.</li>
+  <li>Make a bulk change that does not deserve a tool:
+    <code>with doc.lock(): layers.freeze('A-ANNO-*')</code>.</li>
+  <li>Try a helper from the <a href="https://docs.pyacad.com/api-reference.html">API
+    reference</a> on the open drawing before you build a button around it. The
+    <a href="https://docs.pyacad.com/quickstart.html">quickstart</a> turns the lines you keep
+    pasting into a button.</li>
+</ul>
+</section>
+
+<section id="reload" title="Reload" kind="Button"
+         bundle="pyACAD.panel/Reload.pushbutton"
+         summary="Rescan every extension folder and rebuild the pyACAD ribbon, without restarting AutoCAD."
+         needs="Nothing"
+         shortcut="None set (bind one in Shortcuts)">
+
+<h2>What it does</h2>
+<p>Reads every extension folder again and rebuilds the pyACAD tabs from what it finds. New
+bundles appear, removed ones go, changed captions, tooltips, icons, keytips and shortcuts
+take effect, every tool's AutoCAD command is registered again, dock panels are rebuilt, and
+each extension's <code>startup.py</code> and <code>app-init</code> hook run again. Editing a
+tool and clicking Reload is the whole development loop. The command is
+<code>PYRELOAD</code>.</p>
+
+<h2>How to use it</h2>
+<ol class="steps">
+  <li>Change something on disk: a new bundle folder, an edited <code>bundle.yaml</code>, a new
+    icon, a file in <code>pyacadlib</code>.</li>
+  <li>Click <strong>Reload</strong>. A toast says when the ribbon is rebuilt.</li>
+  <li>Click your button. A script edit alone does not even need this: <code>script.py</code>
+    is read fresh on every run.</li>
+</ol>
+
+<h2>Good to know / limits</h2>
+<ul>
+  <li>Two things need an AutoCAD restart instead: a changed engine path, and a
+    <code>*.lib</code> folder added or removed (Reload says so in a toast). Edits to files
+    already inside a <code>*.lib</code> folder are picked up.</li>
+  <li>Dock panels are rebuilt from scratch: the Layer Manager forgets its filter text and
+    selection. The Ask AI conversation is kept.</li>
+  <li>Open pyACAD toasts close.</li>
+  <li>Only pyACAD's own tabs are rebuilt. Other add-ins are untouched.</li>
+  <li>If the ribbon is broken badly enough that this button is not there, type
+    <code>PYACADRELOAD</code>: the loader defines it, so it exists even when no extension
+    loaded.</li>
+</ul>
+
+<h2>Other uses</h2>
+<ul>
+  <li>Pick up an edit to the <code>pyacad</code> library itself: library modules stay cached
+    between runs, and Reload is what refreshes them.</li>
+  <li>Reload writes <code>==== pyACAD reload ====</code> to
+    <code>%APPDATA%\pyACAD\logs\pyACAD.log</code>, followed by every bundle it skipped and why,
+    so a button that fails to appear is one log line away from an explanation.</li>
+</ul>
+</section>

@@ -1,0 +1,384 @@
+<!-- title: Icons -->
+<!-- eyebrow: Bundles -->
+<!-- lead: Four PNGs per bundle, how the runtime picks between them for AutoCAD's light and dark themes, and how to draw them so they sit well on the ribbon. -->
+
+<p>A bundle with no icon renders as a text-only button. It works, but next to AutoCAD's own
+ribbon glyphs it looks like a placeholder, and on a stacked row or in a pulldown menu it is
+hard to find. Icons are the cheapest thing you can do to make a tool look like it belongs.</p>
+
+<p>Icons are plain PNG files sitting beside <code>script.py</code>. There is no manifest entry
+and no key in <code>bundle.yaml</code>: the runtime looks for fixed file names in the bundle
+folder and uses what it finds.</p>
+
+<h2>The four files</h2>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>File</th><th>Slot</th><th>Recommended size</th></tr></thead>
+<tbody>
+<tr><td><code>icon.png</code></td>
+    <td>Large button, light theme</td><td>96&times;96</td></tr>
+<tr><td><code>icon.dark.png</code></td>
+    <td>Large button, dark theme</td><td>96&times;96</td></tr>
+<tr><td><code>icon.small.png</code></td>
+    <td>Stacked rows and pulldown menu rows, light theme</td><td>32&times;32</td></tr>
+<tr><td><code>icon.small.dark.png</code></td>
+    <td>Stacked rows and pulldown menu rows, dark theme</td><td>32&times;32</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>These folder kinds read the four files: <code>*.pushbutton</code>, <code>*.toggle</code>
+(with extra on/off art, below), <code>*.smartbutton</code>, the three pulldown kinds
+(<code>*.pulldown</code>, <code>*.splitbutton</code>, <code>*.splitpushbutton</code>, for
+their own header), <code>*.urlbutton</code>, <code>*.linkbutton</code> and
+<code>*.dockpane</code>. A <code>*.stack</code>, a <code>*.slideout</code>, a panel and a tab
+never carry icons: a stack has no button of its own, so each child brings its own art. A
+<code>*.nobutton</code> may hold icon files, but it never appears on the ribbon, so nothing
+shows them.</p>
+
+<p>The theme is decided once per ribbon build, so in a given session a bundle only ever shows
+two of its four files: the light pair or the dark pair. See
+<a href="#light-or-dark">Light or dark</a> for how the runtime decides.</p>
+
+<h2>The fallback rules</h2>
+
+<p>Each variant is resolved on its own, against <code>icon.png</code> and nothing else. This
+is the whole rule, from <code>BundleParser.IconSet</code>:</p>
+
+<pre data-lang="text">
+large      = icon.png
+dark       = icon.dark.png        or else  icon.png
+small      = icon.small.png       or else  icon.png
+small dark = icon.small.dark.png  or else  icon.png
+</pre>
+
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 700 254" width="700" role="img"
+     aria-label="Each of the three optional icon variants falls back directly to icon.png; nothing chains between variants.">
+  <style>
+    .ic1-m   { font: 11px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--muted); }
+    .ic1-mono{ font: 12px Consolas, monospace; fill: var(--ink); }
+    .ic1-lbl { font: 10.5px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--muted);
+               text-transform: uppercase; letter-spacing: .07em; }
+    .ic1-box { fill: var(--paper); stroke: var(--line-strong); stroke-width: 1; }
+    .ic1-arw { stroke: var(--frame); stroke-width: 1.25; fill: none; }
+  </style>
+  <defs>
+    <marker id="ic1-a" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path d="M0 0.6 L6.4 3.5 L0 6.4 z" fill="var(--frame)"/>
+    </marker>
+  </defs>
+
+  <text class="ic1-lbl" x="24"  y="12">The base file</text>
+  <text class="ic1-lbl" x="392" y="12">The three optional variants</text>
+
+  <rect class="ic1-box" x="24" y="74" width="196" height="68" rx="4"/>
+  <text class="ic1-mono" x="40" y="104">icon.png</text>
+  <text class="ic1-m"    x="40" y="124">96&#215;96, large, light</text>
+
+  <rect class="ic1-box" x="392" y="18" width="272" height="52" rx="4"/>
+  <text class="ic1-mono" x="408" y="40">icon.dark.png</text>
+  <text class="ic1-m"    x="408" y="58">large button, dark theme</text>
+
+  <rect class="ic1-box" x="392" y="84" width="272" height="52" rx="4"/>
+  <text class="ic1-mono" x="408" y="106">icon.small.png</text>
+  <text class="ic1-m"    x="408" y="124">stacked and menu rows</text>
+
+  <rect class="ic1-box" x="392" y="150" width="272" height="52" rx="4"/>
+  <text class="ic1-mono" x="408" y="172">icon.small.dark.png</text>
+  <text class="ic1-m"    x="408" y="190">stacked and menu rows, dark</text>
+
+  <path class="ic1-arw" d="M386 44 H 300 V 92 H 228"  marker-end="url(#ic1-a)"/>
+  <path class="ic1-arw" d="M386 110 H 228"            marker-end="url(#ic1-a)"/>
+  <path class="ic1-arw" d="M386 176 H 300 V 128 H 228" marker-end="url(#ic1-a)"/>
+
+  <text class="ic1-m" x="256" y="66">if missing</text>
+  <text class="ic1-m" x="256" y="150">if missing</text>
+
+  <text class="ic1-m" x="24" y="230">Every arrow points at icon.png. A missing small dark variant
+    does not borrow icon.dark.png</text>
+  <text class="ic1-m" x="24" y="246">or icon.small.png: it goes straight to the light, large
+    icon.png.</text>
+</svg>
+</div>
+<figcaption>The fallback is a star, not a chain. Each variant is resolved independently
+against <code>icon.png</code>.</figcaption>
+</figure>
+
+<p>Then, when the ribbon item is built, each of its two image slots borrows from the other if
+it is still empty: the large slot takes the small path when there is no large one, and the
+small slot takes the large path when there is no small one. Only when both are empty does
+the button become text-only.</p>
+
+<div class="note warn">
+<span class="note-t">Partial sets fall back to light art</span>
+<p>Ship <code>icon.png</code> and <code>icon.dark.png</code> but no small files, and a
+stacked or menu row in the dark theme shows <code>icon.png</code>, the <em>light</em> art,
+because <code>icon.small.dark.png</code> falls back to <code>icon.png</code> and never to
+<code>icon.dark.png</code>. Dark ink on a dark ribbon is close to invisible. Ship all four
+files, or ship exactly one.</p>
+</div>
+
+<div class="note trap">
+<span class="note-t">A set without icon.png is theme-dependent</span>
+<p>With no <code>icon.png</code> the base is empty, so the light slots only have what you
+ship under their own names. A bundle holding only <code>icon.dark.png</code> shows that file
+in the dark theme and no image at all in the light theme. A bundle holding only
+<code>icon.small.png</code> shows it (blown up into the large slot) in the light theme and
+nothing in the dark theme. <code>icon.png</code> is the file that makes every slot safe.</p>
+</div>
+
+<p>A file that exists but cannot be decoded logs <code>Could not load icon '&lt;path&gt;'</code>
+in <code>%APPDATA%\pyACAD\logs\pyACAD.log</code> and counts as empty for that slot, so a
+corrupt PNG behaves like a missing one. Files are read with no lock held, so you can
+overwrite an icon while AutoCAD runs and press <strong>Reload</strong> to see it.</p>
+
+<h2>Toggle on and off art</h2>
+
+<p>A <code>*.toggle</code> reads two more pairs for its large slot, and the state decides
+which one shows:</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>State</th><th>Light theme</th><th>Dark theme</th></tr></thead>
+<tbody>
+<tr><td>Off</td>
+    <td><code>icon.off.png</code>, else <code>icon.png</code></td>
+    <td><code>icon.off.dark.png</code>, else the light off file</td></tr>
+<tr><td>On</td>
+    <td><code>icon.on.png</code>, else <code>icon.png</code></td>
+    <td><code>icon.on.dark.png</code>, else the light on file</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Three details follow from the code:</p>
+
+<ul>
+  <li>A toggle's dark large slot never reads <code>icon.dark.png</code>. The dark off file
+    falls back to the light off file, which falls back to <code>icon.png</code>. Ship
+    <code>icon.off.dark.png</code> and <code>icon.on.dark.png</code> for a toggle that looks
+    right in the dark theme.</li>
+  <li>The first build of an off toggle uses <code>icon.small(.dark).png</code> for its small
+    slot. As soon as the state changes (or the ribbon is rebuilt while the toggle is on),
+    both slots are pointed at the same on or off file, loaded at the small size. A toggle in a
+    stack therefore shows your 96-pixel on/off art shrunk to the row after its first
+    click.</li>
+  <li>The state lives for the AutoCAD session and survives <strong>Reload</strong>; the icon
+    is redrawn the moment the script calls <code>pyacad.script.set_toggle_state</code>.</li>
+</ul>
+
+<h2>Dock pane art</h2>
+
+<p>A <code>*.dockpane</code> renders as a large ribbon toggle that shows or hides its
+palette. It reads the ordinary four files, nothing else: the checked look of the button is
+AutoCAD's own pressed highlight, not a different image.</p>
+
+<div class="note warn">
+<span class="note-t">icon.on.png is not read for dock panes</span>
+<p>The shipped dock panes (Ask AI, Layer Manager) carry <code>icon.on.png</code> and
+<code>icon.on.dark.png</code> files, and the icon generator draws them as the "palette open"
+state. The runtime does not read them: only <code>*.toggle</code> bundles use on/off art. A
+dock pane button shows <code>icon.png</code> or <code>icon.dark.png</code> whether its palette
+is open or closed.</p>
+</div>
+
+<h2>Smartbutton icons</h2>
+
+<p>A <code>*.smartbutton</code> gets its four files like a pushbutton, and its build-time run
+may replace them through <code>__button__.SetIcon(path)</code>. <code>SetIcon</code> points
+<em>both</em> slots at the one file and does no theme handling, so pick the file
+yourself:</p>
+
+<pre data-lang="python" data-file="script.py">
+import os
+from pyacad import script
+
+if __selfinit__:
+    # get_bundle_file() reads the last command's folder, which is not this
+    # bundle during the build-time run, so build the path from __file__.
+    here = os.path.dirname(__file__)
+    name = 'busy.dark.png' if script.is_dark_theme() else 'busy.png'
+    __button__.SetIcon(os.path.join(here, name))
+</pre>
+
+<h2 id="light-or-dark">Light or dark</h2>
+
+<p>Every pyACAD surface (ribbon icons, dialogs, toasts, the output window) asks one question,
+"is the host dark?", and the answer is resolved in this order:</p>
+
+<ol>
+  <li><strong><code>"theme"</code> in <code>config.json</code>.</strong>
+    <code>"dark"</code> or <code>"light"</code> (any case) wins outright. The Settings
+    window writes it as Theme: Light or Dark; "Follow AutoCAD" removes the key.</li>
+  <li><strong>AutoCAD's <code>COLORTHEME</code> system variable.</strong> <code>0</code> is
+    dark, <code>1</code> is light.</li>
+  <li><strong>The ribbon's background colour</strong>, only when <code>COLORTHEME</code>
+    cannot be read: a solid background darker than mid-grey (WCAG relative luminance under
+    0.5) reads as dark.</li>
+  <li>Otherwise <strong>light</strong>. Detection never throws; a failure logs and reads
+    light.</li>
+</ol>
+
+<p>The log says which rule decided, for example <code>Theme: COLORTHEME says dark.</code>
+The answer is cached until the next <strong>Reload</strong>, which forgets it and asks again.
+That has one practical consequence:</p>
+
+<div class="note">
+<span class="note-t">Switching AutoCAD's theme needs a Reload</span>
+<p>Changing <code>COLORTHEME</code> (Options, Display, Color theme) recolours AutoCAD at once,
+but pyACAD's icons and windows keep the theme they were built with until you press
+<strong>Reload</strong> or restart. Scripts can ask the same question with
+<code>pyacad.script.is_dark_theme</code>, which returns the cached answer too.</p>
+</div>
+
+<h2>Sizes and scaling</h2>
+
+<p>AdWindows, the ribbon framework AutoCAD uses, draws an image at its natural WPF size rather
+than fitting it to the button. A 96-pixel PNG stamped at the usual 96 DPI is 96 logical
+pixels wide, which would overflow a 32-unit button. So the runtime re-stamps every icon's DPI
+on load, keeping the pixel data and changing only the logical size:</p>
+
+<pre data-lang="text">
+dpi = 96 * pixelWidth / logicalSize
+</pre>
+
+<p>The large slot loads at a logical size of 32, the small slot at 16. A 96-pixel file in the
+large slot is stamped at 288 DPI: it lays out 32 units wide but hands the compositor three
+times the pixels, which is what keeps it sharp at 150% and 200% display scaling. A 32-pixel
+small file is twice the density of its 16-unit slot. Pulldown menus draw their rows at the
+16-unit size too, so the small art matters most inside a pulldown.</p>
+
+<p>Any pixel size loads: the runtime scales by width. That gives three rules of thumb.</p>
+
+<ul>
+  <li><strong>Ship square art.</strong> The scale comes from the width alone and the aspect
+    ratio is kept, so a 96&times;64 file lays out 32 units wide and about 21 tall.</li>
+  <li><strong>Do not ship 32-pixel large art.</strong> It loads at 1:1 into a 32-unit slot
+    and looks soft on any high-DPI display. 96 is three times the slot; 64 would be the bare
+    minimum for 200% scaling.</li>
+  <li><strong>PNG with these exact names.</strong> The runtime only looks for the
+    <code>.png</code> names on this page. Windows file names are case-insensitive, so
+    <code>Icon.PNG</code> is found too, but keep them lowercase for the repository's
+    sake.</li>
+</ul>
+
+<h2>Drawing them</h2>
+
+<p>The shipped extension's icons share one visual language, and your extension sits on the
+same ribbon, so it is worth borrowing.</p>
+
+<p><strong>Neutral ink draws the thing. A solid accent mark draws the action.</strong> A user
+scanning a panel reads the grey shape to find <em>what</em> a tool works on (a layer stack, a
+block, a sheet) and the blue mark to find <em>what it does to it</em> (an arrow for mapping,
+a tick for an audit). Colour always means the verb.</p>
+
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 700 226" width="700" role="img" data-literal-colors="true"
+     aria-label="The light and dark icon palettes used by the shipped icons: ink, accent, alert and the ribbon colour they sit on.">
+  <style>
+    .ic4-lbl { font: 10.5px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--muted);
+               text-transform: uppercase; letter-spacing: .07em; }
+    .ic4-n   { font: 12px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--ink); }
+    .ic4-h   { font: 11.5px Consolas, monospace; fill: var(--muted); }
+    .ic4-hd  { font: 11.5px Consolas, monospace; fill: #A0A0A0; }
+    .ic4-nd  { font: 12px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: #E8E8E8; }
+    .ic4-sw  { stroke: var(--line-strong); stroke-width: 1; }
+  </style>
+
+  <text class="ic4-lbl" x="16" y="14">Light theme</text>
+  <rect class="ic4-sw" x="16"  y="24" width="64" height="44" rx="3" fill="#3D4451"/>
+  <rect class="ic4-sw" x="176" y="24" width="64" height="44" rx="3" fill="#0078D4"/>
+  <rect class="ic4-sw" x="336" y="24" width="64" height="44" rx="3" fill="#C42B1C"/>
+  <rect class="ic4-sw" x="496" y="24" width="64" height="44" rx="3" fill="#FFFFFF"/>
+  <text class="ic4-n" x="90"  y="44">ink</text>
+  <text class="ic4-h" x="90"  y="60">#3D4451</text>
+  <text class="ic4-n" x="250" y="44">accent</text>
+  <text class="ic4-h" x="250" y="60">#0078D4</text>
+  <text class="ic4-n" x="410" y="44">alert</text>
+  <text class="ic4-h" x="410" y="60">#C42B1C</text>
+  <text class="ic4-n" x="570" y="44">paper</text>
+  <text class="ic4-h" x="570" y="60">#FFFFFF</text>
+
+  <rect x="0" y="90" width="700" height="94" rx="4" fill="#202020"/>
+  <text class="ic4-lbl" x="16" y="110" fill="#A0A0A0">Dark theme</text>
+  <rect class="ic4-sw" x="16"  y="120" width="64" height="44" rx="3" fill="#E8E8E8"/>
+  <rect class="ic4-sw" x="176" y="120" width="64" height="44" rx="3" fill="#4CC2FF"/>
+  <rect class="ic4-sw" x="336" y="120" width="64" height="44" rx="3" fill="#FF5F52"/>
+  <rect class="ic4-sw" x="496" y="120" width="64" height="44" rx="3" fill="#202020"/>
+  <text class="ic4-nd" x="90"  y="140">ink</text>
+  <text class="ic4-hd" x="90"  y="156">#E8E8E8</text>
+  <text class="ic4-nd" x="250" y="140">accent</text>
+  <text class="ic4-hd" x="250" y="156">#4CC2FF</text>
+  <text class="ic4-nd" x="410" y="140">alert</text>
+  <text class="ic4-hd" x="410" y="156">#FF5F52</text>
+  <text class="ic4-nd" x="570" y="140">paper</text>
+  <text class="ic4-hd" x="570" y="156">#202020</text>
+
+  <text class="ic4-h" x="16" y="208" fill="var(--muted)">Paper is never painted into the file.
+    Icons are transparent; paper is only what they are checked against.</text>
+</svg>
+</div>
+<figcaption>The colours the shipped icons are drawn with. They are fixed values, not the
+user's Windows accent, so an icon looks the same on every machine.</figcaption>
+</figure>
+
+<ul>
+  <li><strong>Transparent background.</strong> Never bake in white or grey: the ribbon
+    background changes with the theme.</li>
+  <li><strong>One accent colour, used for the verb.</strong> Two accents in one glyph and the
+    eye has nothing to land on.</li>
+  <li><strong>Keep red for destruction.</strong> The palette has an alert red for a tool that
+    deletes something you cannot get back. Spend it rarely and it keeps meaning that.</li>
+  <li><strong>Match the stroke weight.</strong> The shipped set draws in a 0 to 96 space with
+    a stroke of 8 for the large files and 14 for the small ones, rounded caps. A hairline
+    icon beside them reads as broken rather than delicate.</li>
+  <li><strong>Draw the small size separately.</strong> At 16 units on screen a detail either
+    survives at two or three pixels or turns into grey mush. Drop anything under about a
+    fifth of the canvas, thicken every stroke, push the shape towards the edges and keep one
+    accent mark. Export from a simplified artboard, not by shrinking the 96-pixel file.</li>
+  <li><strong>Check both themes on a real ribbon.</strong> Swapping the ink to a near-white
+    is usually the whole dark variant, but check it against AutoCAD's dark ribbon, not a
+    white page.</li>
+</ul>
+
+<h2>How the shipped icons are made</h2>
+
+<p>Every icon in the shipped <code>pyACAD.extension</code> (and in the test fixtures) is
+generated by <code>tools/make_icons.py</code> in the pyACAD repository, a development-time
+CPython script that needs Pillow. It never ships into AutoCAD and no engine loads it. Each
+glyph is a Python function drawing in the 0 to 96 space at four times the size and
+downsampled, with a separate branch for the 32-pixel pass, and the per-panel drawings live in
+<code>tools/icons/</code>. The rule for the shipped set is that nobody edits a PNG by hand: the
+drawing is changed and the generator re-run.</p>
+
+<p>You do not need the generator for your own extension. Any PNGs with the right names work,
+whatever produced them: Figma, Illustrator, Inkscape or an icon font export.</p>
+
+<h2>Checklist</h2>
+
+<ul>
+  <li><code>icon.png</code> exists and is 96&times;96. It is the fallback for every other
+    slot.</li>
+  <li>All four files present, or exactly one. A partial set falls back to light art in the
+    dark theme.</li>
+  <li>Square, transparent PNG.</li>
+  <li>The small pair is a simplified drawing, not a resize.</li>
+  <li>Toggles ship <code>icon.off(.dark).png</code> and <code>icon.on(.dark).png</code>;
+    <code>icon.dark.png</code> alone does not cover a toggle's dark state.</li>
+  <li>The dark pair is checked against AutoCAD's dark ribbon.</li>
+  <li><strong>Reload</strong> after adding or changing a file; icons, like the theme, are
+    read when the ribbon is built.</li>
+</ul>
+
+<div class="cards">
+  <a href="buttons.html"><span class="c-t">Buttons, stacks and pulldowns</span>
+    <span class="c-d">Which slot each icon lands in, and how each folder kind renders.</span></a>
+  <a href="shortcuts.html"><span class="c-t">Shortcuts and keytips</span>
+    <span class="c-d">Chords, user overrides and Alt navigation.</span></a>
+  <a href="user-interface.html"><span class="c-t">Talking to the user</span>
+    <span class="c-d">Dialogs, toasts and the output window, all themed the same way.</span></a>
+</div>

@@ -1,0 +1,978 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Buttons, stacks and pulldowns - pyACAD authoring</title>
+<meta name="description" content="All twelve bundle kinds: the three a panel holds most often, the nine narrower ones, what each costs in ribbon space, and exactly what each one does when clicked.">
+<link rel="stylesheet" href="_assets/site.css">
+</head>
+<body data-base="">
+<div class="layout">
+<div class="sidebar">
+  <div class="brand"><a href="index.html"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="26" height="26" aria-hidden="true"><polygon points="157.0,327.8 351.8,327.8 363.1,342.4 363.1,403.3 168.3,403.3 157.0,388.7" fill="#78082A"/><polygon points="157.0,327.8 351.8,327.8 351.8,388.7 157.0,388.7" fill="#B80C40"/><polygon points="51.5,482.0 234.1,157.4 278.7,181.7 290.1,196.3 152.1,496.6 62.8,496.6" fill="#78082A"/><polygon points="51.5,482.0 140.8,482.0 278.7,181.7 234.1,157.4" fill="#E51050"/><polygon points="359.9,482.0 205.7,108.7 217.0,123.3 371.2,496.6" fill="#78082A"/><polygon points="205.7,108.7 201.6,55.9 213.0,70.5 217.0,123.3" fill="#78082A"/><polygon points="201.6,55.9 246.3,15.4 257.6,30.0 213.0,70.5" fill="#78082A"/><polygon points="246.3,15.4 343.7,23.5 355.0,38.1 257.6,30.0" fill="#78082A"/><polygon points="343.7,23.5 388.3,51.9 399.7,66.5 355.0,38.1" fill="#78082A"/><polygon points="388.3,51.9 347.7,76.2 359.1,90.8 399.7,66.5" fill="#78082A"/><polygon points="347.7,76.2 295.0,84.3 306.3,99.0 359.1,90.8" fill="#78082A"/><polygon points="295.0,84.3 449.2,482.0 460.5,496.6 306.3,99.0" fill="#78082A"/><polygon points="449.2,482.0 359.9,482.0 371.2,496.6 460.5,496.6" fill="#78082A"/><polygon points="359.9,482.0 205.7,108.7 201.6,55.9 246.3,15.4 343.7,23.5 388.3,51.9 347.7,76.2 295.0,84.3 449.2,482.0" fill="#E51050"/><polygon points="270.6,39.7 311.2,35.7 297.0,51.9" fill="#1F2329"/></svg><span class="brand-name">pyACAD
+    <span class="brand-sub">Tool authoring guide</span></span></a></div>
+  <div class="search-wrap">
+    <svg class="search-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <circle cx="6" cy="6" r="4.2" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M9.2 9.2 12.5 12.5" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round"/></svg>
+    <input id="search" type="search" placeholder="Search the docs" autocomplete="off"
+           spellcheck="false" aria-label="Search the documentation">
+    <span class="search-kbd">/</span>
+    <div id="search-results" class="search-results"></div>
+  </div>
+  <nav class="pages">
+<div class="grp">Start</div>
+<a href="overview.html"><span class="num">01</span>How pyACAD works</a>
+<a href="quickstart.html"><span class="num">02</span>Your first button</a>
+<div class="grp">Bundles</div>
+<a href="anatomy.html"><span class="num">03</span>Anatomy of an extension</a>
+<a href="buttons.html" class="active"><span class="num">04</span>Buttons, stacks and pulldowns</a>
+<a href="bundle-yaml.html"><span class="num">05</span>The bundle.yaml reference</a>
+<a href="icons.html"><span class="num">06</span>Icons</a>
+<a href="shortcuts.html"><span class="num">07</span>Shortcuts and keytips</a>
+<a href="click-actions.html"><span class="num">08</span>Click actions and config.py</a>
+<a href="hooks.html"><span class="num">09</span>Hooks</a>
+<div class="grp">Scripts</div>
+<a href="script-environment.html"><span class="num">10</span>The script environment</a>
+<a href="user-interface.html"><span class="num">11</span>Talking to the user</a>
+<a href="settings.html"><span class="num">12</span>Settings and per-tool state</a>
+<a href="commands.html"><span class="num">13</span>AutoCAD commands and AutoLISP</a>
+<a href="command-line.html"><span class="num">14</span>pyacad.exe and headless runs</a>
+<div class="grp">Reference</div>
+<a href="api-reference.html"><span class="num">15</span>Python API reference</a>
+<div class="grp">Practice</div>
+<a href="cookbook.html"><span class="num">16</span>Cookbook</a>
+<a href="ai-assistant.html"><span class="num">17</span>Writing tools with an AI assistant</a>
+<a href="troubleshooting.html"><span class="num">18</span>Troubleshooting</a>
+<a href="style-guide.html"><span class="num">19</span>Style guide for tools</a>
+</nav>
+  <div class="side-foot">
+    <span>pyACAD 0.1.0</span>
+    <button id="theme-toggle" type="button" aria-label="Toggle colour theme">
+      <span>Dark</span></button>
+  </div>
+</div>
+<main class="main">
+<article>
+  <p class="eyebrow">Bundles</p>
+  <h1>Buttons, stacks and pulldowns</h1>
+  <p class="lead">All twelve bundle kinds: the three a panel holds most often, the nine narrower ones, what each costs in ribbon space, and exactly what each one does when clicked.</p>
+  <p>A panel has room for a handful of large buttons before it starts pushing other panels off
+the ribbon. Stacks and pulldowns exist to buy that space back: a stack trades icon size for
+three tools in one column, a pulldown trades one extra click for a menu of any length.</p>
+
+<p>Pushbuttons, stacks and pulldowns are the three you will use for almost everything. A panel
+also understands nine narrower suffixes: <code>*.nobutton</code> for a command with no button,
+<code>*.urlbutton</code> and <code>*.linkbutton</code> for pointing at something other than
+your own script, <code>*.toggle</code> for on/off state, <code>*.smartbutton</code> for a
+button that sets its own appearance, <code>*.splitbutton</code> and
+<code>*.splitpushbutton</code> for a menu whose header also runs a child,
+<code>*.dockpane</code> for an AutoCAD palette, and <code>*.slideout</code> for tools that
+belong in the panel's flyout. <a href="#more-button-kinds">More button kinds</a> covers all
+nine.</p>
+
+<h2 id="at-a-glance">At a glance<a class="anchor" href="#at-a-glance" aria-label="Link to this section">#</a></h2>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Suffix</th><th>On the ribbon</th><th>Clicking it</th><th>AutoCAD command</th></tr></thead>
+<tbody>
+<tr><td><code>*.pushbutton</code></td><td>One large button</td><td>Runs <code>script.py</code></td><td>Yes</td></tr>
+<tr><td><code>*.stack</code></td><td>2 or 3 small buttons in one column</td><td>Each row runs its own script</td><td>Each row</td></tr>
+<tr><td><code>*.pulldown</code></td><td>A large button that opens a menu</td><td>Opens the menu</td><td>Each menu row</td></tr>
+<tr><td><code>*.nobutton</code></td><td>Nothing</td><td>Not clickable: chord or typed name only</td><td>Yes</td></tr>
+<tr><td><code>*.urlbutton</code></td><td>One large button</td><td>Opens <code>url:</code> in the browser</td><td>No</td></tr>
+<tr><td><code>*.linkbutton</code></td><td>One large button</td><td>Sends the command named in <code>plugin:</code></td><td>No</td></tr>
+<tr><td><code>*.toggle</code></td><td>One large button with on and off art</td><td>Runs <code>script.py</code>, which flips the state</td><td>Yes</td></tr>
+<tr><td><code>*.smartbutton</code></td><td>One large button that styled itself</td><td>Runs <code>script.py</code></td><td>Yes</td></tr>
+<tr><td><code>*.splitbutton</code></td><td>A large split button and menu</td><td>Header reruns the last child used</td><td>Each menu row</td></tr>
+<tr><td><code>*.splitpushbutton</code></td><td>A large split button and menu</td><td>Header always runs the first child</td><td>Each menu row</td></tr>
+<tr><td><code>*.dockpane</code></td><td>A large toggle button</td><td>Shows or hides an AutoCAD palette</td><td>No</td></tr>
+<tr><td><code>*.slideout</code></td><td>Nothing of its own</td><td>Its contents sit in the panel's flyout</td><td>Its contents, as usual</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>"AutoCAD command" means the bundle is registered as a command named from its title (or
+<code>command:</code>), so it can be typed, put in a macro and called from AutoLISP; a ribbon
+click sends that command rather than running the script itself. See
+<a href="overview.html">How pyACAD works</a>.</p>
+
+<h2 id="the-three-panel-items">The three panel items<a class="anchor" href="#the-three-panel-items" aria-label="Link to this section">#</a></h2>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>&nbsp;</th><th><code>*.pushbutton</code></th><th><code>*.stack</code></th><th><code>*.pulldown</code></th></tr></thead>
+<tbody>
+<tr><td><strong>Renders as</strong></td>
+    <td>One large button</td>
+    <td>2 or 3 small buttons in one column</td>
+    <td>One large button that opens a menu</td></tr>
+<tr><td><strong>Children</strong></td>
+    <td>None</td>
+    <td>Exactly 2 or 3 <code>*.pushbutton</code></td>
+    <td>1 or more <code>*.pushbutton</code></td></tr>
+<tr><td><strong>Its own bundle.yaml</strong></td>
+    <td>Yes, every pushbutton key</td>
+    <td>Only for a <code>layout:</code> list</td>
+    <td><code>title</code>, <code>tooltip</code>, <code>keytip</code>, <code>layout</code></td></tr>
+<tr><td><strong>Its own icon</strong></td>
+    <td>Yes</td>
+    <td>No</td>
+    <td>Yes</td></tr>
+<tr><td><strong>Runs a script</strong></td>
+    <td>Yes, <code>script.py</code></td>
+    <td>No, its children do</td>
+    <td>No, its children do</td></tr>
+<tr><td><strong>Gets a keytip</strong></td>
+    <td>Yes</td>
+    <td>Each row does</td>
+    <td>The button does; menu rows do not</td></tr>
+<tr><td><strong>Icon slot used</strong></td>
+    <td>Large (32 logical pixels)</td>
+    <td>Small (16 logical pixels)</td>
+    <td>Large for itself, small for every menu row</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="what-a-panel-looks-like">What a panel looks like<a class="anchor" href="#what-a-panel-looks-like" aria-label="Link to this section">#</a></h2>
+
+<p>An example panel: a large button, a three-row stack, a two-row stack and a pulldown with
+its menu open, drawn roughly to scale, because the relative sizes are the reason to choose
+one over another.</p>
+
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 700 300" width="700" role="img"
+     aria-label="A ribbon panel holding a large pushbutton, a three-row stack, a two-row stack and a pulldown whose menu is open.">
+  <style>
+    .bt1-t    { font: 12px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--ink); }
+    .bt1-s    { font: 11px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--ink); }
+    .bt1-m    { font: 11px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--muted); }
+    .bt1-mono { font: 11.5px Consolas, monospace; fill: var(--accent); }
+    .bt1-box  { fill: var(--paper); stroke: var(--line-strong); stroke-width: 1; }
+    .bt1-pane { fill: none; stroke: var(--line); stroke-width: 1; stroke-dasharray: 3 3; }
+    .bt1-icon { fill: none; stroke: var(--frame); stroke-width: 1.4; }
+    .bt1-mark { fill: var(--accent); }
+  </style>
+
+  <text class="bt1-mono" x="22"  y="18">.pushbutton</text>
+  <text class="bt1-mono" x="106" y="18">.stack (3)</text>
+  <text class="bt1-mono" x="232" y="18">.stack (2)</text>
+  <text class="bt1-mono" x="358" y="18">.pulldown</text>
+
+  <rect class="bt1-pane" x="8" y="26" width="444" height="126" rx="3"/>
+  <text class="bt1-m" x="230" y="170" text-anchor="middle">Layers</text>
+
+  <rect class="bt1-box"  x="22" y="32" width="76" height="112" rx="3"/>
+  <rect class="bt1-icon" x="44" y="46" width="32" height="32" rx="2"/>
+  <circle class="bt1-mark" cx="68" cy="54" r="4"/>
+  <text class="bt1-t" x="60" y="102" text-anchor="middle">Report</text>
+
+  <rect class="bt1-box"  x="106" y="32"  width="118" height="34" rx="2"/>
+  <rect class="bt1-icon" x="114" y="41"  width="16" height="16" rx="2"/>
+  <text class="bt1-s"    x="138" y="54">Freeze</text>
+  <rect class="bt1-box"  x="106" y="68"  width="118" height="34" rx="2"/>
+  <rect class="bt1-icon" x="114" y="77"  width="16" height="16" rx="2"/>
+  <text class="bt1-s"    x="138" y="90">Thaw</text>
+  <rect class="bt1-box"  x="106" y="104" width="118" height="34" rx="2"/>
+  <rect class="bt1-icon" x="114" y="113" width="16" height="16" rx="2"/>
+  <text class="bt1-s"    x="138" y="126">Lock</text>
+
+  <rect class="bt1-box"  x="232" y="53" width="118" height="34" rx="2"/>
+  <rect class="bt1-icon" x="240" y="62" width="16" height="16" rx="2"/>
+  <text class="bt1-s"    x="264" y="75">Isolate</text>
+  <rect class="bt1-box"  x="232" y="89" width="118" height="34" rx="2"/>
+  <rect class="bt1-icon" x="240" y="98" width="16" height="16" rx="2"/>
+  <text class="bt1-s"    x="264" y="111">Restore</text>
+
+  <rect class="bt1-box"  x="358" y="32" width="80" height="112" rx="3"/>
+  <rect class="bt1-icon" x="382" y="46" width="32" height="32" rx="2"/>
+  <circle class="bt1-mark" cx="406" cy="54" r="4"/>
+  <text class="bt1-t" x="398" y="102" text-anchor="middle">More</text>
+  <path class="bt1-mark" d="M391 112 L405 112 L398 120 z"/>
+
+  <rect class="bt1-box" x="358" y="158" width="252" height="104" rx="3"/>
+  <rect class="bt1-icon" x="370" y="170" width="16" height="16" rx="2"/>
+  <text class="bt1-s"    x="396" y="183">Merge Layers</text>
+  <rect class="bt1-icon" x="370" y="202" width="16" height="16" rx="2"/>
+  <text class="bt1-s"    x="396" y="215">Purge Empty Layers</text>
+  <rect class="bt1-icon" x="370" y="234" width="16" height="16" rx="2"/>
+  <text class="bt1-s"    x="396" y="247">Layer Standard</text>
+  <text class="bt1-m" x="622" y="183">the pulldown's</text>
+  <text class="bt1-m" x="622" y="199">children</text>
+
+  <text class="bt1-m" x="8" y="286">The pulldown draws its large icon; every stack row and every menu row draws the small one.</text>
+</svg>
+</div>
+<figcaption>Four panel items, eight tools, eight commands. The three-row stack takes the same
+height as one large button and holds three times as much.</figcaption>
+</figure>
+
+<h2 id="pushbuttons">Pushbuttons<a class="anchor" href="#pushbuttons" aria-label="Link to this section">#</a></h2>
+
+<p>A <code>*.pushbutton</code> placed directly on a panel is a large button: icon on top,
+caption underneath. A click sends its command, which runs <code>script.py</code>. It is the
+default and it is what a tool should be unless you have a reason otherwise.</p>
+
+<div class="code"><div class="code-head"><span>folders</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-f">Layers.panel</span>\
+  <span class="tok-f">Report.pushbutton</span>\
+    <span class="tok-k">script.py</span>              <span class="tok-c"># required</span>
+    <span class="tok-k">config.py</span>              <span class="tok-c"># optional: Shift+Click, and the command PYREPORTCFG</span>
+    <span class="tok-k">bundle.yaml</span>            <span class="tok-c"># title, tooltip, command, engine, shortcut, keytip, context, ...</span>
+    <span class="tok-k">icon.png</span>               <span class="tok-c"># 96x96</span>
+    <span class="tok-k">icon.dark.png</span>
+    <span class="tok-k">icon.small.png</span>         <span class="tok-c"># 32x32, used if this button ever moves into a stack or menu</span>
+    <span class="tok-k">icon.small.dark.png</span></code></pre></div>
+
+<p>Only <code>script.py</code> is required. Without it the folder is dropped and the reason is
+logged and toasted: <code>'&lt;dir&gt;' has no script.py - skipped.</code></p>
+
+<p>The caption can carry two small markers that pyACAD adds itself: a dot after the caption
+when a keyboard chord is bound to the tool (on by default), and an arrow when the bundle has a
+<code>config.py</code> (off by default). Both are switched in Settings. The tooltip gets the
+bound chord appended in brackets, so a rebound tool shows the user's key, not yours. A large
+button's caption can be broken onto two lines with a literal <code>\n</code> in
+<code>title:</code>.</p>
+
+<div class="note tip">
+<span class="note-t">Ship the small icons anyway</span>
+<p>A top-level button uses the large slot, but a bundle you later move into a stack or a menu
+needs small art. Generating all four variants costs nothing and means reorganising a panel
+never degrades an icon. See <a href="icons.html">Icons</a>.</p>
+</div>
+
+<h2 id="stacks">Stacks<a class="anchor" href="#stacks" aria-label="Link to this section">#</a></h2>
+
+<p>A <code>*.stack</code> renders as two or three small buttons filling one panel column. Each
+row is a full pushbutton with its own script, icon, tooltip, command, shortcut and keytip; the
+stack itself is only a container.</p>
+
+<div class="code"><div class="code-head"><span>folders</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-f">Layers.panel</span>\
+  <span class="tok-f">State.stack</span>\                     <span class="tok-c"># no script.py, no icon, no caption</span>
+    <span class="tok-k">bundle.yaml</span>                    <span class="tok-c"># layout: Freeze, Thaw, Lock (nothing else is read)</span>
+    <span class="tok-f">Freeze.pushbutton</span>\
+      <span class="tok-k">script.py</span>
+      <span class="tok-k">icon.small.png</span>
+    <span class="tok-f">Thaw.pushbutton</span>\
+      <span class="tok-k">script.py</span>
+      <span class="tok-k">icon.small.png</span>
+    <span class="tok-f">Lock.pushbutton</span>\
+      <span class="tok-k">script.py</span>
+      <span class="tok-k">icon.small.png</span></code></pre></div>
+
+<div class="note warn">
+<span class="note-t">A stack's bundle.yaml holds only the order</span>
+<p>The parser opens <code>bundle.yaml</code> inside a <code>.stack</code> folder for one key,
+<code>layout:</code>, and never looks for an icon there. The folder name is not shown
+anywhere either: the stack exists purely to group. Put metadata on the children. Their
+captions are drawn on one line beside a 16-pixel icon, so keep them short.</p>
+</div>
+
+<h3 id="the-2-or-3-rule">The 2-or-3 rule<a class="anchor" href="#the-2-or-3-rule" aria-label="Link to this section">#</a></h3>
+
+<p>AutoCAD's stacked-row control holds two or three rows. Rather than let it render wrong,
+pyACAD drops the stack at parse time and logs why:</p>
+
+<div class="code"><div class="code-head"><span>%APPDATA%\pyACAD\logs\pyACAD.log</span><button class="copy-btn" type="button">Copy</button></div><pre><code>Stack &#x27;D:\CadTools\...\State.stack&#x27; holds 1 button(s); a stack needs 2 or 3 - skipped.</code></pre></div>
+
+<p>The count is of <em>usable</em> children, so a stack of three where one child lost its
+<code>script.py</code> survives as two rows, and a stack of two where one child broke
+disappears entirely. That line is in the log only, not in the after-scan toast, so a stack that
+silently vanished after an edit is the case to check the log for.</p>
+
+<div class="do-dont">
+<div class="do"><div class="dd-t">Do</div>
+<pre><span class="tok-f">State.stack</span>\
+  <span class="tok-f">Freeze.pushbutton</span>\
+  <span class="tok-f">Thaw.pushbutton</span>\
+  <span class="tok-f">Lock.pushbutton</span>\</pre></div>
+<div class="dont"><div class="dd-t">Don't</div>
+<pre><span class="tok-f">State.stack</span>\
+  <span class="tok-f">Freeze.pushbutton</span>\
+  <span class="tok-f">Thaw.pushbutton</span>\
+  <span class="tok-f">Lock.pushbutton</span>\
+  <span class="tok-f">Unlock.pushbutton</span>\       <span class="tok-c"># 4 rows: the whole stack is dropped</span>
+  <span class="tok-f">Snap.toggle</span>\             <span class="tok-c"># not a pushbutton: reported and ignored</span></pre></div>
+</div>
+
+<h2 id="pulldowns">Pulldowns<a class="anchor" href="#pulldowns" aria-label="Link to this section">#</a></h2>
+
+<p>A <code>*.pulldown</code> is a large button with no action of its own. Clicking it opens a
+menu of its children. It is the one item that scales past three tools without consuming panel
+width, so it is where the long tail goes.</p>
+
+<div class="code"><div class="code-head"><span>folders</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-f">Layers.panel</span>\
+  <span class="tok-f">More.pulldown</span>\
+    <span class="tok-k">bundle.yaml</span>                    <span class="tok-c"># title, tooltip, keytip, layout</span>
+    <span class="tok-k">icon.png</span>                       <span class="tok-c"># 96x96, the face of the button</span>
+    <span class="tok-k">icon.dark.png</span>
+    <span class="tok-k">icon.small.png</span>                 <span class="tok-c"># 32x32</span>
+    <span class="tok-k">icon.small.dark.png</span>
+    <span class="tok-f">Merge_Layers.pushbutton</span>\
+      <span class="tok-k">script.py</span>
+    <span class="tok-f">Purge_Empty_Layers.pushbutton</span>\
+      <span class="tok-k">script.py</span>
+    <span class="tok-f">Layer_Standard.pushbutton</span>\
+      <span class="tok-k">script.py</span></code></pre></div>
+
+<div class="code"><div class="code-head"><span>More.pulldown\bundle.yaml</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-k">title</span>: More
+<span class="tok-k">tooltip</span>: Merge layers, purge the empty ones, or apply the office layer standard.
+<span class="tok-k">layout</span>:
+  - Merge_Layers
+  - Purge_Empty_Layers
+  - Layer_Standard</code></pre></div>
+
+<h3 id="what-a-pulldown-s-bundle-yaml-can-say">What a pulldown's bundle.yaml can say<a class="anchor" href="#what-a-pulldown-s-bundle-yaml-can-say" aria-label="Link to this section">#</a></h3>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Key</th><th>On a pulldown</th></tr></thead>
+<tbody>
+<tr><td><code>title</code></td><td>Read. Falls back to the folder name, underscores turned into spaces and any legacy prefix stripped.</td></tr>
+<tr><td><code>tooltip</code></td><td>Read. There is no docstring to fall back to, so without this key the button has no tooltip.</td></tr>
+<tr><td><code>keytip</code></td><td>Read. Overrides the generated Alt-navigation letters.</td></tr>
+<tr><td><code>layout</code></td><td>Read. The order of the menu rows. Unlisted children follow in name order.</td></tr>
+<tr><td>anything else</td><td>Not read. <code>shortcut</code>, <code>command</code>, <code>engine</code> and <code>context</code> belong on the children.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The children are ordinary pushbuttons and lose nothing by being in a menu. Each is its own
+AutoCAD command, may declare its own <code>engine</code>, <code>shortcut</code> and
+<code>context</code> (a row whose context is false is greyed in the menu), and responds to
+<kbd>Shift</kbd>+Click and <kbd>Alt</kbd>+Click exactly as a top-level button does. Menu rows
+draw the small icon and a one-line caption.</p>
+
+<div class="note">
+<span class="note-t">Menu rows get no keytip</span>
+<p>Alt-navigation assigns letters to top-level buttons, stack rows and the pulldown itself, but
+not to a pulldown's children: once the menu is open you arrow through it. If a buried tool
+needs to be reachable from the keyboard, give it a <code>shortcut:</code>, or type its
+command. <a href="shortcuts.html">Shortcuts and keytips</a> explains both.</p>
+</div>
+
+<p>One usable child is enough; zero is not. A pulldown whose children all failed is dropped
+with <code>Pulldown '&lt;dir&gt;' has no usable pushbuttons - skipped.</code> in the log.</p>
+
+<h2 id="more-button-kinds">More button kinds<a class="anchor" href="#more-button-kinds" aria-label="Link to this section">#</a></h2>
+
+<p>Nine more suffixes, each a variation on a pushbutton, a pulldown or the panel itself rather
+than a new concept. All nine take their place on the panel from its <code>layout:</code> list
+like the three above, and every icon rule from <a href="icons.html">Icons</a> applies unless
+a section below says otherwise.</p>
+
+<h3 id="nobutton-a-command-with-no-ribbon-presence">nobutton: a command with no ribbon presence<a class="anchor" href="#nobutton-a-command-with-no-ribbon-presence" aria-label="Link to this section">#</a></h3>
+
+<p>A <code>*.nobutton</code> is parsed exactly like a pushbutton (<code>script.py</code>,
+<code>config.py</code>, <code>bundle.yaml</code>) but the ribbon never draws it. It is still an
+AutoCAD command, so it can be typed, put in a macro or called from AutoLISP, and it is listed
+in the Shortcuts editor for a chord.</p>
+
+<div class="code"><div class="code-head"><span>folders</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-f">Utility.panel</span>\
+  <span class="tok-f">Rebuild_Index.nobutton</span>\
+    <span class="tok-k">script.py</span>
+    <span class="tok-k">bundle.yaml</span>         <span class="tok-c"># a shortcut and a memorable command</span></code></pre></div>
+
+<div class="code"><div class="code-head"><span>Rebuild_Index.nobutton\bundle.yaml</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-k">title</span>: Rebuild index
+<span class="tok-k">tooltip</span>: Rebuilds the block index this session caches.
+<span class="tok-k">command</span>: PYREINDEX
+<span class="tok-k">shortcut</span>: Ctrl+Alt+R</code></pre></div>
+
+<p>Everything else is ordinary: the same keys, the same engine resolution, the same
+<code>min_host_version</code>/<code>max_host_version</code> gating. Two things do not carry
+over. <code>context:</code> is parsed but never evaluated, because greying is applied to a
+drawn button and a nobutton has none. And <kbd>Shift</kbd>+Click needs a button, so a
+nobutton's <code>config.py</code> is reachable only through its <code>CFG</code> command
+(<code>PYREINDEXCFG</code> above).</p>
+
+<h3 id="urlbutton-opens-a-link">urlbutton: opens a link<a class="anchor" href="#urlbutton-opens-a-link" aria-label="Link to this section">#</a></h3>
+
+<p>A <code>*.urlbutton</code> ships no <code>script.py</code>. Its whole job is the
+<code>url:</code> key in <code>bundle.yaml</code>: clicking opens that address with the
+default browser and runs nothing else.</p>
+
+<div class="code"><div class="code-head"><span>folders</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-f">Help.panel</span>\
+  <span class="tok-f">Office_Standards.urlbutton</span>\
+    <span class="tok-k">bundle.yaml</span>
+    <span class="tok-k">icon.png</span></code></pre></div>
+
+<div class="code"><div class="code-head"><span>Office_Standards.urlbutton\bundle.yaml</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-k">title</span>: Office\nStandards
+<span class="tok-k">tooltip</span>: The CAD standards manual on the intranet.
+<span class="tok-k">url</span>: https://intranet.example.com/cad-standards</code></pre></div>
+
+<p>Without <code>tooltip:</code>, the tooltip is the address itself. A urlbutton is not an
+AutoCAD command, takes no <code>shortcut:</code>, has no <code>context:</code>, and ignores
+<kbd>Shift</kbd> and <kbd>Alt</kbd> on the click. If the address cannot be opened, the failure
+is logged and toasted (<em>Could not open URL</em>) rather than raised.
+<a href="bundle-yaml.html#the-keys-a-urlbutton-reads">bundle.yaml</a> has the key table.</p>
+
+<div class="note warn">
+<span class="note-t">Known issue on AutoCAD 2025 and 2026</span>
+<p>The current build opens the address with a call that .NET 8 does not hand to the shell, so
+on AutoCAD 2025 and 2026 a urlbutton is expected to show the <em>Could not open URL</em> toast
+instead of opening the browser. It works on 2021 to 2024. Until that is fixed, a pushbutton
+whose script starts the browser explicitly is the reliable route on the newer releases.</p>
+</div>
+
+<h3 id="linkbutton-sends-another-command">linkbutton: sends another command<a class="anchor" href="#linkbutton-sends-another-command" aria-label="Link to this section">#</a></h3>
+
+<p>A <code>*.linkbutton</code> also ships no script. Its required key is
+<code>plugin:</code>, which names an AutoCAD command: a native one, one defined by another
+add-in, or another pyACAD tool's. Clicking sends that command to the active drawing exactly as
+if it had been typed, so you can put someone else's tool on your own panel.</p>
+
+<div class="code"><div class="code-head"><span>Layer_Walk.linkbutton\bundle.yaml</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-k">title</span>: Layer\nWalk
+<span class="tok-k">tooltip</span>: AutoCAD&#x27;s LAYWALK, on our panel.
+<span class="tok-k">plugin</span>: LAYWALK</code></pre></div>
+
+<ul>
+  <li>The value is uppercased and cut down to letters, digits, <code>_</code> and
+    <code>-</code>, so <code>-LAYER</code> works but a space, a dot or a macro does not:
+    one command name, no arguments.</li>
+  <li>pyACAD sends it as <code>_.&lt;NAME&gt;</code>, the form that skips command
+    translation and redefinition, so write the plain English name without your own
+    <code>_</code> or <code>.</code> prefix.</li>
+  <li>A name AutoCAD does not know is not detected by pyACAD: the command line simply reports
+    an unknown command. With no drawing open the click toasts <em>Open a drawing
+    first.</em></li>
+  <li>A linkbutton is not itself a command, takes no <code>shortcut:</code> or
+    <code>context:</code>, and ignores <kbd>Shift</kbd> and <kbd>Alt</kbd> on the click.</li>
+</ul>
+
+<p>The key is called <code>plugin:</code> for historical reasons; it has always meant a
+command name in pyACAD. <a href="bundle-yaml.html#the-keys-a-linkbutton-reads">bundle.yaml</a>
+has the key table.</p>
+
+<h3 id="toggle-a-button-with-on-off-state">toggle: a button with on/off state<a class="anchor" href="#toggle-a-button-with-on-off-state" aria-label="Link to this section">#</a></h3>
+
+<p>A <code>*.toggle</code> is a pushbutton that also tracks a session-scoped boolean and swaps
+its icon (and optionally its caption and tooltip) to match. <code>script.py</code> and
+<code>bundle.yaml</code> work exactly as on a pushbutton, and it is an AutoCAD command like
+one; the additions are on/off art and two functions in <code>pyacad.script</code>.</p>
+
+<div class="code"><div class="code-head"><span>folders</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-f">Ortho_Snap.toggle</span>\
+  <span class="tok-k">script.py</span>
+  <span class="tok-k">bundle.yaml</span>
+  <span class="tok-k">icon.on.png</span>          <span class="tok-c"># 96x96, shown while on</span>
+  <span class="tok-k">icon.on.dark.png</span>
+  <span class="tok-k">icon.off.png</span>         <span class="tok-c"># 96x96, shown while off, and at the start of every session</span>
+  <span class="tok-k">icon.off.dark.png</span></code></pre></div>
+
+<div class="code"><div class="code-head"><span>Ortho_Snap.toggle\script.py</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-s">&quot;&quot;&quot;Turns ORTHOMODE and SNAPMODE on or off together.&quot;&quot;&quot;</span>
+<span class="tok-k">from</span> pyacad <span class="tok-k">import</span> doc, script, toast
+
+on = <span class="tok-k">not</span> script.get_toggle_state()
+doc.set_sysvar(<span class="tok-s">&#x27;ORTHOMODE&#x27;</span>, <span class="tok-n">1</span> <span class="tok-k">if</span> on <span class="tok-k">else</span> <span class="tok-n">0</span>)
+doc.set_sysvar(<span class="tok-s">&#x27;SNAPMODE&#x27;</span>, <span class="tok-n">1</span> <span class="tok-k">if</span> on <span class="tok-k">else</span> <span class="tok-n">0</span>)
+script.set_toggle_state(on)
+toast.info(<span class="tok-s">&#x27;Ortho and snap &#x27;</span> + (<span class="tok-s">&#x27;on&#x27;</span> <span class="tok-k">if</span> on <span class="tok-k">else</span> <span class="tok-s">&#x27;off&#x27;</span>))</code></pre></div>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Icon file</th><th>Falls back to</th></tr></thead>
+<tbody>
+<tr><td><code>icon.off.png</code></td><td><code>icon.png</code></td></tr>
+<tr><td><code>icon.off.dark.png</code></td><td><code>icon.off.png</code> (after its own fallback)</td></tr>
+<tr><td><code>icon.on.png</code></td><td><code>icon.png</code></td></tr>
+<tr><td><code>icon.on.dark.png</code></td><td><code>icon.on.png</code> (after its own fallback)</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Every toggle starts off. <code>script.get_toggle_state()</code> reads the current state;
+<code>script.set_toggle_state(on)</code> sets it and repaints the button immediately. Note that
+the state is pyACAD's, not AutoCAD's: the example above sets two system variables and then
+records that it did, but if the user types <code>ORTHO</code> the button does not know.</p>
+
+<p>A caption that names an action reads wrong once the toggle is pressed: "Hide Grid" on a
+button whose next click shows it. Give the on state its own words with <code>title_on</code>
+and <code>tooltip_on</code> in <code>bundle.yaml</code>; the button swaps caption and tooltip
+with the icon, keeps them across a Reload, and still carries its markers. Leave them out and
+one caption serves both states. Only a <code>*.toggle</code> reads them; anywhere else they
+are logged and ignored.</p>
+
+<div class="code"><div class="code-head"><span>Grid.toggle\bundle.yaml</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-k">title</span>: Hide\nGrid
+<span class="tok-k">title_on</span>: Show\nGrid
+<span class="tok-k">tooltip</span>: Turns the drawing grid off.
+<span class="tok-k">tooltip_on</span>: Turns the drawing grid back on.</code></pre></div>
+
+<div class="note warn">
+<span class="note-t">Session-scoped, and settable only by the toggle itself</span>
+<p>Toggle state lives in memory for the AutoCAD session, keyed by the bundle key. It survives a
+Reload but not a restart, and only the toggle's own <code>script.py</code> or
+<code>config.py</code> can set it: <code>get_toggle_state</code> and
+<code>set_toggle_state</code> act on whichever bundle is running, and neither a hook nor
+<code>startup.py</code> runs as a bundle. A toggle that must come back on after a restart
+saves its flag with <code>pyacad.settings</code> and reapplies it on its first run of the
+session.</p>
+</div>
+
+<p>A toggle is always a large button: stacks and menus take only pushbuttons.</p>
+
+<h3 id="smartbutton-sets-its-own-title-tooltip-and-icon-at-build-time">smartbutton: sets its own title, tooltip and icon at build time<a class="anchor" href="#smartbutton-sets-its-own-title-tooltip-and-icon-at-build-time" aria-label="Link to this section">#</a></h3>
+
+<p>A <code>*.smartbutton</code> runs <code>script.py</code> once while the ribbon is being
+built, so the script can set its own appearance before anyone sees it, and then on every click
+like a pushbutton. A global, <code>__selfinit__</code>, tells the script which run it is in.</p>
+
+<div class="code"><div class="code-head"><span>Xref_Status.smartbutton\script.py</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-s">&quot;&quot;&quot;Reloads every xref; the caption shows how many the drawing had at startup.&quot;&quot;&quot;</span>
+<span class="tok-k">if</span> __selfinit__:
+    <span class="tok-k">from</span> pyacad <span class="tok-k">import</span> xrefs
+    <span class="tok-k">try</span>:
+        count = len(xrefs.list())
+    <span class="tok-k">except</span> Exception:
+        count = <span class="tok-n">0</span>                             <span class="tok-c"># no drawing yet at ribbon build</span>
+    __button__.Title = <span class="tok-s">&#x27;Xrefs (%d)&#x27;</span> % count
+<span class="tok-k">else</span>:
+    <span class="tok-k">from</span> pyacad <span class="tok-k">import</span> toast, xrefs
+    toast.success(<span class="tok-s">&#x27;%d xref(s) reloaded&#x27;</span> % xrefs.reload())</code></pre></div>
+
+<p>On the build-time run, <code>__selfinit__</code> is <code>True</code> and
+<code>__button__</code> is a small proxy over the live ribbon control:</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Member</th><th>Does</th></tr></thead>
+<tbody>
+<tr><td><code>__button__.Title</code></td><td>Read/write. The caption.</td></tr>
+<tr><td><code>__button__.Enabled</code></td><td>Read/write. <code>False</code> greys the button.
+    A <code>context:</code> rule on the same bundle overrides it at the next
+    re-evaluation.</td></tr>
+<tr><td><code>__button__.Tooltip</code></td><td>Write-only. The hover tooltip.</td></tr>
+<tr><td><code>__button__.SetIcon(path)</code></td><td>Points both icon slots at one PNG.
+    Choosing light or dark art is the script's job (<code>script.is_dark_theme()</code>).</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>On a click, <code>__selfinit__</code> is <code>False</code> and <code>__button__</code> does
+not exist at all: guard on <code>__selfinit__</code>, as the example does, or a click raises
+<code>NameError</code>. The build-time scope is smaller than a click's in the other direction
+too: it has only <code>__file__</code>, <code>__selfinit__</code>, <code>__button__</code>,
+<code>__pyacad__</code> and <code>__runner__</code>, so <code>__title__</code>,
+<code>__commandpath__</code> and <code>__args__</code> do not exist there, and
+<code>pyacad.script.get_command_path()</code> reads back whichever command ran last. Anything
+the build-time run prints goes to the log, labelled <code>[selfinit &lt;bundle key&gt;]</code>.</p>
+
+<div class="note trap">
+<span class="note-t">The build-time run happens per ribbon build, not per click</span>
+<p>It fires at boot, on every Reload, and when pyACAD rebuilds its tabs after a workspace
+switch, before the button is clickable. Nothing repeats it in between, so it is the place for
+an initial appearance, not for a value that changes while AutoCAD runs: at boot there may not
+even be a drawing open. A build-time run that raises is logged, and the button still renders
+with its normal title and still runs clicks.</p>
+</div>
+
+<p>The command name comes from the bundle's own title (from <code>bundle.yaml</code>,
+<code>__title__</code> or the folder), not from what the build-time run sets. A smartbutton is
+always a large button.</p>
+
+<h3 id="splitbutton-and-splitpushbutton-a-menu-whose-header-also-runs-a-child">splitbutton and splitpushbutton: a menu whose header also runs a child<a class="anchor" href="#splitbutton-and-splitpushbutton-a-menu-whose-header-also-runs-a-child" aria-label="Link to this section">#</a></h3>
+
+<p>Both are pulldowns in every other respect: a folder of <code>*.pushbutton</code> children,
+their own <code>bundle.yaml</code> reading <code>title</code>, <code>tooltip</code>,
+<code>keytip</code> and <code>layout</code>, their own icon set. The difference is what
+clicking the large header does.</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>&nbsp;</th><th><code>*.pulldown</code></th><th><code>*.splitbutton</code></th><th><code>*.splitpushbutton</code></th></tr></thead>
+<tbody>
+<tr><td>Clicking the header</td><td>Opens the menu</td>
+    <td>Runs the child most recently picked from the menu this session; the first child until
+        then</td>
+    <td>Always runs the first child, in layout order</td></tr>
+<tr><td>The arrow</td><td>(the whole button opens the menu)</td>
+    <td>Opens the menu</td><td>Opens the menu</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="code"><div class="code-head"><span>folders</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-f">Output.panel</span>\
+  <span class="tok-f">Plot.splitbutton</span>\
+    <span class="tok-k">bundle.yaml</span>                <span class="tok-c"># title, tooltip, keytip, layout</span>
+    <span class="tok-k">icon.png</span>
+    <span class="tok-f">To_PDF.pushbutton</span>\
+      <span class="tok-k">script.py</span>
+    <span class="tok-f">To_DWF.pushbutton</span>\
+      <span class="tok-k">script.py</span></code></pre></div>
+
+<div class="code"><div class="code-head"><span>Plot.splitbutton\bundle.yaml</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-k">title</span>: Plot
+<span class="tok-k">tooltip</span>: Plots the current layout. The arrow picks the format.
+<span class="tok-k">keytip</span>: PL
+<span class="tok-k">layout</span>:
+  - To_PDF
+  - To_DWF</code></pre></div>
+
+<p>The header runs a child the same way the child's own menu row does, modifiers included:
+<kbd>Shift</kbd> on the header runs that child's <code>config.py</code>. The split button
+itself is not a command; each child is.</p>
+
+<h3 id="dockpane-an-autocad-palette">dockpane: an AutoCAD palette<a class="anchor" href="#dockpane-an-autocad-palette" aria-label="Link to this section">#</a></h3>
+
+<p>A <code>*.dockpane</code> is not a script that runs and returns. It is an AutoCAD palette
+(a <code>PaletteSet</code>, the same kind of window as Properties or Tool Palettes) whose
+content is your <code>pane.xaml</code>, and its ribbon button is a toggle that shows and hides
+the palette and follows it: closing the palette from its own title bar releases the toggle,
+and showing it from code presses it.</p>
+
+<div class="code"><div class="code-head"><span>folders</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-f">Block_Browser.dockpane</span>\
+  <span class="tok-k">pane.xaml</span>     <span class="tok-c"># required: any WPF element; a Window root is unwrapped to its content</span>
+  <span class="tok-k">script.py</span>     <span class="tok-c"># optional: runs once each time the palette is built</span>
+  <span class="tok-k">bundle.yaml</span>   <span class="tok-c"># optional: title, tooltip, keytip, engine</span>
+  <span class="tok-k">icon.png</span>, <span class="tok-k">icon.dark.png</span>, <span class="tok-k">icon.small.png</span>, <span class="tok-k">icon.small.dark.png</span></code></pre></div>
+
+<div class="code"><div class="code-head"><span>Block_Browser.dockpane\bundle.yaml</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-k">title</span>: Block\nBrowser
+<span class="tok-k">tooltip</span>: A docked list of the drawing&#x27;s block definitions with counts.
+<span class="tok-k">keytip</span>: BB</code></pre></div>
+
+<p>The palette is created at boot and rebuilt on every Reload, so its content starts fresh
+each time. It docks left or right, can auto-hide, has a minimum size of 220 by 160 pixels,
+keeps keyboard focus so text boxes in it receive keystrokes rather than the command line, and
+is titled with the bundle's title. Its identity is a GUID derived from the bundle key, which
+is how AutoCAD remembers its size and dock side between sessions; renaming or moving the
+folder makes a new GUID, and the palette forgets.</p>
+
+<p>If <code>script.py</code> exists it runs right after the XAML loads, with
+<code>__file__</code>, <code>__commandpath__</code>, <code>__title__</code>,
+<code>__pyacad__</code>, <code>__runner__</code> (<code>False</code>) and one more global,
+<code>__pane__</code>:</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Member</th><th>Does</th></tr></thead>
+<tbody>
+<tr><td><code>__pane__.Find(name)</code></td>
+    <td>The element with that <code>x:Name</code> in <code>pane.xaml</code>, or <code>None</code>.</td></tr>
+<tr><td><code>__pane__.Content</code></td>
+    <td>The root element <code>pane.xaml</code> produced.</td></tr>
+<tr><td><code>__pane__.Title</code></td>
+    <td>The resolved title, read-only.</td></tr>
+<tr><td><code>__pane__.BundleKey</code></td>
+    <td>The pane's own bundle key, read-only.</td></tr>
+<tr><td><code>__pane__.Visible</code></td>
+    <td>Read/write. Shows or hides the palette; the ribbon toggle follows.</td></tr>
+</tbody>
+</table>
+</div>
+
+<div class="code"><div class="code-head"><span>Block_Browser.dockpane\script.py</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-s">&quot;&quot;&quot;Fills the list on demand; the Refresh button is wired here, once.&quot;&quot;&quot;</span>
+<span class="tok-k">from</span> pyacad <span class="tok-k">import</span> blocks, doc
+
+pane = __pane__
+listing = pane.Find(<span class="tok-s">&#x27;Blocks&#x27;</span>)
+
+
+<span class="tok-k">def</span> refresh(sender, args):
+    <span class="tok-k">with</span> doc.lock():                          <span class="tok-c"># a click in a palette is outside command context</span>
+        counts = blocks.counts()
+    listing.Items.Clear()
+    <span class="tok-k">for</span> name <span class="tok-k">in</span> sorted(counts):
+        listing.Items.Add(<span class="tok-s">&#x27;%s  (%d)&#x27;</span> % (name, counts[name]))
+
+
+pane.Find(<span class="tok-s">&#x27;Refresh&#x27;</span>).Click += refresh</code></pre></div>
+
+<div class="note warn">
+<span class="note-t">Event handlers run outside command context</span>
+<p><code>script.py</code> runs once and returns; everything after that happens in the handlers
+it wired up, when the user clicks inside the palette. Those clicks are not AutoCAD commands, so
+nothing has locked the drawing for you: wrap drawing access in <code>doc.lock()</code>, as
+above. And because the script ran at build time, perhaps before any drawing was open, read
+the drawing in a handler, not at the top of the script.</p>
+</div>
+
+<p>A dock pane is not an AutoCAD command and has no <code>config.py</code>. Its toggle reacts
+to a plain click only: <kbd>Shift</kbd> and <kbd>Alt</kbd> do nothing different there.
+<code>shortcut:</code> is read from its <code>bundle.yaml</code> but not bound to anything in
+the current build, and <code>context:</code> is not read. If <code>pane.xaml</code> fails to
+load, there is no palette and no toggle, and a toast names the pane; if only
+<code>script.py</code> fails, the palette and toggle exist with the bare XAML content, and the
+same toast reports it. There is no limit on how many dock panes an extension may have.</p>
+
+<h3 id="slideout-the-tools-behind-the-panel-title">slideout: the tools behind the panel title<a class="anchor" href="#slideout-the-tools-behind-the-panel-title" aria-label="Link to this section">#</a></h3>
+
+<p>A <code>*.slideout</code> is the one panel item that is not a control at all. Everything
+inside it is placed after a panel break, so AutoCAD keeps it in the flyout that opens from the
+panel title along the bottom of the panel. It costs no ribbon width, which is the point.</p>
+
+<div class="code"><div class="code-head"><span>folders</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-f">Drafting.panel</span>\
+  <span class="tok-k">bundle.yaml</span>                <span class="tok-c"># layout: Count, Rename</span>
+  <span class="tok-f">Count.pushbutton</span>\          <span class="tok-c"># on the face of the panel</span>
+  <span class="tok-f">Rename.pushbutton</span>\
+  <span class="tok-f">Extras.slideout</span>\           <span class="tok-c"># no icon, no script.py; bundle.yaml holds only layout:</span>
+    <span class="tok-k">bundle.yaml</span>              <span class="tok-c"># layout: Settings, Formats, Docs</span>
+    <span class="tok-f">Settings.pushbutton</span>\
+      <span class="tok-k">script.py</span>
+    <span class="tok-f">Formats.pulldown</span>\
+      <span class="tok-k">bundle.yaml</span>
+      <span class="tok-f">CSV.pushbutton</span>\
+        <span class="tok-k">script.py</span>
+    <span class="tok-f">Docs.urlbutton</span>\
+      <span class="tok-k">bundle.yaml</span></code></pre></div>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>&nbsp;</th><th>Behaviour</th></tr></thead>
+<tbody>
+<tr><td><strong>Children</strong></td>
+    <td>Any of the other eleven kinds: pushbuttons, stacks, pulldowns, toggles, smartbuttons,
+        split buttons, url and link buttons, nobuttons and dock panes.</td></tr>
+<tr><td><strong>Its own bundle.yaml</strong></td>
+    <td>Only for a <code>layout:</code> list ordering the items inside it.</td></tr>
+<tr><td><strong>Title</strong></td>
+    <td>Never shown. The flyout belongs to the panel.</td></tr>
+<tr><td><strong>Several per panel</strong></td>
+    <td>Allowed. Their contents join one flyout in the order the panel's
+        <code>layout:</code> list gives the slideouts.</td></tr>
+<tr><td><strong>Nesting</strong></td>
+    <td>One level. A <code>.slideout</code> inside a <code>.slideout</code> is logged and its
+        contents are dropped.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Bundles in the flyout are ordinary bundles: they are commands, they get keytips, they take
+<code>shortcut:</code>, <code>context:</code> and the host version keys, and
+<kbd>Shift</kbd>+Click and <kbd>Alt</kbd>+Click behave as they do on the panel face. Their
+<a href="anatomy.html">bundle key</a> keeps the <code>.slideout</code> folder in the path, so
+moving a tool into or out of a slideout orphans any user shortcut override that pointed at
+it.</p>
+
+<h2 id="mixing-them-on-one-panel">Mixing them on one panel<a class="anchor" href="#mixing-them-on-one-panel" aria-label="Link to this section">#</a></h2>
+
+<p>Panel items are placed once, by the panel's <code>layout:</code> list, whatever their kind.
+They interleave freely and are never grouped, so the panel order is exactly the order of the
+list.</p>
+
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 700 226" width="700" role="img"
+     aria-label="A five-entry layout list on the left produces five panel items in the same order on the right, mixing buttons, stacks and a pulldown.">
+  <style>
+    .bt2-mono { font: 11.5px Consolas, monospace; fill: var(--ink); }
+    .bt2-m    { font: 11px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--muted); }
+    .bt2-s    { font: 9.5px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--ink); }
+    .bt2-lbl  { font: 10.5px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--muted);
+                text-transform: uppercase; letter-spacing: .07em; }
+    .bt2-box  { fill: var(--paper); stroke: var(--line-strong); stroke-width: 1; }
+    .bt2-pane { fill: none; stroke: var(--line); stroke-width: 1; stroke-dasharray: 3 3; }
+    .bt2-icon { fill: none; stroke: var(--frame); stroke-width: 1.3; }
+    .bt2-badge{ fill: none; stroke: var(--accent); stroke-width: 1.2; }
+    .bt2-num  { font: 9px Consolas, monospace; fill: var(--accent); }
+    .bt2-mark { fill: var(--accent); }
+  </style>
+
+  <text class="bt2-lbl" x="0"   y="14">The panel's layout list</text>
+  <text class="bt2-lbl" x="336" y="14">Resulting panel</text>
+
+  <text class="bt2-mono" x="0" y="40">Layers.panel\bundle.yaml</text>
+  <text class="bt2-mono" x="0" y="58">layout:</text>
+
+  <circle class="bt2-badge" cx="10" cy="80"  r="7"/>
+  <text class="bt2-num"  x="10" y="83" text-anchor="middle">1</text>
+  <text class="bt2-mono" x="26" y="84">- Report</text>
+
+  <circle class="bt2-badge" cx="10" cy="104" r="7"/>
+  <text class="bt2-num"  x="10" y="107" text-anchor="middle">2</text>
+  <text class="bt2-mono" x="26" y="108">- Snapshot</text>
+
+  <circle class="bt2-badge" cx="10" cy="128" r="7"/>
+  <text class="bt2-num"  x="10" y="131" text-anchor="middle">3</text>
+  <text class="bt2-mono" x="26" y="132">- State</text>
+
+  <circle class="bt2-badge" cx="10" cy="152" r="7"/>
+  <text class="bt2-num"  x="10" y="155" text-anchor="middle">4</text>
+  <text class="bt2-mono" x="26" y="156">- Visibility</text>
+
+  <circle class="bt2-badge" cx="10" cy="176" r="7"/>
+  <text class="bt2-num"  x="10" y="179" text-anchor="middle">5</text>
+  <text class="bt2-mono" x="26" y="180">- More</text>
+
+  <rect class="bt2-pane" x="336" y="30" width="354" height="142" rx="3"/>
+  <text class="bt2-m" x="513" y="190" text-anchor="middle">Layers</text>
+
+  <circle class="bt2-badge" cx="372" cy="22" r="7"/>
+  <text class="bt2-num" x="372" y="25" text-anchor="middle">1</text>
+  <rect class="bt2-box"  x="346" y="38" width="52" height="126" rx="3"/>
+  <rect class="bt2-icon" x="360" y="52" width="24" height="24" rx="2"/>
+  <text class="bt2-s" x="372" y="100" text-anchor="middle">Report</text>
+
+  <circle class="bt2-badge" cx="428" cy="22" r="7"/>
+  <text class="bt2-num" x="428" y="25" text-anchor="middle">2</text>
+  <rect class="bt2-box"  x="402" y="38" width="52" height="126" rx="3"/>
+  <rect class="bt2-icon" x="416" y="52" width="24" height="24" rx="2"/>
+  <text class="bt2-s" x="428" y="100" text-anchor="middle">Snapshot</text>
+
+  <circle class="bt2-badge" cx="497" cy="22" r="7"/>
+  <text class="bt2-num" x="497" y="25" text-anchor="middle">3</text>
+  <rect class="bt2-box"  x="458" y="38"  width="78" height="40" rx="2"/>
+  <rect class="bt2-icon" x="464" y="50"  width="14" height="14" rx="2"/>
+  <text class="bt2-s"    x="484" y="62">Freeze</text>
+  <rect class="bt2-box"  x="458" y="81"  width="78" height="40" rx="2"/>
+  <rect class="bt2-icon" x="464" y="93"  width="14" height="14" rx="2"/>
+  <text class="bt2-s"    x="484" y="105">Thaw</text>
+  <rect class="bt2-box"  x="458" y="124" width="78" height="40" rx="2"/>
+  <rect class="bt2-icon" x="464" y="136" width="14" height="14" rx="2"/>
+  <text class="bt2-s"    x="484" y="148">Lock</text>
+
+  <circle class="bt2-badge" cx="579" cy="22" r="7"/>
+  <text class="bt2-num" x="579" y="25" text-anchor="middle">4</text>
+  <rect class="bt2-box"  x="540" y="38"  width="78" height="40" rx="2"/>
+  <rect class="bt2-icon" x="546" y="50"  width="14" height="14" rx="2"/>
+  <text class="bt2-s"    x="566" y="62">Isolate</text>
+  <rect class="bt2-box"  x="540" y="81"  width="78" height="40" rx="2"/>
+  <rect class="bt2-icon" x="546" y="93"  width="14" height="14" rx="2"/>
+  <text class="bt2-s"    x="566" y="105">Restore</text>
+
+  <circle class="bt2-badge" cx="648" cy="22" r="7"/>
+  <text class="bt2-num" x="648" y="25" text-anchor="middle">5</text>
+  <rect class="bt2-box"  x="622" y="38" width="52" height="126" rx="3"/>
+  <rect class="bt2-icon" x="636" y="52" width="24" height="24" rx="2"/>
+  <text class="bt2-s" x="648" y="100" text-anchor="middle">More</text>
+  <path class="bt2-mark" d="M642 110 L654 110 L648 117 z"/>
+
+  <text class="bt2-m" x="0" y="214">One list over mixed kinds. Moving the State line below the Visibility line swaps the two stacks.</text>
+</svg>
+</div>
+<figcaption>Five entries, five panel items, same order. A stack sits between two large
+buttons purely by where you list it.</figcaption>
+</figure>
+
+<h2 id="icons-at-each-size">Icons at each size<a class="anchor" href="#icons-at-each-size" aria-label="Link to this section">#</a></h2>
+
+<p>The size an item renders at decides which icon it asks for, which is why the four-variant
+icon set exists. The light or dark set is chosen from AutoCAD's theme when the ribbon is
+built; after changing the theme, click <strong>Reload</strong>.</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Where it renders</th><th>Icon file used</th><th>Drawn at</th></tr></thead>
+<tbody>
+<tr><td>Large button on a panel (pushbutton, toggle, smartbutton, url, link, dock pane)</td>
+    <td><code>icon.png</code> / <code>icon.dark.png</code></td><td>32 logical pixels</td></tr>
+<tr><td>Row in a stack</td><td><code>icon.small.png</code> / <code>icon.small.dark.png</code></td><td>16 logical pixels</td></tr>
+<tr><td>The pulldown or split button itself</td><td><code>icon.png</code> / <code>icon.dark.png</code></td><td>32 logical pixels</td></tr>
+<tr><td>Row in a menu</td><td><code>icon.small.png</code> / <code>icon.small.dark.png</code></td><td>16 logical pixels</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Every missing variant falls back to <code>icon.png</code>, so a bundle that ships only one
+file still renders everywhere; it is loaded at the slot's logical size rather than scaled from
+the large art. A bundle with no icon at all renders as a caption only.</p>
+
+<h2 id="choosing-between-them">Choosing between them<a class="anchor" href="#choosing-between-them" aria-label="Link to this section">#</a></h2>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Situation</th><th>Use</th></tr></thead>
+<tbody>
+<tr><td>A tool people reach for every day</td><td>A large pushbutton, at the left of the panel</td></tr>
+<tr><td>Two or three variations on one action</td><td>A stack</td></tr>
+<tr><td>Four or more related tools</td><td>A pulldown, or a split button if one is the usual choice</td></tr>
+<tr><td>A tool with a long name</td><td>A menu row: menus have horizontal room, stacks do not</td></tr>
+<tr><td>A tool people run from the keyboard or from LISP only</td><td>A nobutton with a <code>command:</code></td></tr>
+<tr><td>A mode the user switches on and off</td><td>A toggle</td></tr>
+<tr><td>A panel of controls that stays open while the user works</td><td>A dock pane</td></tr>
+<tr><td>Rarely used tools you still want on the panel</td><td>A slideout</td></tr>
+<tr><td>Options for an existing tool</td><td>Not a button at all: add <code>config.py</code> and let
+    <kbd>Shift</kbd>+Click open it. See <a href="click-actions.html">Click actions</a>.</td></tr>
+</tbody>
+</table>
+</div>
+
+<h2 id="identity-on-the-ribbon">Identity on the ribbon<a class="anchor" href="#identity-on-the-ribbon" aria-label="Link to this section">#</a></h2>
+
+<p>Each rendered control gets a deterministic id, which is worth knowing when you read a log
+line.</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Control</th><th>Id</th><th>Derived from</th></tr></thead>
+<tbody>
+<tr><td>Script button (pushbutton, toggle, smartbutton, rows)</td><td><code>PYACAD_BTN_&lt;hash&gt;</code></td>
+    <td>The lowercased full path of its <code>script.py</code></td></tr>
+<tr><td>Url or link button</td><td><code>PYACAD_BTN_&lt;hash&gt;</code></td><td>The lowercased bundle folder path</td></tr>
+<tr><td>Pulldown or split button</td><td><code>PYACAD_PULL_&lt;hash&gt;</code></td><td>The lowercased folder path</td></tr>
+<tr><td>Dock pane toggle</td><td><code>PYACAD_PANE_&lt;hash&gt;</code></td><td>The lowercased folder path</td></tr>
+<tr><td>Tab</td><td><code>PYACAD_TAB_&lt;name&gt;</code></td><td>Extension name plus tab folder name, sanitised.
+    See <a href="anatomy.html">Anatomy</a>.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Every pyACAD tab answers to the Alt-navigation keytip <code>PY</code>. Inside a tab, keytips
+are assigned per tab: explicit <code>keytip:</code> values claim first, then each remaining
+item gets the first free of its title's first letter, first two letters, or first letter plus
+a digit from 2 to 9.</p>
+
+<h2 id="common-mistakes">Common mistakes<a class="anchor" href="#common-mistakes" aria-label="Link to this section">#</a></h2>
+
+<ul>
+  <li><strong>A stack with four children.</strong> Split it into two stacks, or make it a
+    pulldown.</li>
+  <li><strong>A toggle or smartbutton inside a stack or menu.</strong> Only pushbuttons go
+    there; the others are reported and ignored.</li>
+  <li><strong>Keys on a stack's <code>bundle.yaml</code>.</strong> Only <code>layout:</code> is
+    read. Move everything else onto the children.</li>
+  <li><strong><code>shortcut:</code> on a pulldown.</strong> Not read. Put it on the child the
+    chord should run.</li>
+  <li><strong>A <code>.pulldown</code> inside a <code>.pulldown</code>.</strong> There are no
+    submenus. Flatten it, or use a <code>*.slideout</code> if the goal was to get it off the
+    panel face.</li>
+  <li><strong>A <code>.slideout</code> inside a <code>.slideout</code>.</strong> One level
+    only.</li>
+  <li><strong>Two buttons with the same short title.</strong> They derive the same command;
+    the second gets none. Give one a <code>command:</code>.</li>
+  <li><strong>Relying on a large icon in a menu.</strong> Draw the 32&times;32 variants for
+    anything that lives in a stack or a menu.</li>
+</ul>
+
+<div class="cards">
+  <a href="bundle-yaml.html"><span class="c-t">bundle.yaml</span>
+    <span class="c-d">Every key, which kinds read it, and the precedence rules.</span></a>
+  <a href="icons.html"><span class="c-t">Icons</span>
+    <span class="c-d">The four variants, the drawing rules, and the generator.</span></a>
+  <a href="shortcuts.html"><span class="c-t">Shortcuts and keytips</span>
+    <span class="c-d">Chords, Alt-navigation, and how users rebind them.</span></a>
+</div>
+  <div class="pagenav">
+<a href="anatomy.html"><span class="dir">Previous</span><span class="ttl">Anatomy of an extension</span></a>
+<a class="next" href="bundle-yaml.html"><span class="dir">Next</span><span class="ttl">The bundle.yaml reference</span></a>
+</div>
+</article>
+<aside class="toc"><div class="toc-head">On this page</div>
+<a href="#at-a-glance">At a glance</a>
+<a href="#the-three-panel-items">The three panel items</a>
+<a href="#what-a-panel-looks-like">What a panel looks like</a>
+<a href="#pushbuttons">Pushbuttons</a>
+<a href="#stacks">Stacks</a>
+<a href="#the-2-or-3-rule" class="h3">The 2-or-3 rule</a>
+<a href="#pulldowns">Pulldowns</a>
+<a href="#what-a-pulldown-s-bundle-yaml-can-say" class="h3">What a pulldown&#x27;s bundle.yaml can say</a>
+<a href="#more-button-kinds">More button kinds</a>
+<a href="#nobutton-a-command-with-no-ribbon-presence" class="h3">nobutton: a command with no ribbon presence</a>
+<a href="#urlbutton-opens-a-link" class="h3">urlbutton: opens a link</a>
+<a href="#linkbutton-sends-another-command" class="h3">linkbutton: sends another command</a>
+<a href="#toggle-a-button-with-on-off-state" class="h3">toggle: a button with on/off state</a>
+<a href="#smartbutton-sets-its-own-title-tooltip-and-icon-at-build-time" class="h3">smartbutton: sets its own title, tooltip and icon at build time</a>
+<a href="#splitbutton-and-splitpushbutton-a-menu-whose-header-also-runs-a-child" class="h3">splitbutton and splitpushbutton: a menu whose header also runs a child</a>
+<a href="#dockpane-an-autocad-palette" class="h3">dockpane: an AutoCAD palette</a>
+<a href="#slideout-the-tools-behind-the-panel-title" class="h3">slideout: the tools behind the panel title</a>
+<a href="#mixing-them-on-one-panel">Mixing them on one panel</a>
+<a href="#icons-at-each-size">Icons at each size</a>
+<a href="#choosing-between-them">Choosing between them</a>
+<a href="#identity-on-the-ribbon">Identity on the ribbon</a>
+<a href="#common-mistakes">Common mistakes</a>
+</aside>
+</main>
+</div>
+<script src="_assets/search-index.js"></script>
+<script src="_assets/site.js"></script>
+</body>
+</html>

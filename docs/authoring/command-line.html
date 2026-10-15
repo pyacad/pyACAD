@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>pyacad.exe and headless runs - pyACAD authoring</title>
+<meta name="description" content="The pyacad command line: check an install, attach the loader, register extension folders, and run a script over a list of drawings in AutoCAD Core Console.">
+<link rel="stylesheet" href="_assets/site.css">
+</head>
+<body data-base="">
+<div class="layout">
+<div class="sidebar">
+  <div class="brand"><a href="index.html"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="26" height="26" aria-hidden="true"><polygon points="157.0,327.8 351.8,327.8 363.1,342.4 363.1,403.3 168.3,403.3 157.0,388.7" fill="#78082A"/><polygon points="157.0,327.8 351.8,327.8 351.8,388.7 157.0,388.7" fill="#B80C40"/><polygon points="51.5,482.0 234.1,157.4 278.7,181.7 290.1,196.3 152.1,496.6 62.8,496.6" fill="#78082A"/><polygon points="51.5,482.0 140.8,482.0 278.7,181.7 234.1,157.4" fill="#E51050"/><polygon points="359.9,482.0 205.7,108.7 217.0,123.3 371.2,496.6" fill="#78082A"/><polygon points="205.7,108.7 201.6,55.9 213.0,70.5 217.0,123.3" fill="#78082A"/><polygon points="201.6,55.9 246.3,15.4 257.6,30.0 213.0,70.5" fill="#78082A"/><polygon points="246.3,15.4 343.7,23.5 355.0,38.1 257.6,30.0" fill="#78082A"/><polygon points="343.7,23.5 388.3,51.9 399.7,66.5 355.0,38.1" fill="#78082A"/><polygon points="388.3,51.9 347.7,76.2 359.1,90.8 399.7,66.5" fill="#78082A"/><polygon points="347.7,76.2 295.0,84.3 306.3,99.0 359.1,90.8" fill="#78082A"/><polygon points="295.0,84.3 449.2,482.0 460.5,496.6 306.3,99.0" fill="#78082A"/><polygon points="449.2,482.0 359.9,482.0 371.2,496.6 460.5,496.6" fill="#78082A"/><polygon points="359.9,482.0 205.7,108.7 201.6,55.9 246.3,15.4 343.7,23.5 388.3,51.9 347.7,76.2 295.0,84.3 449.2,482.0" fill="#E51050"/><polygon points="270.6,39.7 311.2,35.7 297.0,51.9" fill="#1F2329"/></svg><span class="brand-name">pyACAD
+    <span class="brand-sub">Tool authoring guide</span></span></a></div>
+  <div class="search-wrap">
+    <svg class="search-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <circle cx="6" cy="6" r="4.2" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M9.2 9.2 12.5 12.5" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round"/></svg>
+    <input id="search" type="search" placeholder="Search the docs" autocomplete="off"
+           spellcheck="false" aria-label="Search the documentation">
+    <span class="search-kbd">/</span>
+    <div id="search-results" class="search-results"></div>
+  </div>
+  <nav class="pages">
+<div class="grp">Start</div>
+<a href="overview.html"><span class="num">01</span>How pyACAD works</a>
+<a href="quickstart.html"><span class="num">02</span>Your first button</a>
+<div class="grp">Bundles</div>
+<a href="anatomy.html"><span class="num">03</span>Anatomy of an extension</a>
+<a href="buttons.html"><span class="num">04</span>Buttons, stacks and pulldowns</a>
+<a href="bundle-yaml.html"><span class="num">05</span>The bundle.yaml reference</a>
+<a href="icons.html"><span class="num">06</span>Icons</a>
+<a href="shortcuts.html"><span class="num">07</span>Shortcuts and keytips</a>
+<a href="click-actions.html"><span class="num">08</span>Click actions and config.py</a>
+<a href="hooks.html"><span class="num">09</span>Hooks</a>
+<div class="grp">Scripts</div>
+<a href="script-environment.html"><span class="num">10</span>The script environment</a>
+<a href="user-interface.html"><span class="num">11</span>Talking to the user</a>
+<a href="settings.html"><span class="num">12</span>Settings and per-tool state</a>
+<a href="commands.html"><span class="num">13</span>AutoCAD commands and AutoLISP</a>
+<a href="command-line.html" class="active"><span class="num">14</span>pyacad.exe and headless runs</a>
+<div class="grp">Reference</div>
+<a href="api-reference.html"><span class="num">15</span>Python API reference</a>
+<div class="grp">Practice</div>
+<a href="cookbook.html"><span class="num">16</span>Cookbook</a>
+<a href="ai-assistant.html"><span class="num">17</span>Writing tools with an AI assistant</a>
+<a href="troubleshooting.html"><span class="num">18</span>Troubleshooting</a>
+<a href="style-guide.html"><span class="num">19</span>Style guide for tools</a>
+</nav>
+  <div class="side-foot">
+    <span>pyACAD 0.1.0</span>
+    <button id="theme-toggle" type="button" aria-label="Toggle colour theme">
+      <span>Dark</span></button>
+  </div>
+</div>
+<main class="main">
+<article>
+  <p class="eyebrow">Scripts</p>
+  <h1>pyacad.exe and headless runs</h1>
+  <p class="lead">The pyacad command line: check an install, attach the loader, register extension folders, and run a script over a list of drawings in AutoCAD Core Console.</p>
+  <p><code>pyacad.exe</code> is installed with pyACAD, in <code>%APPDATA%\pyACAD\cli</code>. That
+folder is not on your <code>PATH</code>, so call the exe by its full path or add the folder
+yourself. Run it with no arguments, or an unknown verb, and it prints its usage and exits with
+code 2.</p>
+
+<div class="code"><div class="code-head"><span>text</span><button class="copy-btn" type="button">Copy</button></div><pre><code>pyacad - pyACAD command line
+
+  pyacad env                     show detected AutoCAD versions and state
+  pyacad attach &lt;year&gt;           put the loader in the per-user bundle (2021-2026)
+  pyacad detach &lt;year&gt;           remove the loader from the bundle
+  pyacad extensions list         show configured extension roots
+  pyacad extensions add &lt;dir&gt;    add an extension root to config.json
+  pyacad run &lt;script.py&gt; [drawings]  run a script in AutoCAD Core Console (pyacad run --help)
+  pyacad protect-extension ...   (the installer&#x27;s) back up and move your own work
+                                  out of pyACAD.extension before an update</code></pre></div>
+
+<h2 id="pyacad-env">pyacad env<a class="anchor" href="#pyacad-env" aria-label="Link to this section">#</a></h2>
+
+<p>Prints where pyACAD keeps its settings, its builds and its Autodesk bundle, and the state
+of every supported AutoCAD year: <code>not installed</code>, <code>installed, not
+attached</code> or <code>installed, pyACAD ATTACHED</code>. Then every extension root listed
+in <code>config.json</code>. It is the first thing to run when the ribbon does not appear.</p>
+
+<div class="code"><div class="code-head"><span>text</span><button class="copy-btn" type="button">Copy</button></div><pre><code>pyACAD environment
+  config : C:\Users\you\AppData\Roaming\pyACAD\config.json
+  builds : C:\Users\you\AppData\Roaming\pyACAD
+  bundle : C:\Users\you\AppData\Roaming\Autodesk\ApplicationPlugins\pyACAD.bundle
+  AutoCAD 2021 : not installed (no build)
+  ...
+  AutoCAD 2026 : installed, pyACAD ATTACHED (no build)
+  extension root : D:\CadTools</code></pre></div>
+
+<p>A year counts as installed when AutoCAD's install folder for it holds
+<code>acad.exe</code>. The <code>built</code> or <code>no build</code> at the end of each line
+is about a development build folder and reads <code>no build</code> on an installed copy;
+that is expected.</p>
+
+<h2 id="pyacad-attach-and-detach">pyacad attach and detach<a class="anchor" href="#pyacad-attach-and-detach" aria-label="Link to this section">#</a></h2>
+
+<p><code>pyacad attach 2026</code> copies a loader built for that year into
+<code>%APPDATA%\Autodesk\ApplicationPlugins\pyACAD.bundle\Contents\2026\</code> and registers
+it in the bundle's <code>PackageContents.xml</code>, with
+<code>LoadOnAutoCADStartup="True"</code> and the release series AutoCAD matches on
+(<code>R25.1</code> for 2026). <code>pyacad detach 2026</code> removes that year's folder and
+its entry, and deletes the bundle when no year is left.</p>
+
+<p>The setup program does all of this for you, so on an installed copy you will not normally
+need either verb. <code>attach</code> copies from a build folder beside the command line and
+says <code>No pyACAD build for 2026</code> when there is none; it is mainly a developer tool.
+It refuses a year whose AutoCAD is not installed.</p>
+
+<h2 id="pyacad-extensions">pyacad extensions<a class="anchor" href="#pyacad-extensions" aria-label="Link to this section">#</a></h2>
+
+<div class="code"><div class="code-head"><span>powershell</span><button class="copy-btn" type="button">Copy</button></div><pre><code>pyacad extensions add D:\CadTools
+pyacad extensions list</code></pre></div>
+
+<p><code>add</code> takes the folder that <em>contains</em> your <code>*.extension</code>
+folders, makes it absolute, and appends it to the <code>"extensions"</code> array in
+<code>%APPDATA%\pyACAD\config.json</code>. It refuses a folder that does not exist and says
+<code>Already configured</code> for one that is listed. Press Reload in AutoCAD afterwards.
+<code>list</code> prints the array; the two default roots
+(<code>%APPDATA%\pyACAD\extensions</code> and <code>%PROGRAMDATA%\pyACAD\extensions</code>)
+are scanned without being listed and do not appear.</p>
+
+<h2 id="pyacad-run">pyacad run<a class="anchor" href="#pyacad-run" aria-label="Link to this section">#</a></h2>
+
+<p>Some jobs are the same script over a folder of drawings: purge and audit each one, export
+its block attributes, check every layer name against a standard. <code>pyacad run</code> does
+that without the AutoCAD window. For each drawing it starts <strong>AutoCAD Core
+Console</strong> (<code>accoreconsole.exe</code>, the command-line AutoCAD that ships with
+every AutoCAD), opens the drawing, loads the pyACAD loader, runs your script once and exits.
+One process per drawing, one after another.</p>
+
+<div class="note">
+<span class="note-t">Available in this release</span>
+<p>The project README still says <code>pyacad run</code> is not available yet. It is: the
+command, the Core Console runner and <code>results.json</code> are all in the code and were
+exercised against AutoCAD 2026.</p>
+</div>
+
+<div class="code"><div class="code-head"><span>powershell</span><button class="copy-btn" type="button">Copy</button></div><pre><code>pyacad run C:\Jobs\cleanup.py &quot;C:\Jobs\Level 1.dwg&quot; &quot;C:\Jobs\Level 2.dwg&quot; --save --timeout 300</code></pre></div>
+
+<p><code>pyacad run --help</code> prints the usage:</p>
+
+<div class="code"><div class="code-head"><span>text</span><button class="copy-btn" type="button">Copy</button></div><pre><code>pyacad run &lt;script.py&gt; [model ...] [options] [-- script args]
+
+  --models &lt;list.txt&gt;    one model path per line, added to the positional ones
+  --version &lt;year&gt;       AutoCAD year; default is the newest attached one
+  --save                 save each drawing back to its own path after the script
+  --show                 show the AutoCAD window while each script runs
+  --timeout &lt;seconds&gt;    give up on a model after this long; default none
+  --results &lt;file.json&gt;  copy the run summary here as well</code></pre></div>
+
+<h3 id="arguments">Arguments<a class="anchor" href="#arguments" aria-label="Link to this section">#</a></h3>
+
+<ul>
+  <li>The first plain word is the script, every later plain word a drawing. Relative paths
+    resolve against the current folder.</li>
+  <li><code>--models list.txt</code> adds one drawing per line, after the positional ones.
+    Blank lines and lines starting with <code>#</code> are skipped. Relative paths in it also
+    resolve against the current folder, not the list file's. Duplicates are kept: a drawing
+    listed twice runs twice.</li>
+  <li>Everything after <code>--</code> goes to the script untouched, as
+    <code>__args__</code>.</li>
+  <li><code>--version 2025</code> picks the AutoCAD year. Without it, the newest year that is
+    both installed and attached is used.</li>
+  <li><code>--save</code> saves each drawing back to its own path, but only when the script
+    succeeded on it. A script that raises leaves the file untouched.</li>
+  <li><code>--timeout 300</code> limits each drawing's whole Core Console process (open, run,
+    save) to that many seconds. Without it the run waits as long as it takes.</li>
+  <li><code>--results path.json</code> copies the run summary there as well.</li>
+  <li><code>--show</code> is accepted but has no effect: Core Console has no window to
+    show.</li>
+</ul>
+
+<p>With no drawing at all, the script runs once in a Core Console that opens a blank drawing
+of its own. An unknown option, an option missing its value, a <code>--version</code> or
+<code>--timeout</code> that is not a whole number, or a script that does not exist stops the
+command before anything starts.</p>
+
+<h3 id="what-happens-per-drawing">What happens per drawing<a class="anchor" href="#what-happens-per-drawing" aria-label="Link to this section">#</a></h3>
+
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 700 214" width="700" role="img"
+     aria-label="pyacad run writes a request file and a script file, starts accoreconsole with the drawing, and reads back the response.">
+  <style>
+    .cl1-t   { font: 12px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--ink); }
+    .cl1-m   { font: 11px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--muted); }
+    .cl1-mono{ font: 11px Consolas, monospace; fill: var(--ink); }
+    .cl1-lbl { font: 10.5px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--muted);
+               text-transform: uppercase; letter-spacing: .07em; }
+    .cl1-box { fill: var(--paper); stroke: var(--line-strong); stroke-width: 1; }
+    .cl1-hot { fill: var(--surface); stroke: var(--accent); stroke-width: 1.4; }
+    .cl1-arw { stroke: var(--frame); stroke-width: 1.25; fill: none; }
+  </style>
+  <defs>
+    <marker id="cl1-a" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path d="M0 0.6 L6.4 3.5 L0 6.4 z" fill="var(--frame)"/>
+    </marker>
+  </defs>
+
+  <text class="cl1-lbl" x="0" y="12">pyacad.exe</text>
+  <text class="cl1-lbl" x="370" y="12">accoreconsole.exe, one per drawing</text>
+
+  <rect class="cl1-box" x="0" y="24" width="300" height="44" rx="4"/>
+  <text class="cl1-t" x="14" y="42">Write request-N.json and run-N.scr</text>
+  <text class="cl1-m" x="14" y="59">script, drawing, args, run folder, save flag</text>
+
+  <path class="cl1-arw" d="M300 46 H 366" marker-end="url(#cl1-a)"/>
+
+  <rect class="cl1-box" x="370" y="24" width="330" height="44" rx="4"/>
+  <text class="cl1-mono" x="384" y="42">/i drawing /s run-N.scr /l en-US</text>
+  <text class="cl1-m" x="384" y="59">opens the drawing, then plays the script</text>
+
+  <path class="cl1-arw" d="M535 68 V 82" marker-end="url(#cl1-a)"/>
+
+  <rect class="cl1-box" x="370" y="84" width="330" height="30" rx="4"/>
+  <text class="cl1-mono" x="384" y="103">_.NETLOAD "...\PyAcad.dll"</text>
+
+  <path class="cl1-arw" d="M535 114 V 128" marker-end="url(#cl1-a)"/>
+
+  <rect class="cl1-hot" x="370" y="130" width="330" height="44" rx="4"/>
+  <text class="cl1-mono" x="384" y="148">_.PYACADRUN "request-N.json"</text>
+  <text class="cl1-m" x="384" y="165">startup.py once, your script, the save</text>
+
+  <path class="cl1-arw" d="M370 152 H 304" marker-end="url(#cl1-a)"/>
+
+  <rect class="cl1-box" x="0" y="130" width="300" height="44" rx="4"/>
+  <text class="cl1-t" x="14" y="148">Read response-N.json</text>
+  <text class="cl1-m" x="14" y="165">status, duration, error, __result__</text>
+
+  <text class="cl1-m" x="0" y="204">Then the next drawing, in a fresh process. results.json is written once, at the end.</text>
+</svg>
+</div>
+<figcaption>The command line and the add-in never talk directly: they trade a request file and
+a response file through the run folder.</figcaption>
+</figure>
+
+<p>Core Console boots the pyACAD loader the same way AutoCAD does, but builds no ribbon:
+there is nobody to click it. So no bundle commands, no hooks, no dock panes, no keyboard
+shortcuts, no notices and no update check. Every extension's <code>startup.py</code> still runs,
+once per process, before your script, with <code>__runner__</code> set to <code>True</code>.
+The script runs on IronPython; <code>engine:</code> does not apply to a bare <code>.py</code>
+file.</p>
+
+<div class="note warn">
+<span class="note-t">Core Console is not AutoCAD with the window hidden</span>
+<p>It loads the database and command line half of AutoCAD only. The
+<code>pyacad.doc</code>, <code>ents</code>, <code>layers</code>, <code>blocks</code>,
+<code>xrefs</code>, <code>layouts</code>, <code>audit</code> and <code>units</code> modules
+are written to work there; anything that needs the AutoCAD window (the ribbon, palettes, the
+application menu) does not exist. Test a headless script on one drawing before you point it at
+three hundred.</p>
+</div>
+
+<h3 id="what-the-script-sees">What the script sees<a class="anchor" href="#what-the-script-sees" aria-label="Link to this section">#</a></h3>
+
+<p>The runner sets these names, on top of <code>__file__</code>, <code>__commandpath__</code>
+(the script's folder), <code>__title__</code> (the file name without <code>.py</code>),
+<code>__pyacad__</code> and <code>__selfinit__</code> (<code>False</code>):</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Name</th><th>Type</th><th>What it holds</th></tr></thead>
+<tbody>
+<tr><td><code>__runner__</code></td><td>bool</td>
+    <td><code>True</code>. <code>False</code> everywhere else.</td></tr>
+<tr><td><code>__model__</code></td><td>str or None</td>
+    <td>Full path of the drawing open for this run, or <code>None</code> for a run with no
+    drawing.</td></tr>
+<tr><td><code>__models__</code></td><td>sequence of str</td>
+    <td>Every drawing in the run, in order. A .NET string array: iterate it, or wrap it in
+    <code>list()</code>.</td></tr>
+<tr><td><code>__args__</code></td><td>sequence of str</td>
+    <td>The words after <code>--</code>, also a .NET string array.
+    <code>script.get_args()</code> gives you a Python list.</td></tr>
+<tr><td><code>__run_dir__</code></td><td>str</td>
+    <td>The run folder: the natural place for files the script exports.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Set <code>__result__</code> to anything <code>json</code> can serialise (a dict, list,
+string, number or bool) and it lands in <code>results.json</code> beside that drawing's
+status. It is read only when the script succeeded or ended with a clean
+<code>sys.exit()</code>; a value <code>json</code> refuses is dropped, with a line in the
+log.</p>
+
+<div class="code"><div class="code-head"><span>layer_report.py</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-s">&quot;&quot;&quot;Writes each drawing&#x27;s layer names to the run folder; flags non-standard ones.&quot;&quot;&quot;</span>
+<span class="tok-k">import</span> json
+<span class="tok-k">import</span> os
+
+<span class="tok-k">from</span> pyacad <span class="tok-k">import</span> layers, script
+
+prefixes = script.get_args() <span class="tok-k">or</span> [<span class="tok-s">&#x27;A-&#x27;</span>, <span class="tok-s">&#x27;M-&#x27;</span>, <span class="tok-s">&#x27;E-&#x27;</span>]
+names = layers.names()
+odd = [n <span class="tok-k">for</span> n <span class="tok-k">in</span> names <span class="tok-k">if</span> n != <span class="tok-s">&#x27;0&#x27;</span> <span class="tok-k">and</span> <span class="tok-k">not</span> n.startswith(tuple(prefixes))]
+
+stem = os.path.splitext(os.path.basename(__model__))[<span class="tok-n">0</span>]
+<span class="tok-k">with</span> open(os.path.join(__run_dir__, stem + <span class="tok-s">&#x27;.json&#x27;</span>), <span class="tok-s">&#x27;w&#x27;</span>) <span class="tok-k">as</span> fh:
+    json.dump(names, fh)
+
+__result__ = {<span class="tok-s">&#x27;layers&#x27;</span>: len(names), <span class="tok-s">&#x27;nonStandard&#x27;</span>: odd}</code></pre></div>
+
+<div class="code"><div class="code-head"><span>powershell</span><button class="copy-btn" type="button">Copy</button></div><pre><code>pyacad run layer_report.py --models drawings.txt --timeout 120 -- A- M- E- S-</code></pre></div>
+
+<p>Library code that cannot see the script's globals asks <code>script.is_runner()</code>,
+which returns the same flag.</p>
+
+<h3 id="output-and-dialogs">Output and dialogs<a class="anchor" href="#output-and-dialogs" aria-label="Link to this section">#</a></h3>
+
+<p>Nobody can see a Core Console, so whatever a script would show goes to that drawing's
+transcript file instead, and whatever would wait for an answer raises:</p>
+
+<ul>
+  <li><code>print()</code> and <code>pyacad.output</code> write to the transcript. HTML lands
+    as its source, an element link as its label, errors start with <code>ERROR: </code>, and
+    progress writes nothing.</li>
+  <li><code>pyacad.toast</code>, <code>pyacad.banner</code> and
+    <code>pyacad.forms.alert</code> write one line each, such as
+    <code>[success] Purged 14 items</code>.</li>
+  <li><code>forms.confirm</code>, <code>ask_string</code>, <code>ask_number</code>,
+    <code>ask_options</code>, <code>select_from_list</code>, <code>pick_folder</code>,
+    <code>save_file</code>, <code>open_file</code> and
+    <code>forms.WPFWindow.show_dialog()</code> raise <code>InvalidOperationException</code>:
+    <em>Dialogs are not available under pyacad run. Check __runner__ and skip the
+    prompt.</em></li>
+</ul>
+
+<div class="note trap">
+<span class="note-t">Command line prompts are not guarded</span>
+<p><code>sel.pick_one()</code>, <code>sel.pick_many()</code>, <code>sel.pick_point()</code>
+and any other Editor prompt are not stopped under the runner. In Core Console they wait for
+input that never comes, and the process sits there until <code>--timeout</code> ends it. Take
+the answer from <code>__args__</code> when <code>__runner__</code> is true, and always give a
+headless run a timeout.</p>
+</div>
+
+<div class="code"><div class="code-head"><span>python</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-k">from</span> pyacad <span class="tok-k">import</span> forms, script
+
+<span class="tok-k">if</span> script.is_runner():
+    prefix = (script.get_args() <span class="tok-k">or</span> [<span class="tok-s">&#x27;A-&#x27;</span>])[<span class="tok-n">0</span>]
+<span class="tok-k">else</span>:
+    prefix = forms.ask_string(<span class="tok-s">&#x27;Layer prefix:&#x27;</span>, <span class="tok-s">&#x27;A-&#x27;</span>, <span class="tok-s">&#x27;Layer report&#x27;</span>)</code></pre></div>
+
+<h3 id="the-run-folder">The run folder<a class="anchor" href="#the-run-folder" aria-label="Link to this section">#</a></h3>
+
+<p>Each run gets a folder named after the time it started:</p>
+
+<div class="code"><div class="code-head"><span>folders</span><button class="copy-btn" type="button">Copy</button></div><pre><code>%APPDATA%\pyACAD\runs\&lt;yyyyMMdd-HHmmss&gt;\
+  request-1.json      what the command line asked for, one per drawing
+  run-1.scr           the two-line script Core Console played
+  console-1.txt       everything Core Console printed (NETLOAD, PYACADRUN, errors)
+  transcript-1.txt    everything the script wrote
+  response-1.json     what the add-in answered
+  results.json        the summary of the whole run</code></pre></div>
+
+<p>Two runs started in the same second share a folder and overwrite each other's numbered
+files; start them a second apart.</p>
+
+<p><code>results.json</code> holds the script, the AutoCAD year, the start and finish time,
+and one entry per drawing: its path, status, how long the script took, the last line of any
+error, and the script's <code>__result__</code> as JSON (not as a string).</p>
+
+<div class="code"><div class="code-head"><span>results.json</span><button class="copy-btn" type="button">Copy</button></div><pre><code>{
+  <span class="tok-f">&quot;script&quot;</span>: <span class="tok-s">&quot;C:\\Jobs\\layer_report.py&quot;</span>,
+  <span class="tok-f">&quot;year&quot;</span>: <span class="tok-s">&quot;2026&quot;</span>,
+  <span class="tok-f">&quot;startedAt&quot;</span>: <span class="tok-s">&quot;2026-10-15T09:30:00.0000000+01:00&quot;</span>,
+  <span class="tok-f">&quot;finishedAt&quot;</span>: <span class="tok-s">&quot;2026-10-15T09:31:10.0000000+01:00&quot;</span>,
+  <span class="tok-f">&quot;models&quot;</span>: [
+    {
+      <span class="tok-f">&quot;model&quot;</span>: <span class="tok-s">&quot;C:\\Jobs\\Level 1.dwg&quot;</span>,
+      <span class="tok-f">&quot;status&quot;</span>: <span class="tok-s">&quot;ok&quot;</span>,
+      <span class="tok-f">&quot;durationMs&quot;</span>: <span class="tok-n">1840</span>,
+      <span class="tok-f">&quot;error&quot;</span>: <span class="tok-k">null</span>,
+      <span class="tok-f">&quot;result&quot;</span>: { <span class="tok-f">&quot;layers&quot;</span>: <span class="tok-n">42</span>, <span class="tok-f">&quot;nonStandard&quot;</span>: [<span class="tok-s">&quot;Defpoints&quot;</span>, <span class="tok-s">&quot;temp&quot;</span>] }
+    }
+  ]
+}</code></pre></div>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Status</th><th>Means</th></tr></thead>
+<tbody>
+<tr><td><code>ok</code></td><td>The script succeeded, and so did the save when
+    <code>--save</code> was given.</td></tr>
+<tr><td><code>failed</code></td><td>The script raised (or exited with a message or a non-zero
+    code). The drawing was not saved.</td></tr>
+<tr><td><code>open-failed</code></td><td>No response came back: the drawing would not open,
+    the loader did not load, or Core Console could not start. The error points at
+    <code>console-N.txt</code>.</td></tr>
+<tr><td><code>save-failed</code></td><td>The script succeeded but the save did not: the
+    drawing is read-only, was never saved, or the save threw.</td></tr>
+<tr><td><code>save-skipped</code></td><td>The script succeeded and <code>--save</code> was
+    given, but the run had no drawing to save.</td></tr>
+<tr><td><code>timed-out</code></td><td>The process took longer than <code>--timeout</code>
+    and was ended. The next drawing still runs.</td></tr>
+<tr><td><code>cancelled</code></td><td>Ctrl+C landed while this drawing's process was
+    running.</td></tr>
+<tr><td><code>not-run</code></td><td>The run was cancelled before it reached this
+    drawing.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The console shows the same story as it happens: a header naming the script, the year and
+the run folder, then one line per drawing such as <code>[2/5] Level 2.dwg ... ok</code> or
+<code>... failed: NameError: name 'layres' is not defined</code>, and a closing
+<code>Done:</code> line.</p>
+
+<h3 id="saving">Saving<a class="anchor" href="#saving" aria-label="Link to this section">#</a></h3>
+
+<p><code>--save</code> writes the drawing back to the path it was opened from, in the current
+DWG format, after a script that succeeded. A drawing in an older DWG format is upgraded by the
+save. Read-only drawings and drawings with no file are reported as
+<code>save-failed</code>, not written somewhere else. To save under another name or format,
+do it in the script and leave <code>--save</code> off.</p>
+
+<h3 id="exit-codes">Exit codes<a class="anchor" href="#exit-codes" aria-label="Link to this section">#</a></h3>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Code</th><th>Means</th></tr></thead>
+<tbody>
+<tr><td><code>0</code></td><td>Every drawing is <code>ok</code>.</td></tr>
+<tr><td><code>1</code></td><td>At least one drawing is not <code>ok</code> (including
+    <code>save-skipped</code>), or the command itself hit an error.</td></tr>
+<tr><td><code>2</code></td><td>Usage: an unknown option, a missing value, a script that does
+    not exist, no attached AutoCAD, an unsupported or uninstalled year, no
+    <code>accoreconsole.exe</code>, or no pyACAD loader for that year.</td></tr>
+<tr><td><code>3</code></td><td>Cancelled with Ctrl+C.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>A drawing that fails does not stop the run: the next one starts in a fresh process.
+Ctrl+C ends the current drawing's process, marks it <code>cancelled</code> and every later
+drawing <code>not-run</code>, and still writes <code>results.json</code>.</p>
+
+<h3 id="limits">Limits<a class="anchor" href="#limits" aria-label="Link to this section">#</a></h3>
+
+<ul>
+  <li>One drawing per process, sequentially, so every drawing pays Core Console's start-up
+    time.</li>
+  <li>The script always runs on IronPython.</li>
+  <li>No bundle commands exist in Core Console, so the script cannot run a ribbon tool by
+    name. Put shared code in a <code>*.lib</code> folder and import it.</li>
+  <li>The same run gate as on the ribbon applies: one pyACAD script at a time per
+    process.</li>
+</ul>
+
+<div class="cards">
+  <a href="script-environment.html"><span class="c-t">The script environment</span>
+    <span class="c-d">The globals, the engines and the rules every script runs under.</span></a>
+  <a href="commands.html"><span class="c-t">AutoCAD commands and AutoLISP</span>
+    <span class="c-d">The interactive side: commands, macros and (pyacad ...).</span></a>
+  <a href="troubleshooting.html"><span class="c-t">Troubleshooting</span>
+    <span class="c-d">Where the logs are, and what each failure looks like.</span></a>
+</div>
+  <div class="pagenav">
+<a href="commands.html"><span class="dir">Previous</span><span class="ttl">AutoCAD commands and AutoLISP</span></a>
+<a class="next" href="api-reference.html"><span class="dir">Next</span><span class="ttl">Python API reference</span></a>
+</div>
+</article>
+<aside class="toc"><div class="toc-head">On this page</div>
+<a href="#pyacad-env">pyacad env</a>
+<a href="#pyacad-attach-and-detach">pyacad attach and detach</a>
+<a href="#pyacad-extensions">pyacad extensions</a>
+<a href="#pyacad-run">pyacad run</a>
+<a href="#arguments" class="h3">Arguments</a>
+<a href="#what-happens-per-drawing" class="h3">What happens per drawing</a>
+<a href="#what-the-script-sees" class="h3">What the script sees</a>
+<a href="#output-and-dialogs" class="h3">Output and dialogs</a>
+<a href="#the-run-folder" class="h3">The run folder</a>
+<a href="#saving" class="h3">Saving</a>
+<a href="#exit-codes" class="h3">Exit codes</a>
+<a href="#limits" class="h3">Limits</a>
+</aside>
+</main>
+</div>
+<script src="_assets/search-index.js"></script>
+<script src="_assets/site.js"></script>
+</body>
+</html>

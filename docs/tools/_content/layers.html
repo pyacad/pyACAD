@@ -1,0 +1,243 @@
+<p>The Layers panel keeps layers in hand: a palette that lists them with the everyday
+actions one click away, a mapper that brings a drawing's layers into line with a standard
+from a CSV, and snapshots of which layers are on, frozen and locked that you can put back
+later.</p>
+
+<section id="layer-manager" title="Layer Manager" kind="Dock panel"
+         bundle="Layers.panel/Layer_Manager.dockpane"
+         summary="A docked list of the drawing's layers with a filter box. Pick layers to isolate, freeze, turn off, lock, make current, merge or delete them without opening the Layer Properties Manager."
+         needs="An open drawing for the list to show anything"
+         shortcut="None (keytip L M)">
+
+<h2>What it does</h2>
+<p>Opens an AutoCAD palette titled <strong>Layer Manager</strong> that lists every layer of
+the active drawing, sorted by name, with whether it is current, on, frozen and locked, and
+its colour number. Filter the list, pick one or more layers, and act on them with the
+buttons underneath. It is lighter than the Layer Properties Manager and stays open beside
+the drawing while you work.</p>
+
+<figure data-shot="layer-manager-palette" data-wide>
+<figcaption>The Layer Manager palette docked at the side: the filter box, the layer list
+with its On, Frozen, Locked and Color columns, the action buttons and the status line.</figcaption>
+</figure>
+
+<h2>How to use it</h2>
+<ol class="steps">
+  <li>Click <strong>Layer Manager</strong> on the ribbon. The button stays pressed while the
+    palette is showing; click it again to hide it. Drag the palette to dock it on the left
+    or right, or leave it floating.</li>
+  <li>Type in the <strong>Filter</strong> box to narrow the list. Plain text matches anywhere
+    in the name, ignoring case. A term with <code>*</code> or <code>?</code> is a wildcard
+    pattern over the whole name (<code>A-*</code> means names starting with A-). Separate
+    several terms with commas: <code>wall, E-*</code>.</li>
+  <li>Pick layers with click, <kbd>Ctrl</kbd>+click and <kbd>Shift</kbd>+click. The status
+    line underneath counts them and names the current layer.</li>
+  <li>Click an action. Each one changes the drawing straight away, shows a toast, and
+    re-reads the list.</li>
+  <li>Double-click a row to make that layer current.</li>
+</ol>
+
+<h2>The buttons</h2>
+<ul>
+  <li><strong>Isolate</strong>: thaws and turns on the selected layers and freezes every other
+    layer. If the current layer is not among them, the first selected layer becomes
+    current.</li>
+  <li><strong>Freeze/Thaw</strong>: freezes the selected layers, or thaws them when every one
+    is already frozen. The current layer cannot be frozen, so it is skipped and the toast
+    says so.</li>
+  <li><strong>On/Off</strong>: turns the selected layers off, or on when every one is already
+    off.</li>
+  <li><strong>Lock/Unlock</strong>: locks the selected layers, or unlocks them when every one
+    is already locked.</li>
+  <li><strong>Set current</strong> (one layer selected): thaws it, turns it on and makes it
+    current.</li>
+  <li><strong>Merge into...</strong>: asks for a target layer name, moves everything on the
+    selected layers onto it, then deletes them. If no layer has that name, it offers to
+    create one (colour 7, Continuous). The toast says how many objects moved.</li>
+  <li><strong>Delete</strong>: asks first, then deletes the selected layers. Layer 0,
+    Defpoints, the current layer, xref layers and layers still in use are kept, and the toast
+    gives the first reason; the rest are in the pyACAD log.</li>
+</ul>
+
+<figure data-shot="layer-manager-merge">
+<figcaption>Merge into...: the prompt for the target layer, with three layers selected.</figcaption>
+</figure>
+
+<h2>Good to know / limits</h2>
+<ul>
+  <li>The list follows the active drawing. It is read again when the palette is shown, when
+    the mouse comes back over it, and when you click <strong>Refresh</strong>, so a change
+    made elsewhere shows up without you asking. Your selection and scroll position are kept
+    when nothing changed.</li>
+  <li>Merge reaches everywhere in the drawing: objects inside block definitions and attributes
+    move too, so every reference of such a block changes, and objects on locked layers are
+    moved as well. If a selected layer cannot be deleted afterwards (layer 0, Defpoints, an
+    xref layer), the merge fails as a whole and nothing changes.</li>
+  <li>Freeze, Isolate and the rest work on the layers themselves, for every viewport. They do
+    not use viewport freeze.</li>
+  <li>The palette acts outside any AutoCAD command. Check how <code>U</code> behaves on a
+    palette action before you rely on it for a large Merge or Delete, or take a
+    <a href="layer-snapshot.html">Layer Snapshot</a> first.</li>
+  <li>The Color column shows the AutoCAD colour number, not a swatch, and is not editable.
+    Neither is any other column: rename layers and change their properties in the Layer
+    Properties Manager or with <a href="layer-mapper.html">Layer Mapper</a>.</li>
+  <li>The palette is not in the Shortcuts editor. Reach it from the keyboard with its keytip:
+    press <kbd>Alt</kbd>, follow the letters the ribbon shows to the pyACAD tab, then
+    <kbd>L</kbd><kbd>M</kbd>.</li>
+  <li>AutoCAD remembers the palette's size, dock side and whether it was showing. A Reload
+    rebuilds it and clears the filter box.</li>
+</ul>
+
+<h2>Other uses</h2>
+<ul>
+  <li>Focus on one discipline: filter <code>E-*</code>, select all the rows, Isolate.</li>
+  <li>Tidy an imported drawing: filter for its odd prefixes, Merge them into your own layers,
+    then Delete what is left empty.</li>
+  <li>Keep it open as a live readout of which layer is current and what is frozen.</li>
+</ul>
+</section>
+
+<section id="layer-mapper" title="Layer Mapper" kind="Button"
+         bundle="Layers.panel/Layer_Mapper.pushbutton"
+         summary="Applies a layer standard from a CSV with the columns old, new and optionally color and linetype: matching layers are renamed, or merged when the new name already exists, and you tick what to apply."
+         needs="An open drawing, and a CSV of old and new layer names"
+         shortcut="None set (bind one in Shortcuts)">
+
+<h2>What it does</h2>
+<p>Reads a CSV that maps old layer names to new ones and brings the drawing into line. Each
+layer that matches a row is renamed to the new name, or merged into it when a layer of that
+name already exists. New names that no layer was renamed to can be created, with the colour
+and linetype the CSV gives. Everything planned is shown with a tick box before anything
+changes. The command is <code>PYLAYERMAPPER</code>.</p>
+
+<h2>The CSV</h2>
+<p>One mapping per row: <code>old,new[,color][,linetype]</code>.</p>
+<div class="code"><pre><code>old,new,color,linetype
+A-WALL*,A-WALL,1,
+E-LITE,E-LIGHTING,yellow,
+OLD-HIDDEN,M-HIDDEN,4,HIDDEN</code></pre></div>
+<ul>
+  <li><strong>old</strong> may use <code>*</code> (any run of characters) and <code>?</code>
+    (one character), matched against the whole name, ignoring case. Each layer takes the
+    first row that fits it, so put specific rows above general ones.</li>
+  <li><strong>new</strong> is the standard name.</li>
+  <li><strong>color</strong>, optional, is a colour number from 1 to 255 or one of red,
+    yellow, green, cyan, blue, magenta, white (black means 7 too).</li>
+  <li><strong>linetype</strong>, optional, must already be loaded in the drawing.</li>
+  <li>Any columns after the fourth, such as a notes column, are ignored. Blank lines are
+    skipped, and so is a first row that reads like a header (<code>old,new</code>,
+    <code>from,to</code>, <code>existing,standard</code> and the like).</li>
+  <li>Cells may be separated by commas, semicolons or tabs, whichever the first row uses, and
+    may be quoted. Excel's CSV, CSV UTF-8 and Unicode text files all read.</li>
+</ul>
+
+<h2>How to use it</h2>
+<ol class="steps">
+  <li>Click <strong>Layer Mapper</strong> (or type <code>PYLAYERMAPPER</code>) and pick the
+    CSV.</li>
+  <li>If the standard names layers the drawing does not have, it lists them (with the colour
+    and linetype each would get) and asks whether to create them too.</li>
+  <li>A checklist shows every step, all ticked: <em>Rename A to B</em>, <em>Merge A into
+    B</em>, <em>Create B (color 3, DASHED)</em>. Layers that will be left alone are named
+    above the list. Untick anything that should not change, then confirm.</li>
+  <li>The steps run in plan order. A toast sums up what was renamed, merged (and how many
+    objects moved) and created. Steps that failed are counted in the toast and listed in the
+    pyACAD log.</li>
+</ol>
+
+<figure data-shot="layer-mapper-checklist" data-wide>
+<figcaption>The Layer Mapper checklist: renames, merges and creates, each with a tick box,
+and the layers that will be left alone named above.</figcaption>
+</figure>
+
+<h2>How the plan is made</h2>
+<ul>
+  <li>A layer is renamed when no layer has the new name yet. When several layers map to the
+    same new name (<code>A-WALL*</code> above), the first is renamed and the rest are merged
+    into it.</li>
+  <li>A layer is merged when a layer with the new name already exists: everything on it
+    moves across, including objects inside blocks, and the old layer is deleted.</li>
+  <li>A layer already called the new name is left as it is. A name that differs only in case
+    is renamed, so the case comes into line.</li>
+  <li>Layer 0, Defpoints, xref layers and new names AutoCAD would refuse (with characters such
+    as <code>&lt; &gt; / \ : ; ? * | , =</code>) are skipped, with the reason.</li>
+</ul>
+
+<h2>Good to know / limits</h2>
+<ul>
+  <li>The colour and linetype in the CSV are used only for layers it creates. A layer that is
+    renamed or merged keeps its own colour and linetype.</li>
+  <li>A created layer with no colour in the CSV gets colour 7, and one with no linetype gets
+    Continuous. A linetype that is not loaded makes that create step fail; load it first.</li>
+  <li>Unticking a rename that a later merge depends on makes the merge fail (its target does
+    not exist); it is reported, the rest still run.</li>
+  <li>The whole run is one AutoCAD command, so <code>U</code> takes it back.</li>
+</ul>
+
+<h2>Other uses</h2>
+<ul>
+  <li>Bring a consultant's drawing onto your office standard before you xref it.</li>
+  <li>Collapse a drawing's dozens of near-duplicate layers (<code>WALL</code>,
+    <code>Walls</code>, <code>wall-new</code>) into one with a few wildcard rows.</li>
+  <li>Keep one CSV per client standard and run the matching one on every drawing that comes
+    in.</li>
+</ul>
+</section>
+
+<section id="layer-snapshot" title="Layer Snapshot" kind="Button"
+         bundle="Layers.panel/Layer_Snapshot.pushbutton"
+         summary="Saves which layers are on, frozen and locked under a name for this drawing, and puts a saved state back later."
+         needs="An open drawing"
+         shortcut="None set (bind one in Shortcuts)"
+         shift="Lists the states saved for this drawing">
+
+<h2>What it does</h2>
+<p>Takes a snapshot of every layer's on, frozen and locked state and saves it under a name,
+so you can switch layers around freely and come back. Restoring sets those three things back
+on every layer the snapshot knows. The command is <code>PYLAYERSNAPSHOT</code>; Shift+Click
+is <code>PYLAYERSNAPSHOTCFG</code>.</p>
+
+<h2>How to use it</h2>
+<ol class="steps">
+  <li>Click <strong>Layer Snapshot</strong> and choose <strong>Save</strong>,
+    <strong>Restore</strong> or <strong>Delete</strong>.</li>
+  <li><strong>Save</strong>: type a name (the date and time is filled in). A name already used
+    for this drawing, in any case, asks before it is replaced.</li>
+  <li><strong>Restore</strong>: pick a saved state from the list, newest first, each with
+    when it was saved and how many layers it holds. The toast says how many layers changed
+    and how many saved layers the drawing no longer has.</li>
+  <li><strong>Delete</strong>: tick one or more saved states and confirm.</li>
+  <li><kbd>Shift</kbd>+Click lists this drawing's saved states without changing anything,
+    with a Copy button.</li>
+</ol>
+
+<figure data-shot="layer-snapshot-restore">
+<figcaption>Restoring a layer state: the saved states for this drawing, newest first, with
+their time and layer count.</figcaption>
+</figure>
+
+<h2>Good to know / limits</h2>
+<ul>
+  <li>Only on, frozen and locked are restored. Colour, linetype and the rest are saved in
+    the snapshot but never put back.</li>
+  <li>Layers created after the snapshot are left as they are. Layers deleted since are
+    skipped.</li>
+  <li>The current layer is never frozen by a restore.</li>
+  <li>The states are not stored in the drawing. They live in a file under
+    <code>%APPDATA%\pyACAD\data</code>, keyed by the drawing's full path. So they are yours
+    alone, they do not travel with the DWG, and moving or renaming the drawing leaves them
+    behind. Every drawing that has never been saved shares one set.</li>
+  <li>A restore is one AutoCAD command, so <code>U</code> takes it back.</li>
+  <li>AutoCAD's own Layer States (<code>LAYERSTATE</code>) are stored in the drawing and can
+    restore more properties. Use them when the state must travel with the file; use this
+    when you want a quick personal bookmark.</li>
+</ul>
+
+<h2>Other uses</h2>
+<ul>
+  <li>Save before you Isolate in the <a href="layer-manager.html">Layer Manager</a>, and
+    restore to get every layer back exactly as it was.</li>
+  <li>Keep a "plot" and a "work" state for a drawing and switch between them in two
+    clicks.</li>
+</ul>
+</section>

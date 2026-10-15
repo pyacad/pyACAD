@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Xref Manager - pyACAD tools</title>
+<meta name="description" content="Reload, unload, detach or bind several xrefs at once, picked from a list that shows each one&#x27;s status and saved path.">
+<link rel="stylesheet" href="_assets/site.css">
+<link rel="stylesheet" href="_assets/tools.css">
+</head>
+<body data-base="">
+<div class="layout">
+<div class="sidebar">
+  <div class="brand"><a href="index.html"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="26" height="26" aria-hidden="true"><polygon points="157.0,327.8 351.8,327.8 363.1,342.4 363.1,403.3 168.3,403.3 157.0,388.7" fill="#78082A"/><polygon points="157.0,327.8 351.8,327.8 351.8,388.7 157.0,388.7" fill="#B80C40"/><polygon points="51.5,482.0 234.1,157.4 278.7,181.7 290.1,196.3 152.1,496.6 62.8,496.6" fill="#78082A"/><polygon points="51.5,482.0 140.8,482.0 278.7,181.7 234.1,157.4" fill="#E51050"/><polygon points="359.9,482.0 205.7,108.7 217.0,123.3 371.2,496.6" fill="#78082A"/><polygon points="205.7,108.7 201.6,55.9 213.0,70.5 217.0,123.3" fill="#78082A"/><polygon points="201.6,55.9 246.3,15.4 257.6,30.0 213.0,70.5" fill="#78082A"/><polygon points="246.3,15.4 343.7,23.5 355.0,38.1 257.6,30.0" fill="#78082A"/><polygon points="343.7,23.5 388.3,51.9 399.7,66.5 355.0,38.1" fill="#78082A"/><polygon points="388.3,51.9 347.7,76.2 359.1,90.8 399.7,66.5" fill="#78082A"/><polygon points="347.7,76.2 295.0,84.3 306.3,99.0 359.1,90.8" fill="#78082A"/><polygon points="295.0,84.3 449.2,482.0 460.5,496.6 306.3,99.0" fill="#78082A"/><polygon points="449.2,482.0 359.9,482.0 371.2,496.6 460.5,496.6" fill="#78082A"/><polygon points="359.9,482.0 205.7,108.7 201.6,55.9 246.3,15.4 343.7,23.5 388.3,51.9 347.7,76.2 295.0,84.3 449.2,482.0" fill="#E51050"/><polygon points="270.6,39.7 311.2,35.7 297.0,51.9" fill="#1F2329"/></svg><span class="brand-name">pyACAD
+    <span class="brand-sub">Tools guide</span></span></a></div>
+  <div class="search-wrap">
+    <svg class="search-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <circle cx="6" cy="6" r="4.2" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M9.2 9.2 12.5 12.5" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round"/></svg>
+    <input id="search" type="search" placeholder="Search the tools" autocomplete="off"
+           spellcheck="false" aria-label="Search the tools guide">
+    <span class="search-kbd">/</span>
+    <div id="search-results" class="search-results"></div>
+  </div>
+  <nav class="pages">
+<div class="grp">pyACAD</div>
+<a href="settings.html"><img class="nav-icon" src="_assets/icons/settings.png" alt="">Settings</a>
+<a href="shortcuts.html"><img class="nav-icon" src="_assets/icons/shortcuts.png" alt="">Shortcuts</a>
+<a href="console.html"><img class="nav-icon" src="_assets/icons/console.png" alt="">Console</a>
+<a href="reload.html"><img class="nav-icon" src="_assets/icons/reload.png" alt="">Reload</a>
+<div class="grp">Data</div>
+<a href="blocks-to-excel.html"><img class="nav-icon" src="_assets/icons/blocks-to-excel.png" alt="">Blocks to Excel</a>
+<a href="excel-to-blocks.html"><img class="nav-icon" src="_assets/icons/excel-to-blocks.png" alt="">Excel to Blocks</a>
+<a href="block-schedule.html"><img class="nav-icon" src="_assets/icons/block-schedule.png" alt="">Block Schedule</a>
+<a href="find-replace-attributes.html"><img class="nav-icon" src="_assets/icons/find-replace-attributes.png" alt="">Find and Replace Attributes</a>
+<div class="grp">Layers</div>
+<a href="layer-manager.html"><img class="nav-icon" src="_assets/icons/layer-manager.png" alt="">Layer Manager</a>
+<a href="layer-mapper.html"><img class="nav-icon" src="_assets/icons/layer-mapper.png" alt="">Layer Mapper</a>
+<a href="layer-snapshot.html"><img class="nav-icon" src="_assets/icons/layer-snapshot.png" alt="">Layer Snapshot</a>
+<div class="grp">Xrefs</div>
+<a href="xref-manager.html" class="active"><img class="nav-icon" src="_assets/icons/xref-manager.png" alt="">Xref Manager</a>
+<a href="xref-repath.html"><img class="nav-icon" src="_assets/icons/xref-repath.png" alt="">Xref Repath</a>
+<div class="grp">Cleanup</div>
+<a href="drawing-cleanup.html"><img class="nav-icon" src="_assets/icons/drawing-cleanup.png" alt="">Drawing Cleanup</a>
+<a href="font-proxy-report.html"><img class="nav-icon" src="_assets/icons/font-proxy-report.png" alt="">Font and Proxy Report</a>
+<div class="grp">Output</div>
+<a href="batch-plot.html"><img class="nav-icon" src="_assets/icons/batch-plot.png" alt="">Batch Plot</a>
+<a href="layout-manager.html"><img class="nav-icon" src="_assets/icons/layout-manager.png" alt="">Layout Manager</a>
+<div class="grp">Takeoff</div>
+<a href="length-takeoff.html"><img class="nav-icon" src="_assets/icons/length-takeoff.png" alt="">Length Takeoff</a>
+<a href="tag-audit.html"><img class="nav-icon" src="_assets/icons/tag-audit.png" alt="">Tag Audit</a>
+<div class="grp">AI (beta)</div>
+<a href="ask-ai.html"><img class="nav-icon" src="_assets/icons/ask-ai.png" alt="">Ask AI</a>
+<a href="ai-settings.html"><img class="nav-icon" src="_assets/icons/ai-settings.png" alt="">AI Settings</a>
+<a href="open-ai-folder.html"><img class="nav-icon" src="_assets/icons/open-ai-folder.png" alt="">Open AI Folder</a>
+</nav>
+  <div class="side-foot">
+    <span>pyACAD 0.1.0</span>
+    <a class="side-link" href="https://docs.pyacad.com/">Authoring guide</a>
+    <button id="theme-toggle" type="button" aria-label="Toggle colour theme">
+      <span>Dark</span></button>
+  </div>
+</div>
+<main class="main">
+<article>
+  <div class="hero"><img class="hero-icon" src="_assets/icons/xref-manager.png" alt=""><div><p class="eyebrow">Xrefs panel</p><h1>Xref Manager</h1><p class="lead">Reload, unload, detach or bind several xrefs at once, picked from a list that shows each one's status and saved path.</p></div></div><div class="facts"><div class="fact"><span class="fact-k">On the ribbon</span><span class="fact-v">Button, Xrefs panel</span></div><div class="fact"><span class="fact-k">Needs</span><span class="fact-v">An open drawing (the button is greyed without one)</span></div><div class="fact"><span class="fact-k">Command</span><span class="fact-v"><code>PYXREFMANAGER</code></span></div><div class="fact"><span class="fact-k">Alias</span><span class="fact-v"><code>XM</code></span></div></div>
+  <h2 id="what-it-does">What it does<a class="anchor" href="#what-it-does" aria-label="Link to this section">#</a></h2>
+<p>Lists every top-level xref in the drawing, sorted by name, with its status and the path
+saved in the drawing. You tick the ones to work on, pick one action, and the tool applies it
+to each xref in turn. One xref that fails does not stop the others: they are all tried, and
+the ones that did not work are listed at the end with the reason.</p>
+
+<p>Each line of the list reads like this:</p>
+<pre><code>Site  [loaded]  ..\Xref\site.dwg
+Grid  [not found, overlay]  P:\Jobs\1234\Xref\grid.dwg
+Logo  [unloaded]  .\logo.dwg</code></pre>
+<p>The word in brackets is the xref's status: <strong>loaded</strong>,
+<strong>unloaded</strong>, <strong>not found</strong> (the file is not at the saved path or
+on any search path), <strong>unresolved</strong> or <strong>unreferenced</strong> (attached
+but with no reference left in the drawing). An xref attached as an overlay also says
+<strong>overlay</strong>. An xref with no saved path shows <code>(no path)</code>.</p>
+
+
+
+<h2 id="how-to-use-it">How to use it<a class="anchor" href="#how-to-use-it" aria-label="Link to this section">#</a></h2>
+<ol class="steps">
+  <li>Click <strong>Xref Manager</strong>, or type <code>PYXREFMANAGER</code>. If the drawing
+    has no xrefs a toast says so and nothing opens.</li>
+  <li>Tick the xrefs to work on. The search box narrows a long list. Click OK.</li>
+  <li>Pick what should happen to them: <strong>Reload</strong>, <strong>Unload</strong>,
+    <strong>Detach</strong> or <strong>Bind</strong>.</li>
+  <li>For <strong>Bind</strong>, pick how. <strong>Bind</strong> keeps each xref's layers and
+    styles apart, renamed in the <code>Site$0$Walls</code> pattern. <strong>Insert</strong>
+    merges them into the drawing's own layers and styles, the way the INSERT command does.</li>
+  <li>Detach and Bind ask once more before they start, because both take the xref out of
+    its file's control.</li>
+  <li>The tool works through the list. When every xref worked, a toast says so (for example
+    "Reloaded 3 xrefs"). When some failed, the toast says how many of how many, and a window
+    lists each failure with its reason. That window shows the first 15; its
+    <strong>Copy</strong> button puts all of them on the clipboard.</li>
+</ol>
+
+
+
+<h2 id="limitations">Limitations<a class="anchor" href="#limitations" aria-label="Link to this section">#</a></h2>
+<ul>
+  <li>Nested xrefs are not listed. Reload, unload or bind the xref that holds them.</li>
+  <li>Only a loaded xref can be bound. An unloaded or missing one is reported as not done,
+    with its status as the reason; reload it (or fix its path with Xref Repath) first.</li>
+  <li>AutoCAD reloads an xref whose file it cannot find without raising an error. The tool
+    reads every xref's status again after a Reload, so one that is still not loaded is
+    reported as failed, for example <code>not found at ..\Xref\site.dwg</code>, rather than
+    counted as done.</li>
+  <li>One action per run. To reload some xrefs and unload others, run the tool twice.</li>
+  <li>The tool does not attach or overlay new xrefs. Use XATTACH for that. Images, PDF
+    underlays and other attachments are not listed: only DWG xrefs.</li>
+</ul>
+
+<h2 id="good-to-know">Good to know<a class="anchor" href="#good-to-know" aria-label="Link to this section">#</a></h2>
+<p>A ribbon click sends the <code>PYXREFMANAGER</code> command to the drawing, so the whole
+run is one command and a single <code>U</code> takes it back, Detach and Bind included.
+Undo is the only way back from either.</p>
+<p>The list is a quick status report in its own right: open it, read it, and press Cancel.
+Nothing changes until you pick an action.</p>
+
+<h2 id="other-uses">Other uses<a class="anchor" href="#other-uses" aria-label="Link to this section">#</a></h2>
+<ul>
+  <li>Unload the heavy backgrounds before you work on your own layers, and reload them all
+    in one pass before you plot.</li>
+  <li>Reload every xref after a consultant issues new backgrounds, and see at once which
+    ones did not come back.</li>
+  <li>Bind the xrefs into a copy of the drawing for an archive or a transmittal that must
+    open without its reference files.</li>
+</ul>
+<h2 id="source">Source<a class="anchor" href="#source" aria-label="Link to this section">#</a></h2>
+<p>The tool's own files, word for word as shipped in <code>Xrefs.panel/Xref_Manager.pushbutton</code>. Every pyACAD tool is an ordinary bundle: copy these into your own extension and change what you like.</p>
+<div class="code src"><div class="code-head"><span><code>script.py</code> <span class="src-note">Runs on a click.</span> <a href="https://github.com/pyacad/pyACAD/blob/main/extensions/pyACAD.extension/pyACAD.tab/Xrefs.panel/Xref_Manager.pushbutton/script.py" rel="noopener">View on GitHub</a></span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-c"># -*- coding: utf-8 -*-</span>
+<span class="tok-s">&quot;&quot;&quot;Reload, unload, detach or bind several of the drawing&#x27;s xrefs at once.
+
+Lists every top-level xref with its status and saved path, asks what to do
+with the ones picked, and does it to each in turn, so one that fails does not
+stop the rest. Detach and bind ask first: both take the xref out of the
+drawing&#x27;s control and only Undo brings it back. Nested xrefs are not listed,
+since they follow the xref that holds them.
+&quot;&quot;&quot;</span>
+
+<span class="tok-k">from</span> pyacad <span class="tok-k">import</span> doc, forms, script, toast, xrefs
+
+__title__ = <span class="tok-s">&#x27;Xref Manager&#x27;</span>
+
+TITLE = <span class="tok-s">&#x27;Xref Manager&#x27;</span>
+ACTIONS = [<span class="tok-s">&#x27;Reload&#x27;</span>, <span class="tok-s">&#x27;Unload&#x27;</span>, <span class="tok-s">&#x27;Detach&#x27;</span>, <span class="tok-s">&#x27;Bind&#x27;</span>]
+DONE = {<span class="tok-s">&#x27;Reload&#x27;</span>: <span class="tok-s">&#x27;Reloaded&#x27;</span>, <span class="tok-s">&#x27;Unload&#x27;</span>: <span class="tok-s">&#x27;Unloaded&#x27;</span>, <span class="tok-s">&#x27;Detach&#x27;</span>: <span class="tok-s">&#x27;Detached&#x27;</span>, <span class="tok-s">&#x27;Bind&#x27;</span>: <span class="tok-s">&#x27;Bound&#x27;</span>}
+LIMIT = <span class="tok-n">15</span>          <span class="tok-c"># failures shown in the alert; Copy carries them all</span>
+
+
+<span class="tok-k">def</span> run():
+    <span class="tok-k">if</span> script.get_document_path() <span class="tok-k">is</span> <span class="tok-k">None</span>:
+        toast.warning(<span class="tok-s">&#x27;Open a drawing first&#x27;</span>)
+        <span class="tok-k">return</span>
+
+    rows = sorted([x <span class="tok-k">for</span> x <span class="tok-k">in</span> xrefs.list() <span class="tok-k">if</span> <span class="tok-k">not</span> x[<span class="tok-s">&#x27;nested&#x27;</span>]],
+                  key=<span class="tok-k">lambda</span> x: x[<span class="tok-s">&#x27;name&#x27;</span>].lower())
+    <span class="tok-k">if</span> <span class="tok-k">not</span> rows:
+        toast.info(<span class="tok-s">&#x27;This drawing has no xrefs&#x27;</span>)
+        <span class="tok-k">return</span>
+
+    labels = xrefs.describe(rows)
+    picked = forms.select_from_list(
+        [(label, row[<span class="tok-s">&#x27;name&#x27;</span>]) <span class="tok-k">for</span> label, row <span class="tok-k">in</span> zip(labels, rows)],
+        title=TITLE, multiselect=<span class="tok-k">True</span>, prompt=<span class="tok-s">&#x27;Pick the xrefs to work on&#x27;</span>)
+    <span class="tok-k">if</span> <span class="tok-k">not</span> picked:
+        <span class="tok-k">return</span>
+
+    action = forms.ask_options(<span class="tok-s">&#x27;What should happen to %s?&#x27;</span> % _what(picked),
+                               ACTIONS, title=TITLE)
+    <span class="tok-k">if</span> action <span class="tok-k">is</span> <span class="tok-k">None</span>:
+        <span class="tok-k">return</span>
+
+    insert = <span class="tok-k">False</span>
+    <span class="tok-k">if</span> action == <span class="tok-s">&#x27;Bind&#x27;</span>:
+        how = forms.ask_options(
+            <span class="tok-s">&quot;Bind keeps each xref&#x27;s layers and styles apart, renamed like &quot;</span>
+            <span class="tok-s">&quot;Site$0$Walls. Insert merges them into the drawing&#x27;s own, as INSERT does.&quot;</span>,
+            [<span class="tok-s">&#x27;Bind&#x27;</span>, <span class="tok-s">&#x27;Insert&#x27;</span>], title=TITLE)
+        <span class="tok-k">if</span> how <span class="tok-k">is</span> <span class="tok-k">None</span>:
+            <span class="tok-k">return</span>
+        insert = how == <span class="tok-s">&#x27;Insert&#x27;</span>
+
+    <span class="tok-k">if</span> action <span class="tok-k">in</span> (<span class="tok-s">&#x27;Detach&#x27;</span>, <span class="tok-s">&#x27;Bind&#x27;</span>) <span class="tok-k">and</span> <span class="tok-k">not</span> forms.confirm(_warning(action, insert, picked), TITLE):
+        <span class="tok-k">return</span>
+
+    status = dict((row[<span class="tok-s">&#x27;name&#x27;</span>], row[<span class="tok-s">&#x27;status&#x27;</span>]) <span class="tok-k">for</span> row <span class="tok-k">in</span> rows)
+    <span class="tok-k">with</span> doc.lock():
+        results = [_apply(action, name, insert, status.get(name)) <span class="tok-k">for</span> name <span class="tok-k">in</span> picked]
+        <span class="tok-k">if</span> action == <span class="tok-s">&#x27;Reload&#x27;</span>:
+            <span class="tok-c"># AutoCAD reloads a missing file without complaint; the status says.</span>
+            results = xrefs.check_loaded(results, xrefs.list())
+    _report(results, DONE[action])
+
+
+<span class="tok-k">def</span> _apply(action, name, insert, status):
+    <span class="tok-s">&quot;&quot;&quot;(name, error) for one xref; error is None when it worked.&quot;&quot;&quot;</span>
+    <span class="tok-k">if</span> action == <span class="tok-s">&#x27;Bind&#x27;</span> <span class="tok-k">and</span> status != <span class="tok-s">&#x27;loaded&#x27;</span>:
+        <span class="tok-k">return</span> name, <span class="tok-s">&#x27;%s; only a loaded xref can be bound&#x27;</span> % xrefs.status_label(status)
+    <span class="tok-k">try</span>:
+        <span class="tok-k">if</span> action == <span class="tok-s">&#x27;Reload&#x27;</span>:
+            xrefs.reload([name])
+        <span class="tok-k">elif</span> action == <span class="tok-s">&#x27;Unload&#x27;</span>:
+            xrefs.unload([name])
+        <span class="tok-k">elif</span> action == <span class="tok-s">&#x27;Detach&#x27;</span>:
+            xrefs.detach(name)
+        <span class="tok-k">else</span>:
+            xrefs.bind([name], insert=insert)
+    <span class="tok-k">except</span> Exception <span class="tok-k">as</span> error:
+        <span class="tok-k">return</span> name, str(error) <span class="tok-k">or</span> error.__class__.__name__
+    <span class="tok-k">return</span> name, <span class="tok-k">None</span>
+
+
+<span class="tok-k">def</span> _report(results, verb):
+    head = xrefs.headline(results, verb)
+    failed = len([<span class="tok-n">1</span> <span class="tok-k">for</span> name, error <span class="tok-k">in</span> results <span class="tok-k">if</span> error])
+    <span class="tok-k">if</span> <span class="tok-k">not</span> failed:
+        toast.success(head)
+        <span class="tok-k">return</span>
+    <span class="tok-k">if</span> failed == len(results):
+        toast.error(head)
+    <span class="tok-k">else</span>:
+        toast.warning(head, <span class="tok-s">&#x27;%d not done&#x27;</span> % failed)
+    forms.alert(xrefs.summarize(results, verb, limit=LIMIT), TITLE,
+                copy=xrefs.summarize(results, verb))
+
+
+<span class="tok-k">def</span> _warning(action, insert, picked):
+    <span class="tok-k">if</span> action == <span class="tok-s">&#x27;Detach&#x27;</span>:
+        <span class="tok-k">return</span> (<span class="tok-s">&#x27;Detach %s? It leaves the drawing with every reference to it.&#x27;</span>
+                <span class="tok-k">if</span> len(picked) == <span class="tok-n">1</span> <span class="tok-k">else</span>
+                <span class="tok-s">&#x27;Detach %s? They leave the drawing with every reference to them.&#x27;</span>) % _what(picked)
+    how = <span class="tok-s">&#x27; as inserted blocks&#x27;</span> <span class="tok-k">if</span> insert <span class="tok-k">else</span> <span class="tok-s">&#x27;&#x27;</span>
+    <span class="tok-k">return</span> (<span class="tok-s">&#x27;Bind %s into the drawing%s? It stops following its file.&#x27;</span>
+            <span class="tok-k">if</span> len(picked) == <span class="tok-n">1</span> <span class="tok-k">else</span>
+            <span class="tok-s">&#x27;Bind %s into the drawing%s? They stop following their files.&#x27;</span>) % (_what(picked), how)
+
+
+<span class="tok-k">def</span> _what(names):
+    <span class="tok-s">&quot;&quot;&quot;&#x27;Site&#x27; for one xref, &#x27;3 xrefs&#x27; for more.&quot;&quot;&quot;</span>
+    <span class="tok-k">return</span> names[<span class="tok-n">0</span>] <span class="tok-k">if</span> len(names) == <span class="tok-n">1</span> <span class="tok-k">else</span> <span class="tok-s">&#x27;%d xrefs&#x27;</span> % len(names)
+
+
+<span class="tok-k">if</span> <span class="tok-s">&#x27;__commandpath__&#x27;</span> <span class="tok-k">in</span> globals():
+    run()</code></pre></div>
+<div class="code src"><div class="code-head"><span><code>bundle.yaml</code> <span class="src-note">The bundle contract: the keys pyACAD reads for this tool.</span> <a href="https://github.com/pyacad/pyACAD/blob/main/extensions/pyACAD.extension/pyACAD.tab/Xrefs.panel/Xref_Manager.pushbutton/bundle.yaml" rel="noopener">View on GitHub</a></span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-k">title</span>: Xref Manager
+<span class="tok-k">tooltip</span>: Reload, unload, detach or bind several xrefs at once. Pick them from a list that shows each one&#x27;s status and saved path.
+<span class="tok-k">context</span>: doc
+<span class="tok-k">keytip</span>: XM
+<span class="tok-k">alias</span>: XM</code></pre></div>
+  <div class="pagenav">
+<a href="layer-snapshot.html"><span class="dir">Previous</span><span class="ttl">Layer Snapshot</span></a>
+<a class="next" href="xref-repath.html"><span class="dir">Next</span><span class="ttl">Xref Repath</span></a>
+</div>
+</article>
+<aside class="toc"><div class="toc-head">On this page</div>
+<a href="#what-it-does">What it does</a>
+<a href="#how-to-use-it">How to use it</a>
+<a href="#limitations">Limitations</a>
+<a href="#good-to-know">Good to know</a>
+<a href="#other-uses">Other uses</a>
+<a href="#source">Source</a>
+</aside>
+</main>
+</div>
+<script src="_assets/search-index.js"></script>
+<script src="_assets/site.js"></script>
+</body>
+</html>

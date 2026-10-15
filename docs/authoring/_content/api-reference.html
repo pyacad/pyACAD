@@ -1,0 +1,2817 @@
+<!-- title: Python API reference -->
+<!-- eyebrow: Reference -->
+<!-- lead: Every public function in the pyacad library, with its exact signature, what it returns, how it fails and whether it needs AutoCAD. -->
+
+<p>The <code>pyacad</code> library is what your script talks to instead of the raw AutoCAD
+.NET API. It is a flat set of small modules, each covering one surface of the drawing or of
+pyACAD itself: the active document, the selection, entities, layers, blocks, xrefs, layouts,
+plotting, drawing health, AutoLISP, units, and then the dialogs, toasts, the output window,
+settings and Excel files. Almost everything is a plain function that takes and returns plain
+Python values.</p>
+
+<p>This page is the complete public surface. If a name is not on this page, it is either
+private (it starts with an underscore) or it does not exist. Every signature below was taken
+from the source, and every <code>pyacad.module.name</code> in an example is checked against
+the library each time the site is built.</p>
+
+<h2 id="importing">Importing pyacad</h2>
+
+<p>The package itself exports one name:</p>
+
+<pre data-lang="python">
+import pyacad
+
+pyacad.__version__      # '0.1.0'
+pyacad.doc              # AttributeError until something imports pyacad.doc
+</pre>
+
+<p>Everything useful lives in a submodule, and the house style is to import the submodules
+you need by name:</p>
+
+<pre data-lang="python">
+from pyacad import doc, ents, layers, forms, toast
+</pre>
+
+<p>That reads well at the call site (<code>layers.freeze('A-*')</code>,
+<code>toast.success('Done')</code>) and it matters here for a second reason: several functions
+share a name with a Python builtin (<code>ents.set</code>, <code>ents.iter</code>,
+<code>xrefs.list</code>), so <code>from pyacad.ents import *</code> would quietly replace
+<code>set</code> and <code>iter</code> in your script. Never star-import a pyacad module.</p>
+
+<div class="note warn">
+<span class="note-t">Underscore modules are off limits</span>
+<p><code>pyacad._api</code>, <code>_atomic</code>, <code>_charts</code>,
+<code>_datafiles</code>, <code>_history</code>, <code>_log</code>, <code>_markdown</code>,
+<code>_repl</code>, <code>_util</code> and <code>_xlsx</code> are internal. They change without
+notice and have no compatibility promise; <code>_api</code> loads the AutoCAD assemblies as a
+side effect of being imported. Everything they do that a script needs is exposed by a public
+module. <a href="#private-modules">The private modules</a> at the foot of this page says what
+each one is, so you can recognise them in a traceback.</p>
+</div>
+
+<h2 id="module-index">The modules at a glance</h2>
+
+<p>The last column says whether <em>importing</em> the module needs a live AutoCAD session
+with pyACAD loaded. The drawing modules import anywhere because they reach the AutoCAD API
+only inside each function, through <code>pyacad._api</code>; calling one of their API
+functions outside AutoCAD raises <code>ImportError</code> with a plain message. The four
+framework modules marked yes load the pyACAD runtime assembly at import time, so they import
+only inside AutoCAD (or AutoCAD Core Console under <code>pyacad run</code>).</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Module</th><th>What it is for</th><th>Import needs AutoCAD</th></tr></thead>
+<tbody>
+<tr><td><a href="#doc"><code>doc</code></a></td>
+    <td>The active drawing: document, database, editor, transactions, locks, saving, system variables.</td><td>No</td></tr>
+<tr><td><a href="#sel"><code>sel</code></a></td>
+    <td>The pickfirst set, interactive picks, and filtered select-all.</td><td>No</td></tr>
+<tr><td><a href="#ents"><code>ents</code></a></td>
+    <td>Entities by handle: iterate a space, snapshot, change, delete, measure.</td><td>No</td></tr>
+<tr><td><a href="#layers"><code>layers</code></a></td>
+    <td>List, create, rename, delete, merge, freeze, isolate, snapshot and restore layers; layer standards.</td><td>No</td></tr>
+<tr><td><a href="#blocks"><code>blocks</code></a></td>
+    <td>Definitions, references, attributes, counts, inserting, tables, spreadsheet round trips.</td><td>No</td></tr>
+<tr><td><a href="#xrefs"><code>xrefs</code></a></td>
+    <td>List, reload, unload, detach, bind and repath external references.</td><td>No</td></tr>
+<tr><td><a href="#layouts"><code>layouts</code></a></td>
+    <td>Paper space tabs: order, current, create, copy, rename, delete, page setups.</td><td>No</td></tr>
+<tr><td><a href="#plot"><code>plot</code></a></td>
+    <td>Plot a layout to PDF, list plot devices and paper sizes, name batch output files.</td><td>No</td></tr>
+<tr><td><a href="#audit"><code>audit</code></a></td>
+    <td>Purge, AUDIT, zero-length and duplicate geometry, proxies, missing fonts.</td><td>No</td></tr>
+<tr><td><a href="#lisp"><code>lisp</code></a></td>
+    <td>Call exposed AutoLISP functions, queue an expression, read <code>(pyacad ...)</code> arguments.</td><td>No</td></tr>
+<tr><td><a href="#units"><code>units</code></a></td>
+    <td>INSUNITS names, conversions through metres, length formatting.</td><td>No</td></tr>
+<tr><td><a href="#forms"><code>forms</code></a></td>
+    <td>Modal dialogs: alert, confirm, prompts, pickers, cancellable progress, XAML windows.</td><td>Yes</td></tr>
+<tr><td><a href="#toast"><code>toast</code></a></td>
+    <td>Small status notes in the corner of the AutoCAD window.</td><td>Yes</td></tr>
+<tr><td><a href="#banner"><code>banner</code></a></td>
+    <td>One result on a full-width bar across the bottom of the window.</td><td>Yes</td></tr>
+<tr><td><a href="#output"><code>output</code></a></td>
+    <td>The output window: HTML, markdown, tables, charts, images, progress, object links.</td><td>No</td></tr>
+<tr><td><a href="#script"><code>script</code></a></td>
+    <td>The running command: paths, arguments, toggle state, session variables, per-tool settings and data, a logger.</td><td>Yes</td></tr>
+<tr><td><a href="#settings"><code>settings</code></a></td>
+    <td>Per-tool JSON settings files under <code>%APPDATA%\pyACAD\settings</code>.</td><td>No</td></tr>
+<tr><td><a href="#xl"><code>xl</code></a></td>
+    <td>Read and write .xlsx workbooks with no Excel and no extra packages.</td><td>No</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Three badges appear on every function:
+<span class="pill pure">Pure</span> means plain Python with no AutoCAD and no pyACAD runtime,
+so it runs and unit-tests anywhere, including a dev-time CPython;
+<span class="pill needs-acad">Needs AutoCAD</span> means it reads or changes the drawing, or
+talks to the pyACAD runtime (a window, a toast, the running command), so it only works inside
+AutoCAD; <span class="pill blocks">Blocks</span> means it opens a modal window or a
+command-line prompt and your script waits until the user answers.</p>
+
+<h2 id="conventions">Conventions that cut across every module</h2>
+
+<p>The modules were written to one set of rules. Read these once and most of the individual
+entries below become predictable.</p>
+
+<h3 id="conv-handles">Objects are handles, not AutoCAD objects</h3>
+
+<p>Every entity, block reference and table the library hands you is identified by its
+<strong>handle</strong>: the hex string AutoCAD shows in LIST, such as <code>'2F3A'</code>.
+Handles survive saving and reopening, so you can store them, write them to Excel and match
+them up later. Functions that read return plain dicts, lists and strings, never an AutoCAD
+object that would go stale once its transaction closes. The only functions that hand you raw
+.NET objects are <code>doc.active()</code>, <code>doc.database()</code>,
+<code>doc.editor()</code>, <code>doc.transaction()</code> and <code>doc.lock()</code>, which
+exist for the moment you need the API directly.</p>
+
+<p>A handle argument may be upper or lower case and may carry a <code>0x</code> prefix
+(<code>ents.normalize_handle</code> cleans it). An argument that takes "one or many" handles or
+names also accepts a single string.</p>
+
+<h3 id="conv-points">Points are tuples, angles are radians</h3>
+
+<p>Points come back as <code>(x, y, z)</code> tuples of floats. Points you pass in may be
+<code>(x, y)</code> or <code>(x, y, z)</code>; a 2D point gets <code>z = 0.0</code>. Angles,
+such as a block reference's <code>rotation</code> in <code>ents.get</code> or the
+<code>rotation</code> you give <code>blocks.insert</code>, are in radians, as AutoCAD stores
+them. The one exception is <code>blocks.export_rows</code>, which writes degrees for people to
+read in Excel.</p>
+
+<h3 id="conv-transactions">One call, one transaction</h3>
+
+<p>Each function opens its own transaction (through <code>doc.transaction()</code>), commits it
+when it finishes and aborts it if anything raises. A failed call therefore leaves the drawing
+exactly as it was. The cost is that calling <code>ents.set</code> a thousand times opens a
+thousand transactions; where a tool naturally works on many objects there is a batch function
+that does them all in one (<code>ents.lengths</code>, <code>ents.delete</code>,
+<code>blocks.snapshots</code>, <code>blocks.apply_changes</code>, <code>audit.erase</code>,
+<code>layers.merge</code>).</p>
+
+<h3 id="conv-context">Command context and document locks</h3>
+
+<p>A ribbon click, a keyboard chord and a typed command name all run your script as an
+AutoCAD command, so the document is already locked and the whole run is one undo step. A
+<code>(pyacad ...)</code> call from AutoLISP runs it in document context, inside whatever
+command or expression called it. Code that runs <em>later</em>, outside any command, is not:
+a hook, a dock pane's button handler, a modeless window's callback. Wrap anything that changes
+the drawing there in <code>with doc.lock():</code>. Reading usually works without a lock, but
+taking one costs nothing.</p>
+
+<h3 id="conv-wildcards">Two kinds of wildcard</h3>
+
+<p>Name patterns in <code>layers</code> (and the block name in <code>blocks.references</code>)
+use pyacad's own matcher: <code>*</code> is any run of characters, <code>?</code> is one
+character, matching ignores case and covers the whole name, and you may pass a list of patterns.
+Nothing else is special, so <code>#</code> and <code>@</code> are literal.
+<code>sel.get(layer=...)</code> is different: it goes straight into an AutoCAD selection
+filter, so it uses AutoCAD's own wildcard syntax (the WCMATCH rules, where <code>#</code>,
+<code>@</code>, <code>~</code> and commas mean something).</p>
+
+<h3 id="conv-spaces">Naming a space</h3>
+
+<p>Functions that take a <code>space</code> argument read it the same way
+(<code>ents.resolve_space</code>): <code>None</code>, <code>''</code> or <code>'model'</code>
+(any case) is model space, <code>'BLOCK:Door'</code> is the definition of block Door, and
+anything else is a paper space layout's name. Watch the default: in <code>ents</code>,
+<code>space=None</code> means model space only; in <code>blocks.references</code> and
+<code>blocks.counts</code>, <code>space=None</code> means model space <em>and every layout</em>.</p>
+
+<h3 id="conv-progress">Progress and cancel callbacks</h3>
+
+<p>Long-running functions take two optional callables, <code>progress</code> and
+<code>cancelled</code>. Every <code>doc.STEP</code> items (200), starting with the first, the
+function calls <code>progress(index, total)</code> and then <code>cancelled()</code>; when
+<code>cancelled()</code> returns true it stops. Most stop where they are and return what they
+have so far (and commit it, for the ones that write); <code>layers.merge</code> instead raises
+<code>RuntimeError</code> and rolls everything back. The cookbook shows
+<a href="cookbook.html#a-long-job-with-progress-and-cancel">how to wire these to a progress window</a>.</p>
+
+<h3 id="conv-errors">How things fail</h3>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Exception</th><th>Means</th></tr></thead>
+<tbody>
+<tr><td><code>ValueError</code></td><td>Bad input, or a name or handle that does not exist:
+<code>'No layer is named X.'</code>, <code>'2F3A is not a block reference.'</code>. The message
+is written for a person, so it is fine to show it in a toast.</td></tr>
+<tr><td><code>RuntimeError</code></td><td>The drawing is in the wrong state: no drawing open,
+never saved, read-only, a plot already running, a cancelled merge.</td></tr>
+<tr><td><code>ImportError</code></td><td>An AutoCAD function was called outside AutoCAD.</td></tr>
+<tr><td>AutoCAD's own exception</td><td>Something the library does not check first, most often
+writing to an entity on a locked layer (<code>eOnLockedLayer</code>). It surfaces as
+<code>Autodesk.AutoCAD.Runtime.Exception</code>, and the transaction is still rolled back.</td></tr>
+</tbody>
+</table>
+</div>
+
+
+<h2 id="doc">doc: the active drawing</h2>
+
+<p>Every other drawing module reaches the drawing through this one, and
+<code>doc.transaction()</code> is the single way into the database. The module imports
+anywhere; its AutoCAD functions import the API when called. Everything here works in Core
+Console too (none of it needs the AutoCAD UI assembly). The last four functions are pure
+helpers the other modules share, and you are welcome to use them.</p>
+
+<h3>doc.active</h3>
+<div class="sig"><span class="mod">doc.</span><span class="fn">active</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> The active <code>Document</code> (AutoCAD's
+<code>DocumentManager.MdiActiveDocument</code>). Raises <code>RuntimeError('No drawing is
+open.')</code> when there is none, which makes it the natural first line of a tool that must
+have a drawing.</p>
+<pre data-lang="python">
+from pyacad import doc
+
+document = doc.active()
+print(document.Name)
+</pre>
+
+<h3>doc.database</h3>
+<div class="sig"><span class="mod">doc.</span><span class="fn">database</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> The active drawing's <code>Database</code>. Raises <code>RuntimeError</code> like
+<code>doc.active()</code>.</p>
+<pre data-lang="python">
+db = doc.database()
+print(db.Filename)
+</pre>
+
+<h3>doc.editor</h3>
+<div class="sig"><span class="mod">doc.</span><span class="fn">editor</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> The active drawing's <code>Editor</code>, for prompts and messages the library does
+not wrap.</p>
+<pre data-lang="python">
+doc.editor().WriteMessage('\nHello from pyACAD\n')
+</pre>
+
+<h3>doc.path</h3>
+<div class="sig"><span class="mod">doc.</span><span class="fn">path</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> The drawing's full path as a string, or the literal <code>'untitled'</code> when it
+has never been saved. Compare against <code>'untitled'</code>, not against
+<code>None</code>.</p>
+<pre data-lang="python">
+if doc.path() == 'untitled':
+    toast.warning('Save the drawing first')
+</pre>
+
+<h3>doc.is_saved</h3>
+<div class="sig"><span class="mod">doc.</span><span class="fn">is_saved</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> <code>True</code> when the drawing has a file and no unsaved changes (the DBMOD system
+variable is 0). Always <code>False</code> for an untitled drawing.</p>
+<pre data-lang="python">
+if not doc.is_saved():
+    forms.alert('Save your changes before running a batch plot.')
+</pre>
+
+<h3>doc.is_read_only</h3>
+<div class="sig"><span class="mod">doc.</span><span class="fn">is_read_only</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> <code>True</code> when the drawing was opened read-only.</p>
+<pre data-lang="python">
+if doc.is_read_only():
+    toast.error('This drawing is read-only')
+</pre>
+
+<h3>doc.transaction</h3>
+<div class="sig"><span class="mod">doc.</span><span class="fn">transaction</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> A context manager over one database transaction. <code>with</code> hands you the
+AutoCAD <code>Transaction</code>; it commits when the block ends normally and aborts when the
+block raises (the exception still propagates), then disposes it either way. Use it when you need
+the raw API inside one transaction; the rest of the library calls it for you.</p>
+<pre data-lang="python">
+from pyacad import doc
+
+db = doc.database()          # loads the AutoCAD assemblies on first use
+from Autodesk.AutoCAD.DatabaseServices import OpenMode
+
+with doc.transaction() as tr:
+    table = tr.GetObject(db.LayerTableId, OpenMode.ForRead)
+    print(table.Has('A-WALL'))
+</pre>
+<div class="note">
+<span class="note-t">Raw API types</span>
+<p>The <code>Autodesk.AutoCAD</code> namespaces import once the assemblies are loaded, and
+the first pyacad call that touches the drawing loads them. That is why the example calls
+<code>doc.database()</code> before the <code>from Autodesk...</code> line.</p>
+</div>
+
+<h3>doc.lock</h3>
+<div class="sig"><span class="mod">doc.</span><span class="fn">lock</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> A context manager that locks the active document and unlocks it on exit. Commands are
+already locked; you need this in code that runs outside a command: hooks, dock pane handlers,
+modeless window callbacks. It does not start a transaction.</p>
+<pre data-lang="python">
+def on_click(sender, args):          # a dock pane button
+    with doc.lock():
+        layers.freeze('Z-*')
+</pre>
+
+<h3>doc.save</h3>
+<div class="sig"><span class="mod">doc.</span><span class="fn">save</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Saves the drawing to its own path in the current DWG format, taking a document lock
+itself, and returns the path. Raises <code>RuntimeError</code> when the drawing has never been
+saved (there is no path to save to) or is read-only.</p>
+<pre data-lang="python">
+saved_to = doc.save()
+toast.success('Saved', saved_to)
+</pre>
+
+<h3>doc.units</h3>
+<div class="sig"><span class="mod">doc.</span><span class="fn">units</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> The drawing's insertion units (INSUNITS) as AutoCAD's enum name, such as
+<code>'Millimeters'</code>, <code>'Inches'</code> or <code>'Undefined'</code>. These names
+are exactly what the <a href="#units"><code>units</code></a> module takes.</p>
+<pre data-lang="python">
+print(doc.units())     # 'Millimeters'
+</pre>
+
+<h3>doc.open_documents</h3>
+<div class="sig"><span class="mod">doc.</span><span class="fn">open_documents</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> A list with one entry per open drawing: the full path for saved drawings, the document
+name (such as <code>'Drawing1.dwg'</code>) for untitled ones.</p>
+<pre data-lang="python">
+for name in doc.open_documents():
+    print(name)
+</pre>
+
+<h3>doc.send_command</h3>
+<div class="sig"><span class="mod">doc.</span><span class="fn">send_command</span>(text)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Queues <code>text</code> plus a newline on the active drawing's command line. It does
+not run now: it runs after your script returns, so you get nothing back and the next line of
+your script runs before it. Prefix command names with <code>_.</code> so they work in any
+language and are not redefined.</p>
+<pre data-lang="python">
+doc.send_command('_.ZOOM _E')
+</pre>
+
+<h3>doc.sysvar</h3>
+<div class="sig"><span class="mod">doc.</span><span class="fn">sysvar</span>(name)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> A system variable's value, as AutoCAD returns it (an int, float, string or point
+object). Wrap it in <code>int()</code> or <code>str()</code> when you compare it, as the
+library does.</p>
+<pre data-lang="python">
+if int(doc.sysvar('PSLTSCALE')) != 1:
+    toast.warning('PSLTSCALE is not 1')
+</pre>
+
+<h3>doc.set_sysvar</h3>
+<div class="sig"><span class="mod">doc.</span><span class="fn">set_sysvar</span>(name, value)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Sets a system variable. Booleans go in as 1 or 0. Integers are tried as 16-bit first
+(most integer variables are) and then as 32-bit, floats go in as doubles, anything else as it
+is. AutoCAD raises its own exception for an unknown or read-only variable.</p>
+<pre data-lang="python">
+doc.set_sysvar('LTSCALE', 1.0)
+doc.set_sysvar('PSLTSCALE', True)
+doc.set_sysvar('CLAYER', 'A-WALL')
+</pre>
+
+<h3>doc.as_point</h3>
+<div class="sig"><span class="mod">doc.</span><span class="fn">as_point</span>(value)</div>
+<p><span class="pill pure">Pure</span> <code>(x, y)</code> or <code>(x, y, z)</code> as a tuple of three floats; a 2D point gets
+<code>z = 0.0</code>. Raises <code>ValueError</code> for anything else.</p>
+<pre data-lang="python">
+doc.as_point((10, 20))        # (10.0, 20.0, 0.0)
+</pre>
+
+<h3>doc.as_names</h3>
+<div class="sig"><span class="mod">doc.</span><span class="fn">as_names</span>(value)</div>
+<p><span class="pill pure">Pure</span> One name or an iterable of names as a list of strings; <code>None</code> gives
+<code>[]</code>. This is why "one or many" arguments accept a bare string.</p>
+<pre data-lang="python">
+doc.as_names('A-WALL')            # ['A-WALL']
+doc.as_names(('A-WALL', 'A-DOOR'))
+</pre>
+
+<h3>doc.step</h3>
+<div class="sig"><span class="mod">doc.</span><span class="fn">step</span>(index, total, progress=None, cancelled=None)</div>
+<p><span class="pill pure">Pure</span> The progress and cancel hook every batch function uses. On every
+<code>STEP</code>th index (0, 200, 400, ...) it calls <code>progress(index, total)</code> when
+given, then returns <code>True</code> when <code>cancelled</code> is given and returns true.
+On other indices it returns <code>False</code> without calling anything. Use it in your own
+loops to behave like the library.</p>
+<pre data-lang="python">
+for index, handle in enumerate(handles):
+    if doc.step(index, len(handles), report, user_cancelled):
+        break
+</pre>
+
+<h3>doc.STEP</h3>
+<div class="sig"><span class="mod">doc.</span><span class="fn">STEP</span> = 200</div>
+<p><span class="pill pure">Pure</span> How many items pass between progress reports and cancel checks in every batch
+function.</p>
+
+<h2 id="sel">sel: selection</h2>
+
+<p>The pickfirst set (what is selected when your tool starts), interactive picks on the command
+line, and filtered select-all. Everything is in handles. <code>build_filter</code> and
+<code>value_kind</code> are pure; the rest import the API when called. The <code>pick_*</code>
+prompts need an interactive editor, so under Core Console they come back as <code>None</code> or
+<code>[]</code>.</p>
+
+<h3>sel.current</h3>
+<div class="sig"><span class="mod">sel.</span><span class="fn">current</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Handles of the objects that were selected when the command started (the pickfirst
+set), or <code>[]</code>. pyACAD's commands accept a pickfirst set, so selecting first and
+then clicking a button works.</p>
+<pre data-lang="python">
+from pyacad import sel, toast
+
+picked = sel.current()
+if not picked:
+    toast.info('Select something first')
+</pre>
+
+<h3>sel.set_current</h3>
+<div class="sig"><span class="mod">sel.</span><span class="fn">set_current</span>(handles)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Makes these handles the pickfirst set, so they show as selected (grips) when your
+script ends. One handle or a list. Raises <code>ValueError</code> for a handle that does not
+exist.</p>
+<pre data-lang="python">
+sel.set_current(sel.get(type='CIRCLE'))
+</pre>
+
+<h3>sel.clear</h3>
+<div class="sig"><span class="mod">sel.</span><span class="fn">clear</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Empties the pickfirst set.</p>
+<pre data-lang="python">
+sel.clear()
+</pre>
+
+<h3>sel.pick_one</h3>
+<div class="sig"><span class="mod">sel.</span><span class="fn">pick_one</span>(prompt=&#x27;Select an object: &#x27;)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> <span class="pill blocks">Blocks</span> Prompts on the command line for one object and returns its handle, or
+<code>None</code> when the user presses Esc or picks nothing.</p>
+<pre data-lang="python">
+handle = sel.pick_one('Select a block: ')
+if handle and ents.type_of(handle) == 'INSERT':
+    print(blocks.attributes(handle))
+</pre>
+
+<h3>sel.pick_many</h3>
+<div class="sig"><span class="mod">sel.</span><span class="fn">pick_many</span>(prompt=&#x27;Select objects: &#x27;)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> <span class="pill blocks">Blocks</span> Prompts for a selection (window, crossing, any method) and returns a list of
+handles, <code>[]</code> on cancel.</p>
+<pre data-lang="python">
+handles = sel.pick_many('Select lines to measure: ')
+</pre>
+
+<h3>sel.pick_point</h3>
+<div class="sig"><span class="mod">sel.</span><span class="fn">pick_point</span>(prompt=&#x27;Pick a point: &#x27;)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> <span class="pill blocks">Blocks</span> Prompts for a point (object snaps work) and returns <code>(x, y, z)</code> in
+world coordinates, or <code>None</code> on cancel.</p>
+<pre data-lang="python">
+point = sel.pick_point('Insertion point: ')
+if point is not None:
+    blocks.insert('NORTH', point)
+</pre>
+
+<h3>sel.get</h3>
+<div class="sig"><span class="mod">sel.</span><span class="fn">get</span>(type=None, layer=None, space=None, **more)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Handles of every entity in the drawing that passes the filter, using AutoCAD's
+select-all with a selection filter (see <code>sel.build_filter</code> for the arguments). With
+no arguments it returns every entity in model space and all layouts. Entities inside block
+definitions are not included, because select-all never sees them.</p>
+<pre data-lang="python">
+walls = sel.get(type='LWPOLYLINE', layer='A-WALL*')
+texts = sel.get(type=['TEXT', 'MTEXT'], space='model')
+red = sel.get(c62=1)                   # colour index 1 set on the entity
+</pre>
+
+<h3>sel.build_filter</h3>
+<div class="sig"><span class="mod">sel.</span><span class="fn">build_filter</span>(type=None, layer=None, space=None, **more)</div>
+<p><span class="pill pure">Pure</span> The <code>(code, value)</code> pairs <code>sel.get</code> turns into a selection
+filter. <code>type</code> is one DXF name or a list (any case, joined with commas as AutoCAD
+expects); <code>layer</code> is a layer name with AutoCAD wildcards; <code>space</code> is a
+layout name, with <code>'model'</code> (any case) meaning model space. Any other DXF group code
+goes in as a keyword <code>c&lt;code&gt;=value</code>, such as <code>c62=1</code> for colour 1
+or <code>c40=2.5</code> for a radius; the value is converted to what that code takes (see
+<code>sel.value_kind</code>) and extra pairs are sorted by code. Raises <code>ValueError</code>
+for a keyword that is not shaped like <code>c62</code>.</p>
+<pre data-lang="python">
+sel.build_filter(type=['line', 'arc'], layer='M-*', c62=3)
+# [(0, 'LINE,ARC'), (8, 'M-*'), (62, 3)]
+</pre>
+
+<h3>sel.value_kind</h3>
+<div class="sig"><span class="mod">sel.</span><span class="fn">value_kind</span>(code)</div>
+<p><span class="pill pure">Pure</span> What a DXF group code takes in a filter: <code>'int16'</code>,
+<code>'int32'</code>, <code>'double'</code>, <code>'point'</code> or <code>'text'</code>
+(anything not in a numeric or point range).</p>
+<pre data-lang="python">
+sel.value_kind(62)    # 'int16'
+sel.value_kind(40)    # 'double'
+sel.value_kind(8)     # 'text'
+</pre>
+
+
+<h2 id="ents">ents: entities by handle</h2>
+
+<p>Iterate a space, take a snapshot of an entity as a plain dict, change a few common
+properties, delete, and measure. <code>ents.get</code> returns a dict, so a script never holds
+an AutoCAD object past its transaction. <code>resolve_space</code>,
+<code>normalize_handle</code>, <code>check_props</code> and <code>length_by_layer</code> are
+pure. Two functions here are named like builtins, <code>iter</code> and <code>set</code>:
+always call them as <code>ents.iter</code> and <code>ents.set</code>.</p>
+
+<h3>ents.iter</h3>
+<div class="sig"><span class="mod">ents.</span><span class="fn">iter</span>(space=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> A generator over the handle of every entity in model space (the default), a layout
+(its name) or a block definition (<code>'BLOCK:Name'</code>). The handles are read in one
+transaction before the first one is yielded, so changing the drawing while you loop is safe.
+Raises <code>ValueError</code> for an unknown layout or block.</p>
+<pre data-lang="python">
+from pyacad import ents
+
+for handle in ents.iter():
+    print(handle, ents.type_of(handle))
+
+for handle in ents.iter('BLOCK:Door'):
+    pass        # the entities that make up the Door definition
+</pre>
+
+<h3>ents.get</h3>
+<div class="sig"><span class="mod">ents.</span><span class="fn">get</span>(handle)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> A snapshot of one entity as a plain dict. Every entity carries
+<code>handle</code>, <code>type</code> (the DXF name), <code>layer</code>, <code>color</code>
+(the colour index: 256 is ByLayer, 0 ByBlock), <code>linetype</code>, <code>lineweight</code>
+(an int, see <code>ents.LINEWEIGHTS</code>), <code>visible</code> and <code>space</code>
+(<code>'Model'</code>, a layout name, or <code>'BLOCK:Name'</code>). Some types add geometry:</p>
+<div class="table-scroll">
+<table>
+<thead><tr><th>Type</th><th>Extra keys</th></tr></thead>
+<tbody>
+<tr><td><code>LINE</code></td><td><code>start</code>, <code>end</code></td></tr>
+<tr><td><code>CIRCLE</code></td><td><code>center</code>, <code>radius</code></td></tr>
+<tr><td><code>ARC</code></td><td><code>center</code>, <code>radius</code>, <code>start_angle</code>, <code>end_angle</code> (radians)</td></tr>
+<tr><td><code>LWPOLYLINE</code></td><td><code>points</code> (a list of <code>(x, y)</code>), <code>closed</code></td></tr>
+<tr><td><code>TEXT</code></td><td><code>text</code>, <code>height</code>, <code>position</code></td></tr>
+<tr><td><code>MTEXT</code></td><td><code>text</code> (the raw contents, formatting codes included), <code>height</code>, <code>position</code></td></tr>
+<tr><td><code>INSERT</code></td><td><code>name</code> (a dynamic block's real name, not <code>*U12</code>), <code>position</code>, <code>rotation</code> (radians), <code>scale</code> <code>(x, y, z)</code>, <code>attributes</code> <code>{tag: text}</code></td></tr>
+</tbody>
+</table>
+</div>
+<p>Raises <code>ValueError</code> when no object has that handle.</p>
+<pre data-lang="python">
+snap = ents.get('2F3A')
+if snap['type'] == 'LINE':
+    print(snap['start'], snap['end'])
+</pre>
+
+<h3>ents.set</h3>
+<div class="sig"><span class="mod">ents.</span><span class="fn">set</span>(handle, **props)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Changes properties of one entity. Any entity takes <code>layer</code>,
+<code>color</code> (an int 0 to 256), <code>linetype</code>, <code>lineweight</code> (one of
+<code>ents.LINEWEIGHTS</code>) and <code>visible</code>; <code>TEXT</code> and
+<code>MTEXT</code> also take <code>text</code> and <code>height</code>; <code>INSERT</code>
+takes <code>attributes</code> (a dict of tag to text, matched to the tags exactly as the
+drawing spells them). Everything is validated by <code>ents.check_props</code> before anything
+changes, and the layer and linetype must exist (<code>'ByLayer'</code> and
+<code>'ByBlock'</code> are always allowed), else <code>ValueError</code>. Returns
+<code>None</code>. An entity on a locked layer raises AutoCAD's
+<code>eOnLockedLayer</code>.</p>
+<pre data-lang="python">
+ents.set('2F3A', layer='A-WALL', color=256)
+ents.set('2F40', text='LEVEL 2', height=3.5)
+ents.set('2F41', attributes={'ROOM_NO': '2.14'})
+</pre>
+
+<h3>ents.delete</h3>
+<div class="sig"><span class="mod">ents.</span><span class="fn">delete</span>(handles, progress=None, cancelled=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Erases the entities (one handle or a list) in one transaction and returns how many
+were erased. A handle that does not exist raises <code>ValueError</code> and nothing is
+erased; an entity on a locked layer raises AutoCAD's exception and nothing is erased. Stopping
+through <code>cancelled</code> keeps what was erased so far. For a forgiving delete that skips
+locked layers and missing handles, use <code>audit.erase</code>.</p>
+<pre data-lang="python">
+erased = ents.delete(sel.get(type='POINT'))
+</pre>
+
+<h3>ents.count</h3>
+<div class="sig"><span class="mod">ents.</span><span class="fn">count</span>(space=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> How many entities a space holds (model space by default; a layout name or
+<code>'BLOCK:Name'</code> otherwise).</p>
+<pre data-lang="python">
+print(ents.count(), 'in model space')
+</pre>
+
+<h3>ents.bounds</h3>
+<div class="sig"><span class="mod">ents.</span><span class="fn">bounds</span>(handle)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> The entity's extents as <code>((minx, miny, minz), (maxx, maxy, maxz))</code>.
+AutoCAD raises its own exception for an entity with no extents (an empty text, a ray).</p>
+<pre data-lang="python">
+low, high = ents.bounds(handle)
+width = high[0] - low[0]
+</pre>
+
+<h3>ents.type_of</h3>
+<div class="sig"><span class="mod">ents.</span><span class="fn">type_of</span>(handle)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> The entity's DXF type name, such as <code>'LINE'</code>,
+<code>'LWPOLYLINE'</code> or <code>'INSERT'</code>, without opening a transaction. Raises
+<code>ValueError</code> for an unknown handle.</p>
+<pre data-lang="python">
+if ents.type_of(handle) == 'INSERT':
+    print(blocks.attributes(handle))
+</pre>
+
+<h3>ents.length_of</h3>
+<div class="sig"><span class="mod">ents.</span><span class="fn">length_of</span>(handle)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> The length along a curve in drawing units: lines, arcs, circles (the circumference),
+polylines of every kind, splines and ellipses. Raises <code>ValueError</code> for anything
+without a length.</p>
+<pre data-lang="python">
+print('%.1f' % ents.length_of(handle))
+</pre>
+
+<h3>ents.lengths</h3>
+<div class="sig"><span class="mod">ents.</span><span class="fn">lengths</span>(handles, types=LENGTH_TYPES, progress=None, cancelled=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Measures many curves in one transaction. Returns a list of
+<code>{'handle', 'type', 'layer', 'length'}</code> for each handle whose DXF type is in
+<code>types</code> (by default <code>ents.LENGTH_TYPES</code>: lines, arcs, both kinds of
+polyline and splines). Other entities and handles that no longer exist are left out silently;
+a curve AutoCAD cannot measure gets <code>length</code> <code>None</code>. Feed the result to
+<code>ents.length_by_layer</code> for totals.</p>
+<pre data-lang="python">
+rows = ents.lengths(sel.get(layer='M-DUCT*'))
+total = sum(r['length'] for r in rows if r['length'] is not None)
+</pre>
+
+<h3>ents.length_by_layer</h3>
+<div class="sig"><span class="mod">ents.</span><span class="fn">length_by_layer</span>(snapshots)</div>
+<p><span class="pill pure">Pure</span> Totals per layer from dicts that carry at least <code>'layer'</code> and
+<code>'length'</code> (what <code>ents.lengths</code> returns): a list of
+<code>{'layer', 'count', 'length'}</code> sorted by layer name ignoring case. A dict whose length
+is <code>None</code> is left out of both the count and the total.</p>
+<pre data-lang="python">
+ents.length_by_layer([{'layer': 'A', 'length': 2.0}, {'layer': 'A', 'length': 3.0}])
+# [{'layer': 'A', 'count': 2, 'length': 5.0}]
+</pre>
+
+<h3>ents.resolve_space</h3>
+<div class="sig"><span class="mod">ents.</span><span class="fn">resolve_space</span>(text)</div>
+<p><span class="pill pure">Pure</span> How a <code>space</code> argument is read: <code>('model', 'Model')</code> for
+<code>None</code>, <code>''</code> or <code>'model'</code> in any case;
+<code>('block', name)</code> for <code>'BLOCK:name'</code>; <code>('layout', text)</code> for
+anything else. Raises <code>ValueError</code> for <code>'BLOCK:'</code> with no name.</p>
+<pre data-lang="python">
+ents.resolve_space('block:Door')    # ('block', 'Door')
+ents.resolve_space('A1 Plan')       # ('layout', 'A1 Plan')
+</pre>
+
+<h3>ents.normalize_handle</h3>
+<div class="sig"><span class="mod">ents.</span><span class="fn">normalize_handle</span>(handle)</div>
+<p><span class="pill pure">Pure</span> A handle as uppercase hex text, with surrounding spaces and a <code>0x</code> prefix
+removed. Raises <code>ValueError</code> when the text is not hex. Use it before comparing
+handles that came from a spreadsheet or a file.</p>
+<pre data-lang="python">
+ents.normalize_handle(' 0x2f3a ')    # '2F3A'
+</pre>
+
+<h3>ents.check_props</h3>
+<div class="sig"><span class="mod">ents.</span><span class="fn">check_props</span>(type_name, props)</div>
+<p><span class="pill pure">Pure</span> The validation <code>ents.set</code> runs: raises <code>ValueError</code> when a key
+is not allowed for that DXF type, when <code>color</code> is not an int from 0 to 256, when
+<code>lineweight</code> is not in <code>ents.LINEWEIGHTS</code>, when <code>height</code> is
+not above zero, or when <code>attributes</code> is not a dict. Returns <code>None</code>
+otherwise. Handy for checking user input before a batch.</p>
+<pre data-lang="python">
+ents.check_props('LINE', {'color': 1})       # fine
+ents.check_props('LINE', {'text': 'x'})      # ValueError: LINE cannot set 'text'
+</pre>
+
+<h3>ents.LINEWEIGHTS</h3>
+<div class="sig"><span class="mod">ents.</span><span class="fn">LINEWEIGHTS</span> = (
+    -3, -2, -1, 0, 5, 9, 13, 15, 18, 20, 25, 30, 35, 40, 50, 53,
+    60, 70, 80, 90, 100, 106, 120, 140, 158, 200, 211
+)</div>
+<p><span class="pill pure">Pure</span> The lineweights <code>ents.set</code> accepts, in hundredths of a millimetre:
+<code>-3</code> is Default, <code>-2</code> ByBlock, <code>-1</code> ByLayer, and the rest are
+AutoCAD's standard weights from 0 to 2.11 mm. The same numbers come back in
+<code>ents.get</code> and <code>layers.get</code>.</p>
+
+<h3>ents.LENGTH_TYPES</h3>
+<div class="sig"><span class="mod">ents.</span><span class="fn">LENGTH_TYPES</span> = (&#x27;LINE&#x27;, &#x27;ARC&#x27;, &#x27;LWPOLYLINE&#x27;, &#x27;POLYLINE&#x27;, &#x27;SPLINE&#x27;)</div>
+<p><span class="pill pure">Pure</span> The DXF types <code>ents.lengths</code> measures by default. <code>POLYLINE</code>
+covers both the old 2D polyline and the 3D polyline.</p>
+
+
+<h2 id="layers">layers: layers and layer standards</h2>
+
+<p>Read, create, rename, delete and merge layers; freeze, thaw, turn off and on, lock and
+unlock by pattern; isolate; and save and restore layer states. Pattern arguments take
+<code>*</code> and <code>?</code>, ignore case, and may be a list of patterns. The
+freeze-style functions return how many layers actually changed and regenerate the drawing.
+The second half of the module is pure: matching, a filter box, and the engine behind a
+layer-standard mapping (a CSV of old name to new name).</p>
+
+<h3>layers.names</h3>
+<div class="sig"><span class="mod">layers.</span><span class="fn">names</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Every layer name in the drawing, in layer table order (xref layers included, as
+<code>Xref|Layer</code>).</p>
+<pre data-lang="python">
+from pyacad import layers
+
+for name in layers.names():
+    print(name)
+</pre>
+
+<h3>layers.current</h3>
+<div class="sig"><span class="mod">layers.</span><span class="fn">current</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> The current layer's name (CLAYER).</p>
+<pre data-lang="python">
+print(layers.current())
+</pre>
+
+<h3>layers.set_current</h3>
+<div class="sig"><span class="mod">layers.</span><span class="fn">set_current</span>(name)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Makes the named layer current, thawing it and turning it on first so AutoCAD accepts
+it. Raises <code>ValueError</code> when there is no such layer.</p>
+<pre data-lang="python">
+layers.set_current('A-ANNO')
+</pre>
+
+<h3>layers.exists</h3>
+<div class="sig"><span class="mod">layers.</span><span class="fn">exists</span>(name)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> <code>True</code> when the drawing has a layer of that name (AutoCAD compares layer
+names ignoring case).</p>
+<pre data-lang="python">
+if not layers.exists('A-ANNO'):
+    layers.create('A-ANNO', color=2)
+</pre>
+
+<h3>layers.get</h3>
+<div class="sig"><span class="mod">layers.</span><span class="fn">get</span>(name)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> One layer as a dict: <code>name</code>, <code>color</code> (the colour index),
+<code>linetype</code> (its name), <code>lineweight</code> (an int, see
+<code>ents.LINEWEIGHTS</code>), <code>is_off</code>, <code>is_frozen</code>,
+<code>is_locked</code>, <code>is_plottable</code>. Raises <code>ValueError</code> for an
+unknown layer.</p>
+<pre data-lang="python">
+state = layers.get('A-WALL')
+if state['is_frozen']:
+    layers.thaw('A-WALL')
+</pre>
+
+<h3>layers.create</h3>
+<div class="sig"><span class="mod">layers.</span><span class="fn">create</span>(name, color=7, linetype=&#x27;Continuous&#x27;)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Adds a layer and returns its name. <code>color</code> is a colour index from 1 to
+255 (not 0 or 256, which mean ByBlock and ByLayer); <code>linetype</code> must already be
+loaded in the drawing. Raises <code>ValueError</code> when the layer exists, the name is not a
+valid symbol name, the colour is out of range or the linetype is missing.</p>
+<pre data-lang="python">
+layers.create('M-DUCT-SUPPLY', color=4, linetype='Continuous')
+</pre>
+
+<h3>layers.rename</h3>
+<div class="sig"><span class="mod">layers.</span><span class="fn">rename</span>(old, new)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Renames a layer. Raises <code>ValueError</code> for layer 0 and Defpoints, an unknown
+old name, an invalid new name, or a new name another layer already has. A change of case only
+is allowed.</p>
+<pre data-lang="python">
+layers.rename('WALLS', 'A-WALL')
+</pre>
+
+<h3>layers.delete</h3>
+<div class="sig"><span class="mod">layers.</span><span class="fn">delete</span>(name)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Erases a layer. Raises <code>ValueError</code> when it is layer 0 or Defpoints, the
+current layer, an xref layer, or still in use (AutoCAD's purge check says something references
+it). To empty a layer into another one first, use <code>layers.merge</code>.</p>
+<pre data-lang="python">
+try:
+    layers.delete('OLD-TEMP')
+except ValueError as error:
+    toast.warning('Not deleted', str(error))
+</pre>
+
+<h3>layers.merge</h3>
+<div class="sig"><span class="mod">layers.</span><span class="fn">merge</span>(sources, target, progress=None, cancelled=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Moves every entity on the source layers (one name or a list) to
+<code>target</code>, then deletes the sources, all in one transaction, and returns how many
+objects moved. It covers model space, every layout and every block definition in this
+drawing (not xrefs), including the attributes on block references, and it moves entities on
+locked layers too. If a source is the current layer, the target becomes current. A source
+equal to the target is ignored. Raises <code>ValueError</code> for an unknown layer or a
+source that cannot be deleted afterwards; when <code>cancelled</code> fires it raises
+<code>RuntimeError('Merge cancelled; nothing was changed.')</code> and rolls everything
+back.</p>
+<pre data-lang="python">
+moved = layers.merge(['WALL', 'WALLS', 'Wall-old'], 'A-WALL')
+toast.success('Merged 3 layers', '%d objects moved' % moved)
+</pre>
+
+<h3>layers.freeze, thaw, turn_off, turn_on, lock, unlock</h3>
+<div class="sig"><span class="mod">layers.</span><span class="fn">freeze</span>(pattern)</div>
+<div class="sig"><span class="mod">layers.</span><span class="fn">thaw</span>(pattern)</div>
+<div class="sig"><span class="mod">layers.</span><span class="fn">turn_off</span>(pattern)</div>
+<div class="sig"><span class="mod">layers.</span><span class="fn">turn_on</span>(pattern)</div>
+<div class="sig"><span class="mod">layers.</span><span class="fn">lock</span>(pattern)</div>
+<div class="sig"><span class="mod">layers.</span><span class="fn">unlock</span>(pattern)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Change one flag on every layer whose name matches <code>pattern</code> (a pattern or a
+list) and return how many layers actually changed; layers already in that state do not count.
+<code>freeze</code> never freezes the current layer (AutoCAD would refuse) and skips it
+silently. <code>turn_off</code> does turn off the current layer, as AutoCAD allows. All but
+<code>lock</code> and <code>unlock</code> regenerate the drawing afterwards. These change the
+layer itself, so the effect shows in model space and every layout; they do not touch
+viewport overrides.</p>
+<pre data-lang="python">
+frozen = layers.freeze(['*-ANNO*', 'Z-*'])
+layers.lock('X-*')
+layers.turn_on('*')
+</pre>
+
+<h3>layers.isolate</h3>
+<div class="sig"><span class="mod">layers.</span><span class="fn">isolate</span>(names)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Thaws and turns on the named layers (exact names, one or a list) and freezes every
+other layer. If the current layer is not among them, the first named layer becomes current.
+Returns how many layers were frozen. Raises <code>ValueError</code> for an empty list or an
+unknown name. Take a <code>layers.snapshot()</code> first if the user will want the old state
+back.</p>
+<pre data-lang="python">
+before = layers.snapshot()
+layers.isolate(['A-WALL', 'A-DOOR'])
+</pre>
+
+<h3>layers.snapshot</h3>
+<div class="sig"><span class="mod">layers.</span><span class="fn">snapshot</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> <code>{name: layers.get(name)}</code> for every layer, read in one transaction. The
+result is plain data, so it can be stored with <code>script.store_data</code> or written to
+JSON.</p>
+<pre data-lang="python">
+script.store_data('before', layers.snapshot(), per_document=True)
+</pre>
+
+<h3>layers.restore</h3>
+<div class="sig"><span class="mod">layers.</span><span class="fn">restore</span>(snapshot)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Puts back <code>is_off</code>, <code>is_frozen</code> and <code>is_locked</code> from
+a <code>snapshot()</code> (colour and linetype are not restored). Layers that are no longer in
+the drawing are skipped, the current layer is never frozen, and the return value is how many
+layers changed. Regenerates afterwards.</p>
+<pre data-lang="python">
+saved = script.load_data('before', per_document=True)
+if saved:
+    layers.restore(saved)
+</pre>
+
+<h3>layers.matches</h3>
+<div class="sig"><span class="mod">layers.</span><span class="fn">matches</span>(name, pattern)</div>
+<p><span class="pill pure">Pure</span> <code>True</code> when the whole of <code>name</code> fits <code>pattern</code>:
+<code>*</code> is any run of characters, <code>?</code> exactly one, case is ignored, and
+every other character is literal.</p>
+<pre data-lang="python">
+layers.matches('A-WALL-FULL', 'a-wall*')   # True
+layers.matches('A-WALL', 'A-WAL?')         # True
+</pre>
+
+<h3>layers.matches_any</h3>
+<div class="sig"><span class="mod">layers.</span><span class="fn">matches_any</span>(name, patterns)</div>
+<p><span class="pill pure">Pure</span> <code>True</code> when <code>name</code> fits any of <code>patterns</code> (one
+string or a list).</p>
+<pre data-lang="python">
+layers.matches_any('Z-TEMP', ['X-*', 'Z-*'])   # True
+</pre>
+
+<h3>layers.filter_names</h3>
+<div class="sig"><span class="mod">layers.</span><span class="fn">filter_names</span>(names, text)</div>
+<p><span class="pill pure">Pure</span> The names that fit what someone typed in a filter box, in their original order, as a
+new list. Blank text keeps everything. Each comma-separated term is a wildcard pattern when it
+holds <code>*</code> or <code>?</code>, otherwise a case-insensitive substring; a name stays
+when any term fits.</p>
+<pre data-lang="python">
+layers.filter_names(['A-WALL', 'A-DOOR', 'M-DUCT'], 'wall, M-*')
+# ['A-WALL', 'M-DUCT']
+</pre>
+
+<h3>layers.parse_mapping</h3>
+<div class="sig"><span class="mod">layers.</span><span class="fn">parse_mapping</span>(csv_text)</div>
+<p><span class="pill pure">Pure</span> Reads a layer-standard CSV into <code>(old, new, color, linetype)</code> tuples.
+Columns are <code>old,new[,color][,linetype]</code>, and anything after the fourth (a notes
+column) is ignored. <code>old</code> may use wildcards. <code>color</code> is 1 to 255 or one
+of red, yellow, green, cyan, blue, magenta, white (black also reads as 7); colour and linetype
+are <code>None</code> when blank. Cells split on commas, semicolons or tabs, whichever the first
+row uses most, and may be quoted. Blank lines, a byte order mark and a header row
+(<code>old,new</code>, <code>from,to</code>, <code>layer,standard</code> and the like) are
+skipped. Raises <code>ValueError</code> naming the line for a row without an old or new name or
+with a bad colour.</p>
+<pre data-lang="python">
+rows = layers.parse_mapping('old,new,color\nWALL*,A-WALL,1\nDOOR,A-DOOR,red\n')
+# [('WALL*', 'A-WALL', 1, None), ('DOOR', 'A-DOOR', 1, None)]
+</pre>
+
+<h3>layers.plan_mapping</h3>
+<div class="sig"><span class="mod">layers.</span><span class="fn">plan_mapping</span>(existing_names, mapping)</div>
+<p><span class="pill pure">Pure</span> What applying a parsed standard to a drawing would do, as a list of steps, without
+touching anything. Each existing layer, in order, meets the first row whose old pattern fits
+it and becomes <code>('rename', old, new)</code> when no layer is called new yet, or
+<code>('merge', old, target)</code> when one is (counting what earlier steps renamed or merged
+away). Layer 0, Defpoints, xref layers and invalid new names become
+<code>('skip', name, reason)</code>; a layer already called new gives nothing. Every new name
+still missing at the end becomes <code>('create', new, color, linetype)</code> once. Run the
+steps yourself with <code>layers.rename</code>, <code>layers.merge</code> and
+<code>layers.create</code>.</p>
+<pre data-lang="python">
+plan = layers.plan_mapping(layers.names(), rows)
+for step in plan:
+    print(layers.describe_action(step))
+</pre>
+
+<h3>layers.describe_action</h3>
+<div class="sig"><span class="mod">layers.</span><span class="fn">describe_action</span>(action)</div>
+<p><span class="pill pure">Pure</span> One <code>plan_mapping</code> step in words: <code>'Rename A to B'</code>,
+<code>'Merge A into B'</code>, <code>'Create B (color 3, DASHED)'</code>,
+<code>'Skip A: reason'</code>.</p>
+<pre data-lang="python">
+layers.describe_action(('merge', 'WALLS', 'A-WALL'))   # 'Merge WALLS into A-WALL'
+</pre>
+
+<h3>layers.snapshot_choices</h3>
+<div class="sig"><span class="mod">layers.</span><span class="fn">snapshot_choices</span>(slots)</div>
+<p><span class="pill pure">Pure</span> Picker entries for saved snapshot slots. <code>slots</code> maps a slot name to
+<code>{'saved': 'YYYY-MM-DD HH:MM', 'layers': snapshot()}</code>; the result is
+<code>(label, name)</code> pairs, newest first then by name, with labels such as
+<code>'Before issue  (saved 2026-10-12 14:05, 42 layers)'</code>. Slots with no time, or that
+are not dicts, come last. The pairs go straight into <code>forms.select_from_list</code>.</p>
+<pre data-lang="python">
+slots = script.load_data('slots', {}, per_document=True)
+name = forms.select_from_list(layers.snapshot_choices(slots), title='Restore layers')
+</pre>
+
+
+<h2 id="blocks">blocks: definitions, references and attributes</h2>
+
+<p>Block definitions and references, attributes, counts, inserting blocks and AutoCAD tables,
+and the pure engine behind the spreadsheet round trip (export to Excel, edit, write back).
+Dynamic block references always report their definition's real name, never the anonymous
+<code>*U</code> copy. Name arguments take <code>*</code> and <code>?</code> as in
+<code>layers.matches</code>. The pure half (<code>attribute_tags</code>,
+<code>export_rows</code>, <code>diff_rows</code>, <code>schedule_rows</code>,
+<code>replace_in_attributes</code>, <code>tag_audit</code>, <code>column_widths</code>) works on
+the plain dicts <code>blocks.snapshots</code> returns.</p>
+
+<h3>blocks.definitions</h3>
+<div class="sig"><span class="mod">blocks.</span><span class="fn">definitions</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Names of the drawing's own blocks, sorted ignoring case: layouts, anonymous blocks,
+xrefs and blocks that belong to xrefs are left out.</p>
+<pre data-lang="python">
+from pyacad import blocks
+
+names = blocks.definitions()
+</pre>
+
+<h3>blocks.references</h3>
+<div class="sig"><span class="mod">blocks.</span><span class="fn">references</span>(name=None, space=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Handles of block references. <code>name</code> is <code>None</code> for all of them, or
+a pattern (or list of patterns) matched against the block name. <code>space</code> is
+<code>None</code> for model space and every layout, or one space as in <code>ents.iter</code>.
+Xref attachments are references too, so they are included when their name matches.</p>
+<pre data-lang="python">
+doors = blocks.references('DOOR*')
+in_model = blocks.references(space='model')
+</pre>
+
+<h3>blocks.attributes</h3>
+<div class="sig"><span class="mod">blocks.</span><span class="fn">attributes</span>(handle)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> <code>{tag: text}</code> of one block reference's attributes. Raises
+<code>ValueError</code> when the handle does not exist or is not a block reference.</p>
+<pre data-lang="python">
+values = blocks.attributes(handle)
+print(values.get('ROOM_NO'))
+</pre>
+
+<h3>blocks.set_attributes</h3>
+<div class="sig"><span class="mod">blocks.</span><span class="fn">set_attributes</span>(handle, values)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Writes <code>{tag: text}</code> into one block reference and returns how many values
+actually changed. Tags are matched exactly as the drawing spells them (usually upper case);
+tags the reference does not have are ignored. Raises <code>ValueError</code> when
+<code>values</code> is not a dict or the handle is not a block reference.</p>
+<pre data-lang="python">
+changed = blocks.set_attributes(handle, {'ROOM_NO': '2.14', 'ROOM_NAME': 'Plant'})
+</pre>
+
+<h3>blocks.counts</h3>
+<div class="sig"><span class="mod">blocks.</span><span class="fn">counts</span>(space=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> <code>{block name: number of references}</code> in a space, or in model space and every
+layout when <code>space</code> is <code>None</code>. Xref attachments are counted under the xref
+name.</p>
+<pre data-lang="python">
+for name, number in sorted(blocks.counts().items()):
+    print(name, number)
+</pre>
+
+<h3>blocks.insert</h3>
+<div class="sig"><span class="mod">blocks.</span><span class="fn">insert</span>(name, point, rotation=0.0, scale=1.0, layer=None, attributes=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Inserts a reference to a block already defined in the drawing into the current space
+(model space, or the paper space layout that is current) and returns its handle.
+<code>rotation</code> is in radians; <code>scale</code> is one number or <code>(x, y, z)</code>;
+<code>layer</code> must exist. Every non-constant attribute is added, with the value from
+<code>attributes</code> when its tag is there and the definition's default otherwise. Raises
+<code>ValueError</code> for an unknown block or layer.</p>
+<pre data-lang="python">
+import math
+handle = blocks.insert('TAG-ROOM', (1200, 3400), rotation=math.radians(90),
+                       layer='A-ANNO', attributes={'ROOM_NO': '2.14'})
+</pre>
+
+<h3>blocks.definition_info</h3>
+<div class="sig"><span class="mod">blocks.</span><span class="fn">definition_info</span>(name)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> One block definition as a dict: <code>name</code>, <code>has_attributes</code>,
+<code>is_dynamic</code>, <code>origin</code> (the base point) and <code>comments</code> (its
+description). Raises <code>ValueError</code> for an unknown block.</p>
+<pre data-lang="python">
+info = blocks.definition_info('TAG-ROOM')
+if not info['has_attributes']:
+    toast.warning('TAG-ROOM has no attributes')
+</pre>
+
+<h3>blocks.snapshots</h3>
+<div class="sig"><span class="mod">blocks.</span><span class="fn">snapshots</span>(handles=None, progress=None, cancelled=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Snapshot dicts of block references, read in one transaction: every reference in model
+space and the layouts when <code>handles</code> is <code>None</code>, else those of the given
+handles that are block references (anything else, and handles that no longer exist, are left
+out). Each dict is what <code>ents.get</code> gives for an <code>INSERT</code>, plus
+<code>tags</code>: the attribute tags in the order the drawing holds them. Xref attachments are
+never included. This is the input to every pure function below.</p>
+<pre data-lang="python">
+picked = sel.current()
+refs = blocks.snapshots(picked if picked else None)
+</pre>
+
+<h3>blocks.apply_changes</h3>
+<div class="sig"><span class="mod">blocks.</span><span class="fn">apply_changes</span>(changes, progress=None, cancelled=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Writes changes into many block references in one transaction. <code>changes</code>
+maps a handle to <code>{'attributes': {tag: text}, 'layer': name}</code>, either part optional,
+exactly as <code>blocks.diff_rows</code> produces. Returns
+<code>{'updated': references changed, 'values': attribute values changed, 'failed': {handle:
+reason}}</code>. A reference that fails (gone, not a block reference, unknown or locked layer)
+is left as it was and reported; the rest still go in. Raises <code>ValueError</code> up front
+when <code>changes</code> is not shaped right.</p>
+<pre data-lang="python">
+result = blocks.apply_changes({'2F3A': {'attributes': {'ROOM_NO': '2.15'}}})
+if result['failed']:
+    output.print_table(sorted(result['failed'].items()), ['Handle', 'Reason'])
+</pre>
+
+<h3>blocks.insert_table</h3>
+<div class="sig"><span class="mod">blocks.</span><span class="fn">insert_table</span>(point, headers, rows, title=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Inserts an AutoCAD table with its top left corner at <code>point</code>, in the current
+space and the drawing's current table style: an optional title row, a header row, then one row
+per item. Every cell is written as text (whole floats lose their <code>.0</code>), short rows are
+padded, and columns are sized to their longest text using the style's text height. Returns the
+table's handle. Raises <code>ValueError</code> for no headers or a row longer than the
+headers.</p>
+<pre data-lang="python">
+headers, rows = blocks.schedule_rows(blocks.snapshots())
+point = sel.pick_point('Table corner: ')
+if point:
+    blocks.insert_table(point, headers, rows, title='Block schedule')
+</pre>
+
+<h3>blocks.attribute_tags</h3>
+<div class="sig"><span class="mod">blocks.</span><span class="fn">attribute_tags</span>(refs)</div>
+<p><span class="pill pure">Pure</span> Every attribute tag across the references, once each, in the order first met (a
+reference's <code>tags</code> order when it has one, else its tags sorted). Tags that differ only
+in case count once, spelled as first met.</p>
+<pre data-lang="python">
+blocks.attribute_tags([{'tags': ['NO', 'NAME'], 'attributes': {'NO': '1', 'NAME': 'A'}},
+                       {'attributes': {'AREA': '12'}}])
+# ['NO', 'NAME', 'AREA']
+</pre>
+
+<h3>blocks.export_rows</h3>
+<div class="sig"><span class="mod">blocks.</span><span class="fn">export_rows</span>(refs)</div>
+<p><span class="pill pure">Pure</span> <code>(headers, rows)</code> for a spreadsheet of block references: the
+<code>blocks.EXPORT_COLUMNS</code>, then one column per attribute tag. One row per reference,
+sorted by block name then handle. Rotation is in degrees (0 up to 360); Scale is one number when
+uniform, else <code>'x, y, z'</code> text; a tag the reference lacks is an empty string.</p>
+<pre data-lang="python">
+headers, rows = blocks.export_rows(blocks.snapshots())
+xl.write(path, rows, headers=headers, sheet='Blocks')
+</pre>
+
+<h3>blocks.diff_rows</h3>
+<div class="sig"><span class="mod">blocks.</span><span class="fn">diff_rows</span>(current_refs, sheet_rows)</div>
+<p><span class="pill pure">Pure</span> Compares a sheet written from <code>export_rows</code> (header row first, as
+<code>xl.read</code> returns it) with the references in the drawing now. Columns are found by
+header name, so a reordered sheet still reads. Only attribute values and Layer go back: a tag
+cell is a change when its text differs from the reference's value (an emptied cell clears the
+value), a Layer cell when it is filled in and differs. Returns <code>(changes, skipped)</code>:
+<code>changes</code> is ready for <code>blocks.apply_changes</code>, <code>skipped</code> lists
+the sheet's handles that are no longer block references. Raises <code>ValueError</code> for an
+empty sheet or one with no Handle column.</p>
+<pre data-lang="python">
+changes, skipped = blocks.diff_rows(blocks.snapshots(), xl.read(path))
+result = blocks.apply_changes(changes)
+</pre>
+
+<h3>blocks.schedule_rows</h3>
+<div class="sig"><span class="mod">blocks.</span><span class="fn">schedule_rows</span>(refs, by_layer=False)</div>
+<p><span class="pill pure">Pure</span> <code>(headers, rows)</code> counting references by block name, or by name and layer:
+headers <code>['Block', 'Count']</code> or <code>['Block', 'Layer', 'Count']</code>, rows sorted
+ignoring case, counts as ints.</p>
+<pre data-lang="python">
+headers, rows = blocks.schedule_rows(refs, by_layer=True)
+output.print_table(rows, headers)
+</pre>
+
+<h3>blocks.replace_in_attributes</h3>
+<div class="sig"><span class="mod">blocks.</span><span class="fn">replace_in_attributes</span>(refs, find, replace, case_sensitive=True, tag=None)</div>
+<p><span class="pill pure">Pure</span> <code>{handle: {tag: new text}}</code> for every attribute value that changes when
+<code>find</code> becomes <code>replace</code> (plain text, never a pattern). Only changed values
+are listed; <code>tag</code> limits it to one tag (any case). Raises <code>ValueError</code> when
+<code>find</code> is empty. Turn it into <code>apply_changes</code> input with a dict
+comprehension.</p>
+<pre data-lang="python">
+found = blocks.replace_in_attributes(refs, 'LVL', 'LEVEL', case_sensitive=False)
+blocks.apply_changes(dict((h, {'attributes': v}) for h, v in found.items()))
+</pre>
+
+<h3>blocks.tag_audit</h3>
+<div class="sig"><span class="mod">blocks.</span><span class="fn">tag_audit</span>(refs, tag, ignore_case=True)</div>
+<p><span class="pill pure">Pure</span> Audits one attribute tag across references. Returns
+<code>{'duplicates': {value: [handles]}, 'blanks': [handles], 'missing': [handles], 'tagged':
+count}</code>: values two or more references share, references whose value is empty or spaces,
+references without that attribute, and how many have a value. Values are compared trimmed and,
+unless <code>ignore_case</code> is <code>False</code>, ignoring case. Raises
+<code>ValueError</code> for an empty tag.</p>
+<pre data-lang="python">
+report = blocks.tag_audit(blocks.snapshots(blocks.references('TAG-ROOM')), 'ROOM_NO')
+for value, handles in report['duplicates'].items():
+    print(value, len(handles))
+</pre>
+
+<h3>blocks.column_widths</h3>
+<div class="sig"><span class="mod">blocks.</span><span class="fn">column_widths</span>(headers, rows, text_height, margin=None, title=None, title_height=None)</div>
+<p><span class="pill pure">Pure</span> The column widths <code>insert_table</code> uses: each column's longest text (at least
+3 characters) times <code>text_height</code> times 0.9, plus a margin each side (a third of the
+text height unless given). With a <code>title</code>, the columns share any extra width the
+title needs. Raises <code>ValueError</code> when <code>text_height</code> is not above zero.</p>
+<pre data-lang="python">
+blocks.column_widths(['Block', 'Count'], [['DOOR', 12]], 2.5)
+</pre>
+
+<h3>blocks.EXPORT_COLUMNS</h3>
+<div class="sig"><span class="mod">blocks.</span><span class="fn">EXPORT_COLUMNS</span> = (
+    &#x27;Handle&#x27;,
+    &#x27;Block&#x27;,
+    &#x27;Layer&#x27;,
+    &#x27;Space&#x27;,
+    &#x27;X&#x27;,
+    &#x27;Y&#x27;,
+    &#x27;Z&#x27;,
+    &#x27;Rotation&#x27;,
+    &#x27;Scale&#x27;,
+)</div>
+<p><span class="pill pure">Pure</span> The fixed columns at the front of every <code>export_rows</code> sheet, before the
+attribute tag columns.</p>
+
+
+<h2 id="xrefs">xrefs: external references</h2>
+
+<p>List, reload, unload, detach, bind and repath xrefs. Reload, unload, detach and bind must
+run outside any open transaction, as AutoCAD requires, so call them from your script's top
+level (a command) or inside <code>doc.lock()</code>, never inside
+<code>doc.transaction()</code>. Names are xref names as they appear in the External References
+palette, matched as AutoCAD matches block names. The path helpers and the planning and reporting
+helpers in the second half are pure and use Windows path rules on every platform.
+<code>xrefs.list</code> shares its name with the builtin; call it as
+<code>xrefs.list()</code>.</p>
+
+<h3>xrefs.list</h3>
+<div class="sig"><span class="mod">xrefs.</span><span class="fn">list</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> One dict per xref, nested ones included:</p>
+<div class="table-scroll">
+<table>
+<thead><tr><th>Key</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td><code>name</code></td><td>The xref name.</td></tr>
+<tr><td><code>path</code></td><td>The saved path, exactly as stored (relative or absolute).</td></tr>
+<tr><td><code>found_at</code></td><td>Where AutoCAD actually loaded it from; <code>''</code> when it is not loaded.</td></tr>
+<tr><td><code>status</code></td><td><code>'loaded'</code>, <code>'unloaded'</code>, <code>'not-found'</code>, <code>'unresolved'</code> or <code>'unreferenced'</code>.</td></tr>
+<tr><td><code>is_overlay</code></td><td><code>True</code> for an overlay, <code>False</code> for an attachment.</td></tr>
+<tr><td><code>nested</code></td><td><code>True</code> for an xref inside another xref.</td></tr>
+</tbody>
+</table>
+</div>
+<pre data-lang="python">
+from pyacad import xrefs
+
+broken = [x for x in xrefs.list() if x['status'] == 'not-found']
+</pre>
+
+<h3>xrefs.reload</h3>
+<div class="sig"><span class="mod">xrefs.</span><span class="fn">reload</span>(names=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Reloads the named xrefs (one name or a list), or every top-level xref when
+<code>names</code> is <code>None</code>, and returns how many it asked AutoCAD to reload.
+AutoCAD does not complain when a file still cannot be found, so check the status afterwards
+(<code>xrefs.check_loaded</code> does exactly that). Raises <code>ValueError</code> for an
+unknown name or a name that is a plain block.</p>
+<pre data-lang="python">
+xrefs.reload()
+xrefs.reload('Site')
+</pre>
+
+<h3>xrefs.unload</h3>
+<div class="sig"><span class="mod">xrefs.</span><span class="fn">unload</span>(names)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Unloads the named xrefs and returns how many. Unloaded xrefs stay attached and keep
+their path.</p>
+<pre data-lang="python">
+xrefs.unload(['Site', 'Survey'])
+</pre>
+
+<h3>xrefs.detach</h3>
+<div class="sig"><span class="mod">xrefs.</span><span class="fn">detach</span>(name)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Detaches one xref. Returns <code>None</code>. Pass a single name: given a list it
+detaches only the first.</p>
+<pre data-lang="python">
+xrefs.detach('Old Survey')
+</pre>
+
+<h3>xrefs.bind</h3>
+<div class="sig"><span class="mod">xrefs.</span><span class="fn">bind</span>(names, insert=False)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Binds the named xrefs into the drawing and returns how many. With
+<code>insert=False</code> (Bind) the xref's layers and styles come in with a prefix, so
+<code>A-WALL</code> from xref Site becomes <code>Site$0$A-WALL</code>; with
+<code>insert=True</code> (Insert) they merge into the drawing's own names.</p>
+<pre data-lang="python">
+xrefs.bind('Site', insert=True)
+</pre>
+
+<h3>xrefs.repath</h3>
+<div class="sig"><span class="mod">xrefs.</span><span class="fn">repath</span>(name, new_path, reload=True)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Points one xref at <code>new_path</code> and reloads it. With
+<code>reload=False</code> only the saved path changes, which keeps an unloaded xref unloaded
+until its next reload. Raises <code>ValueError</code> for an unknown name.</p>
+<pre data-lang="python">
+xrefs.repath('Site', r'..\Xref\site-v2.dwg')
+</pre>
+
+<h3>xrefs.find_replace</h3>
+<div class="sig"><span class="mod">xrefs.</span><span class="fn">find_replace</span>(find, replace)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Replaces <code>find</code> with <code>replace</code> (plain text, ignoring case) in
+every top-level xref path, reloads the ones that changed and returns how many. Nested xrefs are
+left alone: they follow the xref that holds them. Raises <code>ValueError</code> when
+<code>find</code> is empty.</p>
+<pre data-lang="python">
+count = xrefs.find_replace(r'\\oldserver\projects', r'\\newserver\projects')
+</pre>
+
+<h3>xrefs.to_relative</h3>
+<div class="sig"><span class="mod">xrefs.</span><span class="fn">to_relative</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Makes every top-level xref path relative to the drawing's folder and returns how many
+changed. Paths on another drive or share cannot be relative and are left alone. Raises
+<code>RuntimeError</code> when the drawing has never been saved.</p>
+<pre data-lang="python">
+xrefs.to_relative()
+</pre>
+
+<h3>xrefs.to_absolute</h3>
+<div class="sig"><span class="mod">xrefs.</span><span class="fn">to_absolute</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Makes every top-level xref path absolute, resolved against the drawing's folder, and
+returns how many changed. Like <code>to_relative</code> it raises <code>RuntimeError</code> for a
+drawing that has never been saved.</p>
+<pre data-lang="python">
+xrefs.to_absolute()
+</pre>
+
+<h3>xrefs.status_name</h3>
+<div class="sig"><span class="mod">xrefs.</span><span class="fn">status_name</span>(xref_status)</div>
+<p><span class="pill pure">Pure</span> The <code>xrefs.list</code> status for an AutoCAD <code>XrefStatus</code> name:
+<code>'Resolved'</code> is <code>'loaded'</code>, <code>'FileNotFound'</code> is
+<code>'not-found'</code>, and so on; anything unknown comes back lower-cased.</p>
+<pre data-lang="python">
+xrefs.status_name('FileNotFound')    # 'not-found'
+</pre>
+
+<h3>xrefs.status_label</h3>
+<div class="sig"><span class="mod">xrefs.</span><span class="fn">status_label</span>(status)</div>
+<p><span class="pill pure">Pure</span> A status as people read it: <code>'not-found'</code> becomes <code>'not found'</code>,
+and an empty status <code>'unknown'</code>.</p>
+<pre data-lang="python">
+xrefs.status_label('not-found')    # 'not found'
+</pre>
+
+<h3>xrefs.apply_replace</h3>
+<div class="sig"><span class="mod">xrefs.</span><span class="fn">apply_replace</span>(path, find, replace)</div>
+<p><span class="pill pure">Pure</span> <code>path</code> with every occurrence of <code>find</code> replaced, ignoring case.
+Raises <code>ValueError</code> when <code>find</code> is empty.</p>
+<pre data-lang="python">
+xrefs.apply_replace(r'P:\Old\site.dwg', 'p:\\old', r'Q:\New')   # 'Q:\\New\\site.dwg'
+</pre>
+
+<h3>xrefs.make_relative</h3>
+<div class="sig"><span class="mod">xrefs.</span><span class="fn">make_relative</span>(path, host_dir)</div>
+<p><span class="pill pure">Pure</span> <code>path</code> relative to <code>host_dir</code>, written the way AutoCAD writes
+relative xref paths (<code>.\x.dwg</code>, <code>..\a\x.dwg</code>). Relative paths, paths on
+another drive or share, and an empty <code>host_dir</code> come back unchanged.</p>
+<pre data-lang="python">
+xrefs.make_relative(r'C:\Job\Xref\site.dwg', r'C:\Job\Sheets')   # '..\\Xref\\site.dwg'
+</pre>
+
+<h3>xrefs.make_absolute</h3>
+<div class="sig"><span class="mod">xrefs.</span><span class="fn">make_absolute</span>(path, host_dir)</div>
+<p><span class="pill pure">Pure</span> A relative path resolved against <code>host_dir</code> and normalised; an absolute
+path comes back normalised; a relative path with no <code>host_dir</code> comes back
+unchanged.</p>
+<pre data-lang="python">
+xrefs.make_absolute(r'..\Xref\site.dwg', r'C:\Job\Sheets')   # 'C:\\Job\\Xref\\site.dwg'
+</pre>
+
+<h3>xrefs.describe</h3>
+<div class="sig"><span class="mod">xrefs.</span><span class="fn">describe</span>(xref_rows)</div>
+<p><span class="pill pure">Pure</span> One picker label per <code>xrefs.list()</code> row, in order, such as
+<code>'Site  [loaded, overlay]  ..\Xref\site.dwg'</code>. A row with no path shows
+<code>(no path)</code>.</p>
+<pre data-lang="python">
+rows = xrefs.list()
+picked = forms.select_from_list(list(zip(xrefs.describe(rows), [r['name'] for r in rows])),
+                                title='Reload xrefs', multiselect=True)
+</pre>
+
+<h3>xrefs.plan_repath</h3>
+<div class="sig"><span class="mod">xrefs.</span><span class="fn">plan_repath</span>(xref_rows, mode, find=None, replace=None, folder=None, exists=None, host_dir=None)</div>
+<p><span class="pill pure">Pure</span> What a repath would do, worked out before anything changes: one
+<code>(old_path, new_path, note)</code> per row. <code>mode</code> is
+<code>'relative'</code> or <code>'absolute'</code> (both need <code>host_dir</code>, the
+drawing's folder), <code>'replace'</code> (<code>find</code> becomes <code>replace</code>,
+ignoring case) or <code>'folder'</code> (each xref points at
+<code>folder\&lt;its file name&gt;</code>, but only where <code>exists(path)</code> is true;
+<code>exists</code> defaults to <code>os.path.isfile</code>, so this mode reads the disk unless
+you pass your own). <code>note</code> is <code>''</code> for a row that changes and says why not
+otherwise (<code>'already relative'</code>, <code>'no match'</code>,
+<code>'not found in the folder'</code>, ...), with <code>new_path</code> equal to
+<code>old_path</code>. Nested xrefs never change. Raises <code>ValueError</code> for an unknown
+mode or a missing argument the mode needs.</p>
+<pre data-lang="python">
+rows = xrefs.list()
+plan = xrefs.plan_repath(rows, 'folder', folder=r'\\server\job\xref')
+</pre>
+
+<h3>xrefs.format_plan</h3>
+<div class="sig"><span class="mod">xrefs.</span><span class="fn">format_plan</span>(xref_rows, plan, limit=None)</div>
+<p><span class="pill pure">Pure</span> A <code>plan_repath</code> result as preview text: each change as its name with from
+and to lines, then every row left alone with its note. <code>limit</code> caps each list, the
+rest becoming <code>...and N more</code>.</p>
+<pre data-lang="python">
+if forms.confirm(xrefs.format_plan(rows, plan, limit=20)):
+    for row, (old, new, note) in zip(rows, plan):
+        if not note:
+            xrefs.repath(row['name'], new)
+</pre>
+
+<h3>xrefs.headline</h3>
+<div class="sig"><span class="mod">xrefs.</span><span class="fn">headline</span>(results, verb=&#x27;Updated&#x27;)</div>
+<p><span class="pill pure">Pure</span> One line for a toast from <code>(name, error)</code> pairs, where a falsy error is a
+success: <code>'Reloaded 3 xrefs'</code>, or <code>'Reloaded 2 of 3 xrefs'</code> when some
+failed; <code>'No xrefs to update'</code> for none.</p>
+<pre data-lang="python">
+xrefs.headline([('Site', None), ('Survey', 'not found')], 'Reloaded')
+# 'Reloaded 1 of 2 xrefs'
+</pre>
+
+<h3>xrefs.summarize</h3>
+<div class="sig"><span class="mod">xrefs.</span><span class="fn">summarize</span>(results, verb=&#x27;Updated&#x27;, limit=None)</div>
+<p><span class="pill pure">Pure</span> The headline as a sentence, then every failure as <code>name: error</code> under
+<code>Not done:</code>; <code>limit</code> caps the failure list. Text for
+<code>forms.alert</code>.</p>
+<pre data-lang="python">
+forms.alert(xrefs.summarize(results, 'Reloaded', limit=15))
+</pre>
+
+<h3>xrefs.check_loaded</h3>
+<div class="sig"><span class="mod">xrefs.</span><span class="fn">check_loaded</span>(results, xref_rows)</div>
+<p><span class="pill pure">Pure</span> <code>results</code> with each success whose xref did not end up loaded turned into a
+failure such as <code>'not found at ..\b.dwg'</code>. Pass the <code>xrefs.list()</code> rows
+read after the action. Names no longer in the rows (detached, bound) and earlier errors are kept
+as they were.</p>
+<pre data-lang="python">
+results = []
+for name in names:
+    try:
+        xrefs.reload(name)
+        results.append((name, None))
+    except ValueError as error:
+        results.append((name, str(error)))
+results = xrefs.check_loaded(results, xrefs.list())
+toast.info(xrefs.headline(results, 'Reloaded'))
+</pre>
+
+<h2 id="layouts">layouts: paper space tabs</h2>
+
+<p>Paper space layouts in tab order, the current one, create, copy, rename, delete, reorder,
+and the drawing's named page setups. Changes go through AutoCAD's <code>LayoutManager</code>,
+which acts on the active drawing. <code>is_model</code>, <code>reorder</code> and
+<code>unique_name</code> are pure.</p>
+
+<h3>layouts.names</h3>
+<div class="sig"><span class="mod">layouts.</span><span class="fn">names</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Paper space layout names in tab order. The Model tab is not included.</p>
+<pre data-lang="python">
+from pyacad import layouts
+
+for name in layouts.names():
+    print(name)
+</pre>
+
+<h3>layouts.current</h3>
+<div class="sig"><span class="mod">layouts.</span><span class="fn">current</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> The current layout's name, <code>'Model'</code> on the model tab.</p>
+<pre data-lang="python">
+if layouts.is_model(layouts.current()):
+    toast.info('You are in model space')
+</pre>
+
+<h3>layouts.set_current</h3>
+<div class="sig"><span class="mod">layouts.</span><span class="fn">set_current</span>(name)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Switches to the named layout (<code>'Model'</code>, any case, for the model tab).
+Raises <code>ValueError</code> for an unknown layout.</p>
+<pre data-lang="python">
+layouts.set_current('A1 - Plan')
+</pre>
+
+<h3>layouts.exists</h3>
+<div class="sig"><span class="mod">layouts.</span><span class="fn">exists</span>(name)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> <code>True</code> when the drawing has a layout of that name.</p>
+<pre data-lang="python">
+layouts.exists('A1 - Plan')
+</pre>
+
+<h3>layouts.create</h3>
+<div class="sig"><span class="mod">layouts.</span><span class="fn">create</span>(name)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Adds an empty paper space layout and returns its name. Raises
+<code>ValueError</code> when it already exists.</p>
+<pre data-lang="python">
+layouts.create('A1 - Sections')
+</pre>
+
+<h3>layouts.delete</h3>
+<div class="sig"><span class="mod">layouts.</span><span class="fn">delete</span>(name)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Deletes a paper space layout. Raises <code>ValueError</code> for the model tab or an
+unknown layout.</p>
+<pre data-lang="python">
+layouts.delete('Layout1')
+</pre>
+
+<h3>layouts.rename</h3>
+<div class="sig"><span class="mod">layouts.</span><span class="fn">rename</span>(old, new)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Renames a paper space layout; a change of case only is allowed. Raises
+<code>ValueError</code> when either name is the model tab, the old one does not exist or the new
+one is taken.</p>
+<pre data-lang="python">
+layouts.rename('Layout1', 'A1 - Plan')
+</pre>
+
+<h3>layouts.copy</h3>
+<div class="sig"><span class="mod">layouts.</span><span class="fn">copy</span>(source, new)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Copies a paper space layout, with its content and plot settings, to a new layout and
+returns the new name. Raises <code>ValueError</code> when either is the model tab, the new name
+is blank or taken, or the source does not exist. Use <code>layouts.unique_name</code> to pick a
+free name.</p>
+<pre data-lang="python">
+new = layouts.copy('A1 - Plan', layouts.unique_name(layouts.names(), 'A1 - Plan'))
+</pre>
+
+<h3>layouts.set_order</h3>
+<div class="sig"><span class="mod">layouts.</span><span class="fn">set_order</span>(ordered)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Puts the paper space layouts in this tab order. <code>ordered</code> must name every
+layout exactly once (any case), as <code>layouts.reorder</code> returns it; otherwise
+<code>ValueError</code> lists the layouts.</p>
+<pre data-lang="python">
+layouts.set_order(sorted(layouts.names(), key=str.lower))
+</pre>
+
+<h3>layouts.page_setups</h3>
+<div class="sig"><span class="mod">layouts.</span><span class="fn">page_setups</span>(paper_only=False)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Names of the drawing's named page setups, sorted ignoring case. With
+<code>paper_only=True</code> the ones made for model space, which a layout cannot take, are left
+out.</p>
+<pre data-lang="python">
+setups = layouts.page_setups(paper_only=True)
+</pre>
+
+<h3>layouts.apply_page_setup</h3>
+<div class="sig"><span class="mod">layouts.</span><span class="fn">apply_page_setup</span>(setup, layout_names)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Makes a named paper space page setup the plot settings of each named layout and returns
+how many. All or nothing: an unknown setup, a model space setup, the model tab or an unknown
+layout raises <code>ValueError</code> before any layout changes.</p>
+<pre data-lang="python">
+layouts.apply_page_setup('A1 PDF', layouts.names())
+</pre>
+
+<h3>layouts.is_model</h3>
+<div class="sig"><span class="mod">layouts.</span><span class="fn">is_model</span>(name)</div>
+<p><span class="pill pure">Pure</span> <code>True</code> for the model tab's name in any case, surrounding spaces
+ignored.</p>
+<pre data-lang="python">
+layouts.is_model(' MODEL ')    # True
+</pre>
+
+<h3>layouts.reorder</h3>
+<div class="sig"><span class="mod">layouts.</span><span class="fn">reorder</span>(names, name, new_index)</div>
+<p><span class="pill pure">Pure</span> <code>names</code> with <code>name</code> moved to <code>new_index</code> (0 is first),
+as a new list. The index is clamped to the list; <code>name</code> matches in any case. Raises
+<code>ValueError</code> when it is not in <code>names</code>.</p>
+<pre data-lang="python">
+order = layouts.reorder(layouts.names(), 'Cover', 0)
+layouts.set_order(order)
+</pre>
+
+<h3>layouts.unique_name</h3>
+<div class="sig"><span class="mod">layouts.</span><span class="fn">unique_name</span>(existing, wanted)</div>
+<p><span class="pill pure">Pure</span> <code>wanted</code>, or <code>wanted</code> with <code>' (2)'</code>,
+<code>' (3)'</code> ... when a layout in <code>existing</code> (any case) or the model tab
+already has that name. A counter <code>wanted</code> already carries is replaced, not stacked.
+Raises <code>ValueError</code> for a blank name.</p>
+<pre data-lang="python">
+layouts.unique_name(['A1', 'A1 (2)'], 'A1 (2)')    # 'A1 (3)'
+</pre>
+
+<h2 id="plot">plot: PDF output</h2>
+
+<p>Plot a layout to a PDF (or any file a plot device writes), list plot devices and their paper
+sizes, and name the files of a batch. <code>to_pdf</code> plots in the foreground: it sets
+BACKGROUNDPLOT to 0 for the duration, puts it back afterwards, and returns once the file is
+written. Everything here also runs in Core Console. <code>output_name</code>,
+<code>batch_names</code> and <code>scale_type</code> are pure.</p>
+
+<h3>plot.to_pdf</h3>
+<div class="sig"><span class="mod">plot.</span><span class="fn">to_pdf</span>(layout, path, page_setup=None, device=&#x27;DWG To PDF.pc3&#x27;, paper=None, scale=&#x27;fit&#x27;)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Plots one layout to <code>path</code> and returns <code>path</code>. The settings start
+from <code>page_setup</code> (a named page setup) when given, else from the layout's own plot
+settings; the device is set to <code>device</code>; <code>paper</code> is a canonical paper
+name the device offers (see <code>plot.papers</code>), else the layout's current paper is kept
+when the device has it. The plot is always the whole layout, centred, unrotated, at
+<code>scale</code> (<code>'fit'</code> or a ratio such as <code>'1:50'</code>, see
+<code>plot.scale_type</code>). Raises <code>RuntimeError</code> when another plot is running and
+<code>ValueError</code> for an unknown layout, page setup, paper or scale. It does not create the
+folder.</p>
+<pre data-lang="python">
+plot.to_pdf('A1 - Plan', r'C:\Out\A1 - Plan.pdf', paper='ISO_full_bleed_A1_(841.00_x_594.00_MM)')
+</pre>
+
+<h3>plot.devices</h3>
+<div class="sig"><span class="mod">plot.</span><span class="fn">devices</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Names of every plot device AutoCAD knows: its .pc3 files and the Windows
+printers.</p>
+<pre data-lang="python">
+if 'DWG To PDF.pc3' not in plot.devices():
+    toast.error('DWG To PDF.pc3 is missing')
+</pre>
+
+<h3>plot.papers</h3>
+<div class="sig"><span class="mod">plot.</span><span class="fn">papers</span>(device)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> The canonical paper size names a device offers, the names <code>to_pdf</code>'s
+<code>paper</code> takes (not the friendly names in the Plot dialog).</p>
+<pre data-lang="python">
+a1 = [p for p in plot.papers('DWG To PDF.pc3') if '_A1_' in p]
+</pre>
+
+<h3>plot.output_name</h3>
+<div class="sig"><span class="mod">plot.</span><span class="fn">output_name</span>(pattern, drawing, layout)</div>
+<p><span class="pill pure">Pure</span> <code>pattern</code> with <code>{drawing}</code> (the drawing's file name without folder
+or extension) and <code>{layout}</code> filled in. Characters Windows forbids in file names
+become <code>_</code>.</p>
+<pre data-lang="python">
+plot.output_name('{drawing} - {layout}.pdf', r'C:\Job\GA-100.dwg', 'A1/Plan')
+# 'GA-100 - A1_Plan.pdf'
+</pre>
+
+<h3>plot.batch_names</h3>
+<div class="sig"><span class="mod">plot.</span><span class="fn">batch_names</span>(drawing_name, layout_names, folder, pattern=None)</div>
+<p><span class="pill pure">Pure</span> <code>(layout, path)</code> for each layout, in order: <code>output_name</code> of
+<code>pattern</code> (<code>plot.DEFAULT_PATTERN</code> when <code>None</code>) inside
+<code>folder</code>, with <code>.pdf</code> added when missing. Two layouts never get the same
+path in any case: a repeat gains <code>' (2)'</code>, <code>' (3)'</code> ... before the
+extension, never a name another layout already plots to.</p>
+<pre data-lang="python">
+for layout, target in plot.batch_names(doc.path(), layouts.names(), r'C:\Out'):
+    plot.to_pdf(layout, target)
+</pre>
+
+<h3>plot.scale_type</h3>
+<div class="sig"><span class="mod">plot.</span><span class="fn">scale_type</span>(scale)</div>
+<p><span class="pill pure">Pure</span> The AutoCAD <code>StdScaleType</code> member name for <code>'fit'</code> or a ratio:
+<code>'1:1'</code>, <code>'1:2'</code>, <code>'1:4'</code>, <code>'1:5'</code>,
+<code>'1:8'</code>, <code>'1:10'</code>, <code>'1:16'</code>, <code>'1:20'</code>,
+<code>'1:30'</code>, <code>'1:40'</code>, <code>'1:50'</code>, <code>'1:100'</code>,
+<code>'2:1'</code>, <code>'4:1'</code>, <code>'8:1'</code>, <code>'10:1'</code>,
+<code>'100:1'</code>, <code>'1000:1'</code>. Spaces and case are ignored; anything else raises
+<code>ValueError</code>.</p>
+<pre data-lang="python">
+plot.scale_type('1:50')    # 'StdScale1To50'
+plot.scale_type('Fit')     # 'ScaleToFit'
+</pre>
+
+<h3>plot.DEFAULT_PATTERN</h3>
+<div class="sig"><span class="mod">plot.</span><span class="fn">DEFAULT_PATTERN</span> = &#x27;{drawing} - {layout}.pdf&#x27;</div>
+<p><span class="pill pure">Pure</span> The file name pattern <code>batch_names</code> uses when you give none.</p>
+
+
+<h2 id="audit">audit: drawing health</h2>
+
+<p>Purge, AUDIT, zero-length and duplicate geometry, colours to ByLayer, proxy objects, and
+text styles whose font files cannot be found. Scans cover model space and every layout;
+<code>proxies</code> and <code>proxy_details</code> also look inside block definitions. The
+pure half plans and words the results, and is what the shipped Drawing Cleanup and Font and
+Proxy Report tools are built on. <code>audit.purge</code> has a parameter called
+<code>all</code>; pass it by keyword.</p>
+
+<h3>audit.purge</h3>
+<div class="sig"><span class="mod">audit.</span><span class="fn">purge</span>(all=True)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Erases unreferenced blocks, layers, linetypes, text styles, dimension styles,
+registered applications, multiline styles, table styles and multileader styles, and returns how
+many it erased. With <code>all=True</code> it repeats until a pass finds nothing, which catches
+blocks nested in blocks; <code>all=False</code> does one pass. One transaction.</p>
+<pre data-lang="python">
+from pyacad import audit
+
+removed = audit.purge()
+</pre>
+
+<h3>audit.audit</h3>
+<div class="sig"><span class="mod">audit.</span><span class="fn">audit</span>(fix=True)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Queues the AUDIT command, answering Yes to fixing errors when <code>fix</code> is true.
+Like <code>doc.send_command</code> it runs after your script returns, so nothing comes back;
+AUDIT reports on the command line.</p>
+<pre data-lang="python">
+audit.audit(fix=True)
+</pre>
+
+<h3>audit.zero_length</h3>
+<div class="sig"><span class="mod">audit.</span><span class="fn">zero_length</span>(progress=None, cancelled=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Handles of <code>LINE</code> and <code>LWPOLYLINE</code> entities with no length, in
+model space and every layout.</p>
+<pre data-lang="python">
+erased, skipped = audit.erase(audit.zero_length())
+</pre>
+
+<h3>audit.duplicates</h3>
+<div class="sig"><span class="mod">audit.</span><span class="fn">duplicates</span>(tolerance=1e-06, progress=None, cancelled=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Groups of handles (two or more each) of entities in the same space with the same type,
+layer and geometry, as <code>audit.geometry_key</code> defines it, with numbers compared to
+<code>tolerance</code>. Only the types <code>geometry_key</code> knows are checked: lines,
+circles, arcs, lightweight polylines, text, mtext and block references.</p>
+<pre data-lang="python">
+groups = audit.duplicates()
+audit.erase(audit.duplicate_extras(groups))   # keeps the first of each group
+</pre>
+
+<h3>audit.erase</h3>
+<div class="sig"><span class="mod">audit.</span><span class="fn">erase</span>(handles, progress=None, cancelled=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Erases entities by handle in one transaction, leaving any on a locked layer alone, and
+returns <code>(erased, skipped)</code>. Handles that no longer resolve are passed over without
+counting. This is the forgiving counterpart of <code>ents.delete</code>.</p>
+<pre data-lang="python">
+erased, skipped = audit.erase(handles)
+toast.success('%d erased' % erased, '%d on locked layers left alone' % skipped)
+</pre>
+
+<h3>audit.colors_to_bylayer</h3>
+<div class="sig"><span class="mod">audit.</span><span class="fn">colors_to_bylayer</span>(progress=None, cancelled=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Sets the colour of every entity in model space and every layout, and of the attributes
+on block references, to ByLayer, and returns <code>(changed, skipped)</code>, where skipped is
+on locked layers. Viewports and the contents of block definitions are left alone.</p>
+<pre data-lang="python">
+changed, skipped = audit.colors_to_bylayer()
+</pre>
+
+<h3>audit.proxies</h3>
+<div class="sig"><span class="mod">audit.</span><span class="fn">proxies</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Handles of proxy entities (DXF name starting <code>ACAD_PROXY</code>) in every space
+and block definition of the drawing.</p>
+<pre data-lang="python">
+if audit.proxies():
+    toast.warning('This drawing has proxy entities')
+</pre>
+
+<h3>audit.proxy_details</h3>
+<div class="sig"><span class="mod">audit.</span><span class="fn">proxy_details</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Every proxy as a dict: <code>handle</code>, <code>kind</code> (<code>'entity'</code> or
+<code>'object'</code>), <code>class</code> (the original class name, <code>''</code> when the
+proxy does not say), <code>application</code> (what made it) and <code>where</code> (the space or
+<code>'BLOCK:Name'</code> for an entity, <code>'Named objects'</code> for an object). Objects are
+found in the named object dictionary and the dictionaries nested in it.</p>
+<pre data-lang="python">
+for cls, app, count in audit.proxy_summary(audit.proxy_details()):
+    print(cls, app, count)
+</pre>
+
+<h3>audit.text_styles_missing_fonts</h3>
+<div class="sig"><span class="mod">audit.</span><span class="fn">text_styles_missing_fonts</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Names of the drawing's own text styles whose font file AutoCAD cannot find (the
+support paths, the drawing's folder, and the Windows fonts for TrueType). Xref styles are
+skipped.</p>
+<pre data-lang="python">
+missing = audit.text_styles_missing_fonts()
+</pre>
+
+<h3>audit.text_style_fonts</h3>
+<div class="sig"><span class="mod">audit.</span><span class="fn">text_style_fonts</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Every font file the drawing's own text styles name, as <code>(style_name, font_file,
+role)</code> rows: role <code>'font'</code> for a style's font, <code>'big font'</code> for its
+Asian big font, <code>'shape'</code> for a shape file loaded for complex linetypes. Feed it to
+<code>audit.missing_fonts</code>.</p>
+<pre data-lang="python">
+missing = audit.missing_fonts(audit.text_style_fonts(), audit.font_finder())
+</pre>
+
+<h3>audit.font_finder</h3>
+<div class="sig"><span class="mod">audit.</span><span class="fn">font_finder</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> A callable that takes a font file name and returns <code>True</code> when AutoCAD can
+find it: the <code>available</code> argument of <code>audit.missing_fonts</code>.</p>
+<pre data-lang="python">
+found = audit.font_finder()
+print(found('romans.shx'))
+</pre>
+
+<h3>audit.set_text_style_font</h3>
+<div class="sig"><span class="mod">audit.</span><span class="fn">set_text_style_font</span>(style_name, font_file)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Points a text style at another font file, such as <code>simplex.shx</code> or
+<code>arial.ttf</code>, clearing any TrueType typeface so the file is what counts. Text already
+drawn shows the new font after a REGEN. Raises <code>ValueError</code> for an empty file name,
+an unknown style, or a style that holds a shape file.</p>
+<pre data-lang="python">
+for kind, default, styles in audit.remap_plan(missing):
+    for style in styles:
+        audit.set_text_style_font(style, default)
+doc.send_command('_.REGEN')
+</pre>
+
+<h3>audit.geometry_key</h3>
+<div class="sig"><span class="mod">audit.</span><span class="fn">geometry_key</span>(snapshot, tolerance=1e-06)</div>
+<p><span class="pill pure">Pure</span> A hashable key for an <code>ents.get</code> snapshot: type, layer (ignoring case) and
+geometry, with every number snapped to <code>tolerance</code>. A line and its reverse share a
+key; a block reference's attribute values are part of its key. Returns <code>None</code> for
+types without a rule. Raises <code>ValueError</code> when <code>tolerance</code> is not above
+zero.</p>
+<pre data-lang="python">
+a = {'type': 'LINE', 'layer': 'A', 'start': (0, 0, 0), 'end': (1, 0, 0)}
+b = {'type': 'LINE', 'layer': 'a', 'start': (1, 0, 0), 'end': (0, 0, 0)}
+audit.geometry_key(a) == audit.geometry_key(b)    # True
+</pre>
+
+<h3>audit.duplicate_extras</h3>
+<div class="sig"><span class="mod">audit.</span><span class="fn">duplicate_extras</span>(groups)</div>
+<p><span class="pill pure">Pure</span> The handles to delete from <code>duplicates</code> groups: every one but the first of
+each group, so one copy always survives.</p>
+<pre data-lang="python">
+audit.duplicate_extras([['1A', '1B', '1C'], ['2A', '2B']])   # ['1B', '1C', '2B']
+</pre>
+
+<h3>audit.step_label</h3>
+<div class="sig"><span class="mod">audit.</span><span class="fn">step_label</span>(key)</div>
+<p><span class="pill pure">Pure</span> The checklist label of a cleanup step key from <code>audit.STEPS</code>. Raises
+<code>ValueError</code> for an unknown key.</p>
+<pre data-lang="python">
+audit.step_label('zero_length')   # 'Delete zero-length lines and polylines'
+</pre>
+
+<h3>audit.cleanup_plan</h3>
+<div class="sig"><span class="mod">audit.</span><span class="fn">cleanup_plan</span>(choices, defaults=None)</div>
+<p><span class="pill pure">Pure</span> The cleanup steps to run, as keys in <code>STEPS</code> order. <code>choices</code> is
+a list of keys (exactly those run), a dict of key to true or false (overriding the defaults one
+step at a time), or <code>None</code> (the defaults run). <code>defaults</code> is a list of
+keys; <code>None</code> means the steps <code>STEPS</code> ticks by default. Unknown and
+repeated keys are dropped; case and spaces are ignored.</p>
+<pre data-lang="python">
+audit.cleanup_plan({'bylayer': True, 'zoom': False})
+# ['purge', 'audit', 'zero_length', 'duplicates', 'bylayer']
+</pre>
+
+<h3>audit.deleting_steps</h3>
+<div class="sig"><span class="mod">audit.</span><span class="fn">deleting_steps</span>(plan)</div>
+<p><span class="pill pure">Pure</span> The steps in a plan that erase something (purge, zero-length, duplicates), in run
+order: the ones to confirm with the user first.</p>
+<pre data-lang="python">
+audit.deleting_steps(['zoom', 'purge'])    # ['purge']
+</pre>
+
+<h3>audit.format_report</h3>
+<div class="sig"><span class="mod">audit.</span><span class="fn">format_report</span>(step_counts)</div>
+<p><span class="pill pure">Pure</span> The Drawing Cleanup report, one line per step, from a list of <code>(key,
+result)</code>. A result is a count, <code>None</code> for a step queued to run later (audit,
+zoom), or a dict with any of <code>count</code>, <code>skipped</code>, <code>groups</code>,
+<code>error</code>, <code>cancelled</code>, <code>not_run</code>. Returns
+<code>'No steps ran.'</code> for an empty list.</p>
+<pre data-lang="python">
+text = audit.format_report([('purge', 14), ('audit', None),
+                            ('duplicates', {'count': 3, 'groups': 2})])
+# Purge: 14 unused items removed
+# Audit: queued; it runs when this tool finishes and reports on the command line
+# Duplicates: 3 extra copies deleted (2 groups)
+</pre>
+
+<h3>audit.summary</h3>
+<div class="sig"><span class="mod">audit.</span><span class="fn">summary</span>(step_counts)</div>
+<p><span class="pill pure">Pure</span> One line for the toast after a cleanup, such as <code>'14 purged, 3 duplicates
+deleted'</code>, from the same <code>(key, result)</code> list; <code>'Nothing needed
+cleaning'</code> when nothing changed.</p>
+<pre data-lang="python">
+toast.success(audit.summary(steps), audit.format_report(steps))
+</pre>
+
+<h3>audit.font_kind</h3>
+<div class="sig"><span class="mod">audit.</span><span class="fn">font_kind</span>(font_file)</div>
+<p><span class="pill pure">Pure</span> <code>'ttf'</code> for a TrueType or OpenType file (.ttf, .ttc, .otf), else
+<code>'shx'</code>.</p>
+<pre data-lang="python">
+audit.font_kind('Arial.TTF')    # 'ttf'
+</pre>
+
+<h3>audit.missing_fonts</h3>
+<div class="sig"><span class="mod">audit.</span><span class="fn">missing_fonts</span>(styles, available)</div>
+<p><span class="pill pure">Pure</span> The rows of <code>styles</code> whose font file (column 2) is not available, in order;
+extra columns ride along, and rows with no font file are skipped. <code>available</code> is
+either a collection of font file names (compared on the bare file name ignoring case, a name
+with no extension meaning .shx) or a callable such as <code>audit.font_finder()</code>, asked
+once per distinct file.</p>
+<pre data-lang="python">
+audit.missing_fonts([('Notes', 'romans.shx'), ('Title', 'corp.ttf')], ['ROMANS'])
+# [('Title', 'corp.ttf')]
+</pre>
+
+<h3>audit.remap_plan</h3>
+<div class="sig"><span class="mod">audit.</span><span class="fn">remap_plan</span>(missing_rows)</div>
+<p><span class="pill pure">Pure</span> How to remap missing fonts: <code>[(kind, default, style_names)]</code>, SHX first
+(<code>'simplex.shx'</code>) then TrueType (<code>'arial.ttf'</code>). Only a style's own font
+is remapped; big fonts and shape files are left out.</p>
+<pre data-lang="python">
+audit.remap_plan([('Title', 'corp.ttf', 'font')])   # [('ttf', 'arial.ttf', ['Title'])]
+</pre>
+
+<h3>audit.proxy_summary</h3>
+<div class="sig"><span class="mod">audit.</span><span class="fn">proxy_summary</span>(details)</div>
+<p><span class="pill pure">Pure</span> <code>[(class, application, count)]</code> from <code>proxy_details</code> rows, most
+common first, then by class name. A proxy with no class counts as
+<code>'(unknown class)'</code>.</p>
+<pre data-lang="python">
+rows = audit.proxy_summary(audit.proxy_details())
+output.print_table(rows, ['Class', 'Application', 'Count'])
+</pre>
+
+<h3>audit.format_font_report</h3>
+<div class="sig"><span class="mod">audit.</span><span class="fn">format_font_report</span>(details, missing, limit=15)</div>
+<p><span class="pill pure">Pure</span> The Font and Proxy Report text: proxies grouped by class, then the missing font rows.
+Each list stops after <code>limit</code> lines with <code>...and N more</code>.</p>
+<pre data-lang="python">
+forms.alert(audit.format_font_report(details, missing), 'Font and proxy report')
+</pre>
+
+<h3>audit.font_report_rows</h3>
+<div class="sig"><span class="mod">audit.</span><span class="fn">font_report_rows</span>(details, missing)</div>
+<p><span class="pill pure">Pure</span> Spreadsheet rows under <code>audit.FONT_REPORT_HEADERS</code>: one per proxy, then one
+per missing font row.</p>
+<pre data-lang="python">
+xl.write(path, audit.font_report_rows(details, missing), headers=audit.FONT_REPORT_HEADERS)
+</pre>
+
+<h3>audit.STEPS</h3>
+<div class="sig"><span class="mod">audit.</span><span class="fn">STEPS</span> = (
+    (&#x27;purge&#x27;, &#x27;Purge everything unused (repeats until nothing is left)&#x27;, True),
+    (&#x27;audit&#x27;, &#x27;Audit the drawing and fix errors&#x27;, True),
+    (&#x27;zero_length&#x27;, &#x27;Delete zero-length lines and polylines&#x27;, True),
+    (&#x27;duplicates&#x27;, &#x27;Delete duplicate entities (same type, layer and geometry)&#x27;, True),
+    (&#x27;bylayer&#x27;, &#x27;Set every entity colour to ByLayer&#x27;, False),
+    (&#x27;zoom&#x27;, &#x27;Zoom extents&#x27;, True),
+)</div>
+<p><span class="pill pure">Pure</span> The Drawing Cleanup steps as <code>(key, checklist label, ticked by default)</code>, in
+the order they run: <code>purge</code>, <code>audit</code>, <code>zero_length</code>,
+<code>duplicates</code>, <code>bylayer</code> (off by default), <code>zoom</code>.</p>
+
+<h3>audit.FONT_REPORT_HEADERS</h3>
+<div class="sig"><span class="mod">audit.</span><span class="fn">FONT_REPORT_HEADERS</span> = [&#x27;Issue&#x27;, &#x27;Name&#x27;, &#x27;Detail&#x27;, &#x27;Where&#x27;, &#x27;Handle&#x27;]</div>
+<p><span class="pill pure">Pure</span> The column headers for <code>font_report_rows</code>.</p>
+
+<h2 id="lisp">lisp: AutoLISP from Python</h2>
+
+<p>Call a LISP function, queue an expression, and read the arguments a
+<code>(pyacad ...)</code> call passed in. <code>call</code> goes through AutoCAD's
+<code>acedInvoke</code>, which reaches only functions LISP has exposed: commands defined as
+<code>C:NAME</code> and functions registered with <code>(vl-acad-defun 'name)</code>. Arbitrary
+expressions cannot be evaluated synchronously from .NET, so <code>evaluate</code> queues one on
+the command line instead. Python functions cannot be registered as LISP functions; a script is
+reachable from LISP as <code>(pyacad "PYNAME" args...)</code>, which hands it the arguments
+and returns its <code>__result__</code> (see the <a href="commands.html">Commands page</a>).
+<code>encode</code> and <code>decode</code> are pure.</p>
+
+<h3>lisp.call</h3>
+<div class="sig"><span class="mod">lisp.</span><span class="fn">call</span>(function, *args)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Calls an exposed LISP function by name with Python arguments (encoded by
+<code>lisp.encode</code>) and returns its result as Python values: a single value bare, several
+as a list, nil as <code>None</code>, T as <code>True</code>, points as tuples, entity names as
+handles. Returns <code>None</code> when the function returns nothing. AutoCAD raises its own
+exception when the function is not exposed.</p>
+<pre data-lang="python">
+# LISP side, loaded at startup:
+#   (defun pa-scale (sheet) (if (= sheet "A1") 50 100))
+#   (vl-acad-defun 'pa-scale)
+factor = lisp.call('pa-scale', 'A1')     # 50
+</pre>
+
+<h3>lisp.evaluate</h3>
+<div class="sig"><span class="mod">lisp.</span><span class="fn">evaluate</span>(expression)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Queues a LISP expression on the command line (wrapping it in parentheses when you
+left them off). It runs after your script returns, so this always returns
+<code>None</code>.</p>
+<pre data-lang="python">
+lisp.evaluate('(setvar "OSMODE" 4133)')
+</pre>
+
+<h3>lisp.args</h3>
+<div class="sig"><span class="mod">lisp.</span><span class="fn">args</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> The arguments of the <code>(pyacad "PYNAME" args...)</code> call, or of the
+<code>PYACAD</code> command line, that ran this script, as a list; <code>[]</code> when it got
+none. The same as <code>script.get_args()</code> and the <code>__args__</code> global. From
+LISP, strings arrive as <code>str</code>, integers as <code>int</code>, reals as
+<code>float</code>, nil as <code>None</code> and T as <code>True</code>; from the
+<code>PYACAD</code> command line every argument is a string.</p>
+<pre data-lang="python">
+args = lisp.args()
+pattern = args[0] if args else '*'
+</pre>
+
+<h3>lisp.encode</h3>
+<div class="sig"><span class="mod">lisp.</span><span class="fn">encode</span>(value)</div>
+<p><span class="pill pure">Pure</span> A Python value as <code>(type code, value)</code> pairs: <code>None</code> and
+<code>False</code> are nil, <code>True</code> is T, strings are text, ints are 32-bit integers
+(reals when they do not fit), floats are reals, lists and tuples are lists, and a dict is a list
+of <code>(key value)</code> pairs. Anything else becomes its <code>str()</code>.</p>
+<pre data-lang="python">
+lisp.encode(['A', 2])
+# [(5016, None), (5005, 'A'), (5010, 2), (5017, None)]
+</pre>
+
+<h3>lisp.decode</h3>
+<div class="sig"><span class="mod">lisp.</span><span class="fn">decode</span>(pairs)</div>
+<p><span class="pill pure">Pure</span> <code>(type code, value)</code> pairs back into Python values: a list with one item
+per top-level LISP value. Lists nest, a dotted pair closes like a list, nil is
+<code>None</code>, T is <code>True</code>.</p>
+<pre data-lang="python">
+lisp.decode([(5016, None), (5005, 'A'), (5010, 2), (5017, None)])   # [['A', 2]]
+</pre>
+
+<h3>lisp type codes</h3>
+<div class="sig"><span class="mod">lisp.</span><span class="fn">NIL</span> = 5019</div>
+<div class="sig"><span class="mod">lisp.</span><span class="fn">T</span> = 5021</div>
+<div class="sig"><span class="mod">lisp.</span><span class="fn">TEXT</span> = 5005</div>
+<div class="sig"><span class="mod">lisp.</span><span class="fn">INT16</span> = 5003</div>
+<div class="sig"><span class="mod">lisp.</span><span class="fn">INT32</span> = 5010</div>
+<div class="sig"><span class="mod">lisp.</span><span class="fn">DOUBLE</span> = 5001</div>
+<div class="sig"><span class="mod">lisp.</span><span class="fn">POINT2D</span> = 5002</div>
+<div class="sig"><span class="mod">lisp.</span><span class="fn">POINT3D</span> = 5009</div>
+<div class="sig"><span class="mod">lisp.</span><span class="fn">LIST_BEGIN</span> = 5016</div>
+<div class="sig"><span class="mod">lisp.</span><span class="fn">LIST_END</span> = 5017</div>
+<div class="sig"><span class="mod">lisp.</span><span class="fn">DOTTED_PAIR</span> = 5018</div>
+<div class="sig"><span class="mod">lisp.</span><span class="fn">VOID</span> = 5014</div>
+<div class="sig"><span class="mod">lisp.</span><span class="fn">ENAME</span> = 5006</div>
+<p><span class="pill pure">Pure</span> AutoCAD's LISP data type codes (<code>LispDataType</code>), as plain ints, for reading
+and writing the pairs above.</p>
+
+<h2 id="units">units: drawing units</h2>
+
+<p>The INSUNITS names, conversions through metres, and length formatting, with feet and inches
+for Inches and Feet drawings. Everything but <code>current</code> is pure. Unit names are
+AutoCAD's <code>UnitsValue</code> names (<code>'Millimeters'</code>, <code>'Feet'</code>, ...)
+in any case, exactly what <code>doc.units()</code> returns.</p>
+
+<h3>units.current</h3>
+<div class="sig"><span class="mod">units.</span><span class="fn">current</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> The active drawing's insertion units name; the same as <code>doc.units()</code>.</p>
+<pre data-lang="python">
+from pyacad import units
+
+name = units.current()     # 'Millimeters'
+</pre>
+
+<h3>units.name_of</h3>
+<div class="sig"><span class="mod">units.</span><span class="fn">name_of</span>(value)</div>
+<p><span class="pill pure">Pure</span> The unit name for an INSUNITS number. Raises <code>ValueError</code> for a number that
+is not one.</p>
+<pre data-lang="python">
+units.name_of(4)    # 'Millimeters'
+</pre>
+
+<h3>units.to_metres</h3>
+<div class="sig"><span class="mod">units.</span><span class="fn">to_metres</span>(value, unit_name)</div>
+<p><span class="pill pure">Pure</span> <code>value</code> in the named unit, as metres. Raises <code>ValueError</code> for an
+unknown name or for <code>'Undefined'</code>, which has no length.</p>
+<pre data-lang="python">
+units.to_metres(2500, 'Millimeters')    # 2.5
+</pre>
+
+<h3>units.from_metres</h3>
+<div class="sig"><span class="mod">units.</span><span class="fn">from_metres</span>(value, unit_name)</div>
+<p><span class="pill pure">Pure</span> <code>value</code> in metres, as the named unit. Fails like
+<code>to_metres</code>.</p>
+<pre data-lang="python">
+units.from_metres(1.0, 'Feet')    # 3.2808...
+</pre>
+
+<h3>units.format_length</h3>
+<div class="sig"><span class="mod">units.</span><span class="fn">format_length</span>(value, unit_name, precision=2)</div>
+<p><span class="pill pure">Pure</span> A length for display: feet and inches such as <code>2'-6.50"</code> for Inches and
+Feet drawings, the number and short label such as <code>'12.35 mm'</code> for the others, and
+the bare number for Undefined. <code>precision</code> is decimal places.</p>
+<pre data-lang="python">
+units.format_length(30.5, 'Inches')           # 2'-6.50"
+units.format_length(12345.6, 'Millimeters')   # '12345.60 mm'
+units.format_length(12.5, 'Feet', 0)          # 12'-6"
+</pre>
+
+<h3>units.UNITS</h3>
+<div class="sig"><span class="mod">units.</span><span class="fn">UNITS</span> = {
+    0: (&#x27;Undefined&#x27;, None, &#x27;&#x27;),
+    1: (&#x27;Inches&#x27;, 0.0254, &#x27;in&#x27;),
+    2: (&#x27;Feet&#x27;, 0.3048, &#x27;ft&#x27;),
+    3: (&#x27;Miles&#x27;, 1609.344, &#x27;mi&#x27;),
+    4: (&#x27;Millimeters&#x27;, 0.001, &#x27;mm&#x27;),
+    5: (&#x27;Centimeters&#x27;, 0.01, &#x27;cm&#x27;),
+    6: (&#x27;Meters&#x27;, 1.0, &#x27;m&#x27;),
+    7: (&#x27;Kilometers&#x27;, 1000.0, &#x27;km&#x27;),
+    8: (&#x27;MicroInches&#x27;, 2.54e-08, &#x27;uin&#x27;),
+    9: (&#x27;Mils&#x27;, 2.54e-05, &#x27;mil&#x27;),
+    10: (&#x27;Yards&#x27;, 0.9144, &#x27;yd&#x27;),
+    11: (&#x27;Angstroms&#x27;, 1e-10, &#x27;A&#x27;),
+    12: (&#x27;Nanometers&#x27;, 1e-09, &#x27;nm&#x27;),
+    13: (&#x27;Microns&#x27;, 1e-06, &#x27;um&#x27;),
+    14: (&#x27;Decimeters&#x27;, 0.1, &#x27;dm&#x27;),
+    15: (&#x27;Dekameters&#x27;, 10.0, &#x27;dam&#x27;),
+    16: (&#x27;Hectometers&#x27;, 100.0, &#x27;hm&#x27;),
+    17: (&#x27;Gigameters&#x27;, 1000000000.0, &#x27;Gm&#x27;),
+    18: (&#x27;Astronomical&#x27;, 149597870700.0, &#x27;au&#x27;),
+    19: (&#x27;LightYears&#x27;, 9460730472580800.0, &#x27;ly&#x27;),
+    20: (&#x27;Parsecs&#x27;, 3.085677581491367e+16, &#x27;pc&#x27;),
+    21: (&#x27;USSurveyFeet&#x27;, 1200.0 / 3937.0, &#x27;ft&#x27;),
+    22: (&#x27;USSurveyInch&#x27;, 100.0 / 3937.0, &#x27;in&#x27;),
+    23: (&#x27;USSurveyYard&#x27;, 3600.0 / 3937.0, &#x27;yd&#x27;),
+    24: (&#x27;USSurveyMile&#x27;, 6336000.0 / 3937.0, &#x27;mi&#x27;),
+}</div>
+<p><span class="pill pure">Pure</span> INSUNITS number to <code>(name, metres per unit, short label)</code> for all 25 values
+AutoCAD defines, from 0 (Undefined, no metres) to 24 (USSurveyMile).</p>
+
+
+<h2 id="forms">forms: dialogs</h2>
+
+<p>Modal dialogs in pyACAD's own style (rounded corners, dark title bar in dark mode, the
+Windows accent colour): an alert, a yes or no question, text, number and file prompts, a
+searchable list picker, a one-click option picker, a folder picker, a cancellable progress
+window, and custom windows loaded from XAML. None of them touch the drawing. Every one
+blocks your script until the user answers, and cancelling always returns <code>None</code>,
+never raises. Under <code>pyacad run</code>, where nobody can answer, <code>alert</code>
+becomes a line in the transcript and the others raise <code>InvalidOperationException</code>
+(check <code>script.is_runner()</code> first).</p>
+
+<h3>forms.alert</h3>
+<div class="sig"><span class="mod">forms.</span><span class="fn">alert</span>(message, title=&#x27;pyACAD&#x27;, copy=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> <span class="pill blocks">Blocks</span> Shows a message with an OK button. <code>copy</code> adds a Copy button that puts
+that text on the clipboard without closing the dialog. Returns <code>None</code>.</p>
+<pre data-lang="python">
+from pyacad import forms
+
+forms.alert('3 xrefs could not be found.', 'Xref check', copy=report_text)
+</pre>
+
+<h3>forms.confirm</h3>
+<div class="sig"><span class="mod">forms.</span><span class="fn">confirm</span>(message, title=&#x27;pyACAD&#x27;)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> <span class="pill blocks">Blocks</span> A Yes and No question. Returns <code>True</code> on Yes, <code>False</code> on No
+or when the window is closed.</p>
+<pre data-lang="python">
+if forms.confirm('Delete 14 duplicate entities?'):
+    audit.erase(extras)
+</pre>
+
+<h3>forms.ask_string</h3>
+<div class="sig"><span class="mod">forms.</span><span class="fn">ask_string</span>(prompt, default=&#x27;&#x27;, title=&#x27;pyACAD&#x27;)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> <span class="pill blocks">Blocks</span> A single-line text prompt. Returns what was typed (possibly an empty string), or
+<code>None</code> on cancel.</p>
+<pre data-lang="python">
+prefix = forms.ask_string('Freeze layers starting with:', default='Z-')
+if prefix:
+    layers.freeze(prefix + '*')
+</pre>
+
+<h3>forms.ask_number</h3>
+<div class="sig"><span class="mod">forms.</span><span class="fn">ask_number</span>(prompt, default=None, min_value=None, max_value=None, title=&#x27;pyACAD&#x27;)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> <span class="pill blocks">Blocks</span> A number prompt that validates as the user types (and against
+<code>min_value</code> and <code>max_value</code> when given). Returns a <code>float</code>, or
+<code>None</code> on cancel.</p>
+<pre data-lang="python">
+height = forms.ask_number('Text height', default=2.5, min_value=0.1)
+</pre>
+
+<h3>forms.ask_options</h3>
+<div class="sig"><span class="mod">forms.</span><span class="fn">ask_options</span>(prompt, options, title=&#x27;pyACAD&#x27;)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> <span class="pill blocks">Blocks</span> One click between a few options, shown as buttons: clicking one is
+the answer, with no OK. Returns the option you passed (the object itself, not its text), or
+<code>None</code> on Esc. With <code>prompt</code> set to <code>None</code> or
+<code>''</code> the window drops its title bar and question and a click anywhere outside it
+cancels, for a quick switch.</p>
+<pre data-lang="python">
+scope = forms.ask_options('Export which blocks?', ['Selected', 'Whole drawing'])
+</pre>
+
+<h3>forms.select_from_list</h3>
+<div class="sig"><span class="mod">forms.</span><span class="fn">select_from_list</span>(items, title=&#x27;Select&#x27;, multiselect=False, prompt=None, checked=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> <span class="pill blocks">Blocks</span> A searchable list picker. <code>items</code> are strings, or <code>(label,
+value)</code> pairs where the label is shown and the value returned. With
+<code>multiselect</code> the user ticks several and you get a list of values; otherwise you get
+one value. <code>checked</code> lists values to open already ticked (or highlighted, single
+select). Returns <code>None</code> on cancel.</p>
+<pre data-lang="python">
+names = forms.select_from_list(layers.names(), title='Freeze layers', multiselect=True)
+if names:
+    layers.freeze(names)
+</pre>
+
+<h3>forms.save_file</h3>
+<div class="sig"><span class="mod">forms.</span><span class="fn">save_file</span>(filter=&#x27;CSV files (*.csv)|*.csv|All files (*.*)|*.*&#x27;, default_name=&#x27;&#x27;, title=&#x27;Save file&#x27;)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> <span class="pill blocks">Blocks</span> The Windows Save dialog (which asks before overwriting). <code>filter</code> is a
+Windows filter string. Returns the chosen path, or <code>None</code> on cancel.</p>
+<pre data-lang="python">
+path = forms.save_file('Excel workbook (*.xlsx)|*.xlsx', 'Blocks.xlsx', 'Export blocks')
+</pre>
+
+<h3>forms.open_file</h3>
+<div class="sig"><span class="mod">forms.</span><span class="fn">open_file</span>(filter=&#x27;All files (*.*)|*.*&#x27;, title=&#x27;Open file&#x27;)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> <span class="pill blocks">Blocks</span> The Windows Open dialog. Returns the chosen path, or <code>None</code> on
+cancel.</p>
+<pre data-lang="python">
+path = forms.open_file('CSV files (*.csv)|*.csv', 'Choose a layer standard')
+</pre>
+
+<h3>forms.pick_folder</h3>
+<div class="sig"><span class="mod">forms.</span><span class="fn">pick_folder</span>(title=&#x27;Select folder&#x27;, initial=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> <span class="pill blocks">Blocks</span> A folder picker, starting at <code>initial</code> when given. Returns the path, or
+<code>None</code> on cancel.</p>
+<pre data-lang="python">
+folder = forms.pick_folder('Save PDFs to')
+</pre>
+
+<h3>forms.progress</h3>
+<div class="sig"><span class="mod">forms.</span><span class="fn">progress</span>(title, label=&#x27;&#x27;)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> A context manager that shows a progress window with a Cancel button and closes it when
+the block ends, however it ends. <code>with</code> hands you an object with two methods:</p>
+<ul>
+<li><code>update(fraction, label=None)</code> moves the bar (0.0 to 1.0) and, when given,
+changes the label. It returns <code>False</code> once the user has clicked Cancel. Leave
+<code>label</code> out after a cancel so the window's own "Cancelling..." stays.</li>
+<li><code>check()</code> lets the window process clicks and raises
+<code>forms.Cancelled</code> once the user has clicked Cancel. A loop that never calls either
+method cannot be cancelled, because your script holds the UI thread.</li>
+</ul>
+<pre data-lang="python">
+handles = list(ents.iter())
+with forms.progress('Checking entities') as bar:
+    for index, handle in enumerate(handles):
+        bar.check()
+        bar.update(float(index) / len(handles), handle)
+</pre>
+
+<h3>forms.Cancelled</h3>
+<div class="sig"><span class="mod">forms.</span><span class="fn">Cancelled</span>(Exception)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> The exception <code>check()</code> raises after a Cancel click. It is an ordinary
+Python exception, but it lives in <code>forms</code>, which imports only inside AutoCAD. Catch
+it to stop quietly.</p>
+<pre data-lang="python">
+try:
+    with forms.progress('Exporting') as bar:
+        for index, item in enumerate(items):
+            bar.check()
+            work(item)
+except forms.Cancelled:
+    toast.info('Cancelled')
+</pre>
+
+<h3>forms.WPFWindow</h3>
+<div class="sig"><span class="mod">forms.</span><span class="fn">WPFWindow</span>(xaml_file)</div>
+<div class="sig"><span class="mod">WPFWindow.</span><span class="fn">find</span>(name)</div>
+<div class="sig"><span class="mod">WPFWindow.</span><span class="fn">show_dialog</span>()</div>
+<div class="sig"><span class="mod">WPFWindow.</span><span class="fn">close</span>(result=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> <span class="pill blocks">Blocks</span> A WPF window loaded from a XAML file. A relative <code>xaml_file</code> is looked
+up in the running bundle's folder; a missing file raises <code>IOError</code>. The loaded
+<code>Window</code> is <code>.window</code>. <code>win['Name']</code> returns the element with
+that <code>x:Name</code> (or raises <code>KeyError</code>), <code>find(name)</code> returns it
+or <code>None</code>. <code>show_dialog()</code> applies pyACAD's window chrome, shows the
+window modally over AutoCAD and returns its <code>DialogResult</code> (it raises under
+<code>pyacad run</code>). <code>close(result)</code> sets <code>DialogResult</code> when
+<code>result</code> is given, then closes.</p>
+<pre data-lang="python">
+win = forms.WPFWindow('rename.xaml')
+win['Ok'].Click += lambda sender, args: win.close(True)
+if win.show_dialog():
+    layers.rename(old, win['NewName'].Text)
+</pre>
+
+<h2 id="toast">toast: status notes</h2>
+
+<p>A toast is a small card in the corner of the AutoCAD window: green for success, red for an
+error, blue for information, amber for a warning. It never takes focus and dismisses itself
+(after 4 seconds, 5 for a warning, 7 for an error), so a tool can say what it did without
+opening the output window. This is where one-line statuses go, never <code>print()</code>,
+which opens an output window for one line. A toast never raises: if one cannot be shown, the
+failure goes to the log. Under <code>pyacad run</code> it becomes a transcript line.</p>
+
+<h3>toast.show</h3>
+<div class="sig"><span class="mod">toast.</span><span class="fn">show</span>(level, message, detail=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Shows a toast. <code>level</code> is <code>'success'</code>, <code>'error'</code>,
+<code>'info'</code> or <code>'warning'</code> (anything else shows as success);
+<code>detail</code> is an optional second, smaller line.</p>
+<pre data-lang="python">
+from pyacad import toast
+
+toast.show('warning', 'Layer A-ANNO is locked', 'Unlock it and run this again')
+</pre>
+
+<h3>toast.success, error, info, warning</h3>
+<div class="sig"><span class="mod">toast.</span><span class="fn">success</span>(message, detail=None)</div>
+<div class="sig"><span class="mod">toast.</span><span class="fn">error</span>(message, detail=None)</div>
+<div class="sig"><span class="mod">toast.</span><span class="fn">info</span>(message, detail=None)</div>
+<div class="sig"><span class="mod">toast.</span><span class="fn">warning</span>(message, detail=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> <code>toast.show</code> with the level filled in.</p>
+<pre data-lang="python">
+toast.success('Exported 42 blocks', path)
+toast.error('Could not write the workbook', 'Is it open in Excel?')
+</pre>
+
+<h2 id="banner">banner: a result bar</h2>
+
+<p>Where a toast is a note in the corner, a banner is a readout: a bar across the full width
+of the bottom of the AutoCAD window, filled in the level colour, with the message in large
+type. Use it for the one value a tool exists to produce, such as a measurement, and for an
+instruction the tool is waiting on. There is only ever one banner; a new one replaces the
+last. It never takes focus, a click dismisses it, and by default it goes after 8 seconds (10 for
+a warning, 12 for an error).</p>
+
+<h3>banner.show</h3>
+<div class="sig"><span class="mod">banner.</span><span class="fn">show</span>(level, message, detail=None, seconds=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Shows the banner. <code>level</code> is as for toasts. <code>seconds</code> is how long
+it stays: <code>None</code> for the level's own time, <code>0</code> to stay until
+<code>banner.clear()</code>, another banner, a click or Reload.</p>
+<pre data-lang="python">
+from pyacad import banner
+
+banner.show('success', 'Total duct run: 148.20 m', '37 segments on M-DUCT*', seconds=20)
+</pre>
+
+<h3>banner.success, error, info, warning</h3>
+<div class="sig"><span class="mod">banner.</span><span class="fn">success</span>(message, detail=None)</div>
+<div class="sig"><span class="mod">banner.</span><span class="fn">error</span>(message, detail=None)</div>
+<div class="sig"><span class="mod">banner.</span><span class="fn">info</span>(message, detail=None)</div>
+<div class="sig"><span class="mod">banner.</span><span class="fn">warning</span>(message, detail=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> <code>banner.show</code> with the level filled in and the level's own duration.</p>
+<pre data-lang="python">
+banner.info('Area: 42.6 m2')
+</pre>
+
+<h3>banner.prompt</h3>
+<div class="sig"><span class="mod">banner.</span><span class="fn">prompt</span>(message, detail=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> An instruction the tool is waiting on: an info banner that stays until replaced or
+cleared. Pair it with <code>banner.clear()</code> once the user has answered.</p>
+<pre data-lang="python">
+banner.prompt('Pick the insertion points', 'Press Enter or Esc to finish')
+try:
+    point = sel.pick_point('Point: ')
+finally:
+    banner.clear()
+</pre>
+
+<h3>banner.clear</h3>
+<div class="sig"><span class="mod">banner.</span><span class="fn">clear</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Removes the banner, if one is showing.</p>
+<pre data-lang="python">
+banner.clear()
+</pre>
+
+<h2 id="output">output: the output window</h2>
+
+<p>The output window is where a report goes: HTML, markdown, tables, charts, images and links
+that select objects in the drawing. Each command run gets its own window, titled after the
+tool, which opens the first time you write to it (a script that writes nothing gets none). When
+the WebView2 runtime is missing it falls back to plain text, and under <code>pyacad run</code>
+everything goes to the transcript; your script never needs to care. <code>table_html</code> and
+<code>format_table</code> are pure, so the module imports anywhere.</p>
+
+<h3>output.print_md</h3>
+<div class="sig"><span class="mod">output.</span><span class="fn">print_md</span>(markdown)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Renders markdown: <code>#</code>, <code>##</code> and <code>###</code> headings,
+<code>**bold**</code>, <code>*italic*</code>, <code>`code`</code>, fenced code blocks,
+<code>- </code> lists, <code>[text](url)</code> links and paragraphs. Everything is escaped
+first, so HTML in the text shows as text.</p>
+<pre data-lang="python">
+from pyacad import output
+
+output.print_md('## Xref check\n\n- **3** loaded\n- **1** not found')
+</pre>
+
+<h3>output.print_html</h3>
+<div class="sig"><span class="mod">output.</span><span class="fn">print_html</span>(html)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Renders an HTML fragment as it is. Escape anything that came from the drawing
+yourself.</p>
+<pre data-lang="python">
+output.print_html('&lt;p&gt;Largest: &lt;b&gt;%d&lt;/b&gt; objects&lt;/p&gt;' % biggest)
+</pre>
+
+<h3>output.print_table</h3>
+<div class="sig"><span class="mod">output.</span><span class="fn">print_table</span>(rows, headers)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> A styled table. Note the order: <code>rows</code> first, then <code>headers</code>.
+Rows are lists or tuples of any values (each is shown with <code>str()</code>); short rows are
+padded. A column whose every filled cell is a number is right-aligned.</p>
+<pre data-lang="python">
+output.print_table([['A-WALL', 120], ['A-DOOR', 14]], ['Layer', 'Objects'])
+</pre>
+
+<h3>output.print_code</h3>
+<div class="sig"><span class="mod">output.</span><span class="fn">print_code</span>(text)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> A monospace block, escaped, scrolling sideways rather than wrapping.</p>
+<pre data-lang="python">
+output.print_code(xrefs.format_plan(rows, plan))
+</pre>
+
+<h3>output.print_image</h3>
+<div class="sig"><span class="mod">output.</span><span class="fn">print_image</span>(path, caption=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Embeds a .png, .jpg, .jpeg, .gif or .svg file, with an optional caption. Raises
+<code>ValueError</code> for any other extension.</p>
+<pre data-lang="python">
+output.print_image(r'C:\Out\preview.png', 'Sheet A1 preview')
+</pre>
+
+<h3>output.chart_bar</h3>
+<div class="sig"><span class="mod">output.</span><span class="fn">chart_bar</span>(labels, values, title=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> A bar chart card, drawn as SVG that follows the window's light or dark theme.
+<code>labels</code> and <code>values</code> pair up by position.</p>
+<pre data-lang="python">
+counts = blocks.counts()
+names = sorted(counts, key=counts.get, reverse=True)[:10]
+output.chart_bar(names, [counts[n] for n in names], 'Top 10 blocks')
+</pre>
+
+<h3>output.chart_line</h3>
+<div class="sig"><span class="mod">output.</span><span class="fn">chart_line</span>(labels, series, title=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> A line chart. <code>series</code> is <code>{name: [values]}</code>, every list sharing
+the <code>labels</code> axis.</p>
+<pre data-lang="python">
+output.chart_line(['L1', 'L2', 'L3'], {'Supply': [40, 52, 47], 'Return': [38, 50, 44]},
+                  'Duct length by level (m)')
+</pre>
+
+<h3>output.chart_pie</h3>
+<div class="sig"><span class="mod">output.</span><span class="fn">chart_pie</span>(labels, values, title=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> A pie chart card.</p>
+<pre data-lang="python">
+output.chart_pie(['Lines', 'Polylines', 'Arcs'], [120, 48, 9], 'Entity mix')
+</pre>
+
+<h3>output.chart_doughnut</h3>
+<div class="sig"><span class="mod">output.</span><span class="fn">chart_doughnut</span>(labels, values, title=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> The pie chart with a hole in the middle.</p>
+<pre data-lang="python">
+output.chart_doughnut(['Loaded', 'Not found'], [5, 2], 'Xrefs')
+</pre>
+
+<h3>output.element_link</h3>
+<div class="sig"><span class="mod">output.</span><span class="fn">element_link</span>(item, label)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> HTML for a link that, when clicked, selects the object in the drawing (it becomes the
+pickfirst set, with grips). <code>item</code> is a handle string; the label is escaped by the
+window. Use the result inside <code>print_html</code> or a table cell. With no output window
+(plain text fallback) you get the label back.</p>
+<pre data-lang="python">
+for handle in audit.zero_length():
+    output.print_html('&lt;div&gt;%s&lt;/div&gt;' % output.element_link(handle, 'Zero-length ' + handle))
+</pre>
+
+<h3>output.progress</h3>
+<div class="sig"><span class="mod">output.</span><span class="fn">progress</span>(fraction, label=&#x27;&#x27;)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Shows or moves a progress bar inside the output window; <code>fraction</code> runs from
+0 to 1, and 1.0 completes it. For a progress window the user can cancel, use
+<code>forms.progress</code>.</p>
+<pre data-lang="python">
+output.progress(0.5, 'Half way')
+</pre>
+
+<h3>output.set_title</h3>
+<div class="sig"><span class="mod">output.</span><span class="fn">set_title</span>(text)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Retitles the output window (the default title is <code>pyACAD - </code> plus the tool's
+title).</p>
+<pre data-lang="python">
+output.set_title('Xref report: ' + doc.path())
+</pre>
+
+<h3>output.save</h3>
+<div class="sig"><span class="mod">output.</span><span class="fn">save</span>(path)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Writes everything printed so far to <code>path</code> as a standalone HTML file.</p>
+<pre data-lang="python">
+output.save(r'C:\Out\layer-report.html')
+</pre>
+
+<h3>output.table_html</h3>
+<div class="sig"><span class="mod">output.</span><span class="fn">table_html</span>(rows, headers)</div>
+<p><span class="pill pure">Pure</span> The HTML <code>print_table</code> renders, as a string: escaped cells, numeric columns
+marked for right alignment.</p>
+<pre data-lang="python">
+html = output.table_html([['A', 1]], ['Layer', 'Count'])
+</pre>
+
+<h3>output.format_table</h3>
+<div class="sig"><span class="mod">output.</span><span class="fn">format_table</span>(rows, headers)</div>
+<p><span class="pill pure">Pure</span> Rows as an aligned plain-text table with a dashed rule under the headers, for a log
+file, the clipboard or an alert.</p>
+<pre data-lang="python">
+text = output.format_table([['A-WALL', 120], ['A-DOOR', 14]], ['Layer', 'Objects'])
+script.clipboard_copy(text)
+</pre>
+
+
+<h2 id="script">script: the running command</h2>
+
+<p>What the running command is (its script, folder, title, arguments), the pyACAD session
+(toggle state, shared variables, theme, Reload), per-tool settings and data files, a logger,
+and a few Windows conveniences. It needs only the pyACAD runtime, never the AutoCAD API, so
+every function works in a hook or a dock pane as well as a button.</p>
+
+<div class="note trap">
+<span class="note-t">"The running command" is the last one that ran</span>
+<p>The runtime records the command's identity when a button or command starts and keeps
+answering with it until the next one starts. A hook, <code>startup.py</code>, a smartbutton's
+ribbon-build run and a dock pane's <code>script.py</code> never set it, so inside them
+<code>get_command_path</code>, <code>get_config</code>, <code>store_data</code> and friends
+answer for whichever button the user clicked last. In those places use
+<code>pyacad.settings</code> with a tool key you choose. Code that runs after a button's
+<code>script.py</code> returns (a modeless window's handlers) should capture the identity first
+with <code>script.bind()</code>.</p>
+</div>
+
+<h3>script.get_host</h3>
+<div class="sig"><span class="mod">script.</span><span class="fn">get_host</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> The runtime's host object, the same object scripts receive as the
+<code>__pyacad__</code> global. Everything else in this module reads from it.</p>
+<pre data-lang="python">
+from pyacad import script
+
+host = script.get_host()
+</pre>
+
+<h3>script.get_script_path</h3>
+<div class="sig"><span class="mod">script.</span><span class="fn">get_script_path</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Full path of the running command's <code>script.py</code>.</p>
+<pre data-lang="python">
+print(script.get_script_path())
+</pre>
+
+<h3>script.get_command_path</h3>
+<div class="sig"><span class="mod">script.</span><span class="fn">get_command_path</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> The running command's bundle folder, where its icons and any files you ship beside
+<code>script.py</code> live.</p>
+<pre data-lang="python">
+import os
+template = os.path.join(script.get_command_path(), 'template.xlsx')
+</pre>
+
+<h3>script.get_bundle_file</h3>
+<div class="sig"><span class="mod">script.</span><span class="fn">get_bundle_file</span>(name)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Full path of a file inside the running command's bundle folder, or <code>None</code>
+when it does not exist.</p>
+<pre data-lang="python">
+csv_path = script.get_bundle_file('standard.csv')
+if csv_path is None:
+    toast.error('standard.csv is missing from the bundle')
+</pre>
+
+<h3>script.get_title</h3>
+<div class="sig"><span class="mod">script.</span><span class="fn">get_title</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> The running command's title, as shown on the ribbon.</p>
+<pre data-lang="python">
+forms.alert('Nothing to do.', script.get_title())
+</pre>
+
+<h3>script.get_document_path</h3>
+<div class="sig"><span class="mod">script.</span><span class="fn">get_document_path</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Full path of the active drawing, <code>'untitled'</code> when it was never saved,
+<code>None</code> when no drawing is open. Unlike <code>doc.path()</code> it never raises, so it
+is the cheap way to ask "is there a drawing at all?".</p>
+<pre data-lang="python">
+if script.get_document_path() is None:
+    toast.warning('Open a drawing first')
+</pre>
+
+<h3>script.get_args</h3>
+<div class="sig"><span class="mod">script.</span><span class="fn">get_args</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> The running script's <code>__args__</code> as a list: what the <code>PYACAD</code>
+command line or a <code>(pyacad "PYNAME" args...)</code> call passed; <code>[]</code> for a
+ribbon click. It reads the global from the calling script, so it also works from a helper
+module the script imported.</p>
+<pre data-lang="python">
+args = script.get_args()
+</pre>
+
+<h3>script.get_host_version</h3>
+<div class="sig"><span class="mod">script.</span><span class="fn">get_host_version</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> pyACAD's product version string, such as <code>'0.1.0'</code>. The build stamps the
+runtime from <code>pyacad.__version__</code>, so the two agree.</p>
+<pre data-lang="python">
+script.get_logger().info('pyACAD ' + script.get_host_version())
+</pre>
+
+<h3>script.is_dark_theme</h3>
+<div class="sig"><span class="mod">script.</span><span class="fn">is_dark_theme</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> <code>True</code> when the AutoCAD UI is dark. Use it to theme your own XAML
+windows.</p>
+<pre data-lang="python">
+background = '#1E1E1E' if script.is_dark_theme() else '#FFFFFF'
+</pre>
+
+<h3>script.is_runner</h3>
+<div class="sig"><span class="mod">script.</span><span class="fn">is_runner</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> <code>True</code> when the script runs under <code>pyacad run</code> (Core Console, no
+ribbon, no windows). Skip prompts when it is; the <code>__runner__</code> global says the
+same.</p>
+<pre data-lang="python">
+folder = r'C:\Out' if script.is_runner() else forms.pick_folder('Save PDFs to')
+</pre>
+
+<h3>script.reload_pyacad</h3>
+<div class="sig"><span class="mod">script.</span><span class="fn">reload_pyacad</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Rescans the extension folders and rebuilds the pyACAD ribbon, as the Reload button
+does. No restart needed.</p>
+<pre data-lang="python">
+script.reload_pyacad()
+</pre>
+
+<h3>script.get_toggle_state</h3>
+<div class="sig"><span class="mod">script.</span><span class="fn">get_toggle_state</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> <code>True</code> when this <code>*.toggle</code> bundle is on. The state lives for the
+AutoCAD session only and starts off.</p>
+<pre data-lang="python">
+on = not script.get_toggle_state()
+</pre>
+
+<h3>script.set_toggle_state</h3>
+<div class="sig"><span class="mod">script.</span><span class="fn">set_toggle_state</span>(on)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Sets this toggle's state and swaps its ribbon icon to <code>icon.on</code> or
+<code>icon.off</code>. It only works from the toggle's own script: the state is keyed on the
+running command, which a hook or <code>startup.py</code> never sets. A toggle that must survive
+a restart should save its value with <code>pyacad.settings</code> (the
+<a href="cookbook.html#a-toggle-that-remembers-its-state">cookbook</a> shows how).</p>
+<pre data-lang="python">
+script.set_toggle_state(on)
+</pre>
+
+<h3>script.get_envvar</h3>
+<div class="sig"><span class="mod">script.</span><span class="fn">get_envvar</span>(name, default=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> A session variable shared by every pyACAD script in this AutoCAD session, or
+<code>default</code> when it is unset. Names ignore case. Nothing is written to disk.</p>
+<pre data-lang="python">
+last_folder = script.get_envvar('pdf_folder', r'C:\Out')
+</pre>
+
+<h3>script.set_envvar</h3>
+<div class="sig"><span class="mod">script.</span><span class="fn">set_envvar</span>(name, value)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Stores a small value for other scripts this session; <code>None</code> removes
+it.</p>
+<pre data-lang="python">
+script.set_envvar('pdf_folder', folder)
+</pre>
+
+<h3>script.get_config</h3>
+<div class="sig"><span class="mod">script.</span><span class="fn">get_config</span>(defaults, _own=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> This tool's saved settings merged over <code>defaults</code> (see
+<code>settings.load</code>): keys missing from the file take the default, keys not in
+<code>defaults</code> are dropped. The file is
+<code>%APPDATA%\pyACAD\settings\cfg_&lt;bundle key&gt;.json</code>, so a tool's
+<code>config.py</code> (Shift+Click) and its <code>script.py</code> share it. Leave
+<code>_own</code> alone; it is how <code>script.bind()</code> pins the key.</p>
+<pre data-lang="python">
+cfg = script.get_config({'prefix': 'Z-', 'regen': True})
+</pre>
+
+<h3>script.save_config</h3>
+<div class="sig"><span class="mod">script.</span><span class="fn">save_config</span>(values, _own=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Saves this tool's settings, replacing the file, so only the keys you pass survive.
+Written atomically.</p>
+<pre data-lang="python">
+cfg['prefix'] = answer
+script.save_config(cfg)
+</pre>
+
+<h3>script.reset_config</h3>
+<div class="sig"><span class="mod">script.</span><span class="fn">reset_config</span>(_own=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Deletes this tool's settings file, if there is one, so the defaults apply
+again.</p>
+<pre data-lang="python">
+if forms.confirm('Forget your saved settings?'):
+    script.reset_config()
+</pre>
+
+<h3>script.store_data</h3>
+<div class="sig"><span class="mod">script.</span><span class="fn">store_data</span>(key, value, per_document=False, _own=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Saves a JSON-serialisable value under <code>key</code> in this tool's data file,
+<code>%APPDATA%\pyACAD\data\cfg_&lt;bundle key&gt;.json</code>. With
+<code>per_document=True</code> the file is per drawing (its name carries the drawing's name and
+a hash of its full path); that raises <code>RuntimeError</code> when no drawing is open, and every
+untitled drawing shares one file. Other keys in the file are kept, and a file that will not
+parse is kept beside it as <code>.corrupt</code> before being replaced.</p>
+<pre data-lang="python">
+script.store_data('snapshot', layers.snapshot(), per_document=True)
+</pre>
+
+<h3>script.load_data</h3>
+<div class="sig"><span class="mod">script.</span><span class="fn">load_data</span>(key, default=None, per_document=False, _own=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> A value saved with <code>store_data</code>, or <code>default</code> when it is not
+there or the file is missing or corrupt.</p>
+<pre data-lang="python">
+saved = script.load_data('snapshot', per_document=True)
+</pre>
+
+<h3>script.data_exists</h3>
+<div class="sig"><span class="mod">script.</span><span class="fn">data_exists</span>(key, per_document=False, _own=None)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> <code>True</code> when <code>key</code> is in this tool's data file.</p>
+<pre data-lang="python">
+if not script.data_exists('snapshot', per_document=True):
+    toast.info('No snapshot saved for this drawing yet')
+</pre>
+
+<h3>script.get_data_file</h3>
+<div class="sig"><span class="mod">script.</span><span class="fn">get_data_file</span>(suffix=&#x27;json&#x27;)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> The path of this tool's shared data file with the given extension, for when you want
+to write the file yourself (a CSV log, say). The folder may not exist yet.</p>
+<pre data-lang="python">
+log_path = script.get_data_file('csv')
+</pre>
+
+<h3>script.bind</h3>
+<div class="sig"><span class="mod">script.</span><span class="fn">bind</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Pins this command's identity for code that runs after <code>script.py</code> has
+returned, and returns a <code>BoundScript</code>. Call it at the top of the script, while the
+identity is still right.</p>
+<pre data-lang="python">
+me = script.bind()
+
+def on_closed(sender, args):        # fires long after script.py returned
+    me.save_config({'width': window.Width})
+</pre>
+
+<h3>script.BoundScript</h3>
+<div class="sig"><span class="mod">script.</span><span class="fn">BoundScript</span>(own)</div>
+<div class="sig"><span class="mod">BoundScript.</span><span class="fn">get_config</span>(defaults)</div>
+<div class="sig"><span class="mod">BoundScript.</span><span class="fn">save_config</span>(values)</div>
+<div class="sig"><span class="mod">BoundScript.</span><span class="fn">reset_config</span>()</div>
+<div class="sig"><span class="mod">BoundScript.</span><span class="fn">store_data</span>(key, value, per_document=False)</div>
+<div class="sig"><span class="mod">BoundScript.</span><span class="fn">load_data</span>(key, default=None, per_document=False)</div>
+<div class="sig"><span class="mod">BoundScript.</span><span class="fn">data_exists</span>(key, per_document=False)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> What <code>script.bind()</code> returns: the settings and data functions above, fixed
+to the tool that was running when it was made. You never construct one yourself.</p>
+<pre data-lang="python">
+me = script.bind()
+cfg = me.get_config({'folder': ''})
+</pre>
+
+<h3>script.get_logger</h3>
+<div class="sig"><span class="mod">script.</span><span class="fn">get_logger</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> A logger for this script with <code>debug</code>, <code>info</code>,
+<code>success</code>, <code>warning</code> and <code>error</code> methods (each takes one
+message) and <code>set_level(level)</code>, where level is <code>'debug'</code>,
+<code>'info'</code> (the default), <code>'warning'</code> or <code>'error'</code>. Lines go to
+the pyACAD log labelled with the tool's title (or <code>hook &lt;name&gt;</code> in a hook);
+warnings and errors also appear in the output window, but only when one is already open, so
+logging never pops up a window. One logger per label, cached.</p>
+<pre data-lang="python">
+log = script.get_logger()
+log.info('Starting export of %d blocks' % len(refs))
+log.warning('3 references were on locked layers')
+</pre>
+
+<h3>script.clipboard_copy</h3>
+<div class="sig"><span class="mod">script.</span><span class="fn">clipboard_copy</span>(text)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Puts text on the Windows clipboard.</p>
+<pre data-lang="python">
+script.clipboard_copy('\n'.join(layers.names()))
+</pre>
+
+<h3>script.clipboard_text</h3>
+<div class="sig"><span class="mod">script.</span><span class="fn">clipboard_text</span>()</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> The clipboard's text, or <code>''</code> when it holds none or another program has it
+locked. Never raises.</p>
+<pre data-lang="python">
+handles = script.clipboard_text().split()
+</pre>
+
+<h3>script.open_url</h3>
+<div class="sig"><span class="mod">script.</span><span class="fn">open_url</span>(url)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Opens a URL in the default browser.</p>
+<pre data-lang="python">
+script.open_url('https://help.autodesk.com/view/OARX/2026/ENU/')
+</pre>
+
+<h3>script.show_in_explorer</h3>
+<div class="sig"><span class="mod">script.</span><span class="fn">show_in_explorer</span>(path)</div>
+<p><span class="pill needs-acad">Needs AutoCAD</span> Opens Explorer with the file selected, or at the folder.</p>
+<pre data-lang="python">
+script.show_in_explorer(path)
+</pre>
+
+<h2 id="settings">settings: per-tool settings files</h2>
+
+<p>One JSON file per tool key under <code>%APPDATA%\pyACAD\settings</code>. Pure standard
+library with no AutoCAD and no runtime, so it works in any engine, in hooks and panes, and
+outside AutoCAD. <code>script.get_config</code> is built on it with the running tool's key; use
+this module directly when you want a key you choose, which is the only reliable choice in a
+hook, a dock pane or <code>startup.py</code>, and the way two tools share settings.</p>
+
+<h3>settings.load</h3>
+<div class="sig"><span class="mod">settings.</span><span class="fn">load</span>(tool, defaults)</div>
+<p><span class="pill pure">Pure</span> The tool's saved values merged over <code>defaults</code> (<code>settings.merge</code>).
+A missing, unreadable or non-object file gives a fresh copy of the defaults; it never
+raises.</p>
+<pre data-lang="python">
+from pyacad import settings
+
+cfg = settings.load('save_log', {'on': False, 'folder': ''})
+</pre>
+
+<h3>settings.save</h3>
+<div class="sig"><span class="mod">settings.</span><span class="fn">save</span>(tool, values)</div>
+<p><span class="pill pure">Pure</span> Writes <code>values</code> as the tool's settings file (sorted, indented JSON),
+creating the folder when needed. The write is atomic: a crash leaves the old file intact.
+<code>values</code> must be JSON-serialisable.</p>
+<pre data-lang="python">
+settings.save('save_log', {'on': True, 'folder': r'C:\Logs'})
+</pre>
+
+<h3>settings.merge</h3>
+<div class="sig"><span class="mod">settings.</span><span class="fn">merge</span>(defaults, stored)</div>
+<p><span class="pill pure">Pure</span> <code>defaults</code> overlaid with <code>stored</code>: only keys in
+<code>defaults</code> survive, so stale keys from an older version of a tool never leak
+back.</p>
+<pre data-lang="python">
+settings.merge({'a': 1, 'b': 2}, {'b': 3, 'old': 9})    # {'a': 1, 'b': 3}
+</pre>
+
+<h3>settings.path_for</h3>
+<div class="sig"><span class="mod">settings.</span><span class="fn">path_for</span>(tool)</div>
+<p><span class="pill pure">Pure</span> The settings file path for a tool key: <code>%APPDATA%\pyACAD\settings\&lt;tool&gt;.json</code>.</p>
+<pre data-lang="python">
+print(settings.path_for('save_log'))
+</pre>
+
+<h2 id="xl">xl: Excel workbooks</h2>
+
+<p>Reads and writes .xlsx files in pure Python, with no Excel and no third-party package, so it
+runs the same under IronPython and CPython, inside or outside AutoCAD. It writes a minimal valid
+workbook (inline strings, a bold header row, approximate column widths) and reads both its own
+files and workbooks Excel saved, shared strings included. Formulas, styles and charts are not
+its business.</p>
+
+<h3>xl.write</h3>
+<div class="sig"><span class="mod">xl.</span><span class="fn">write</span>(path, rows, headers=None, sheet=&#x27;Sheet1&#x27;)</div>
+<p><span class="pill pure">Pure</span> Writes <code>rows</code> (lists of <code>str</code>, <code>int</code>,
+<code>float</code>, <code>bool</code> or <code>None</code>) to the sheet <code>sheet</code> of
+the workbook at <code>path</code>, with <code>headers</code> as a bold first row when given.
+Creates the folder when needed. If the file already holds a workbook, the named sheet is
+replaced in place (or added at the end) and the other sheets are kept, but only as values: they
+lose their formatting, a bold header row included, and their ints come back as floats. The file
+is written to a temporary file first and moved into place, so a failure leaves the old workbook
+intact. A file open in Excel raises <code>IOError</code> or <code>OSError</code>.</p>
+<pre data-lang="python">
+from pyacad import xl
+
+xl.write(r'C:\Out\blocks.xlsx', [['DOOR', 12], ['WINDOW', 30]], headers=['Block', 'Count'])
+</pre>
+
+<h3>xl.read</h3>
+<div class="sig"><span class="mod">xl.</span><span class="fn">read</span>(path, sheet=None)</div>
+<p><span class="pill pure">Pure</span> The rows of the named sheet, or the first sheet when <code>sheet</code> is
+<code>None</code>. Numbers come back as <code>float</code>, booleans as <code>True</code> or
+<code>False</code>, everything else as <code>str</code>. A row is as long as its last used
+column, with gaps as <code>''</code>; blank rows come back as <code>[]</code>, so row positions
+match the sheet. Raises <code>ValueError</code> for a missing sheet.</p>
+<pre data-lang="python">
+rows = xl.read(path)
+headers, body = rows[0], rows[1:]
+</pre>
+
+<h3>xl.sheets</h3>
+<div class="sig"><span class="mod">xl.</span><span class="fn">sheets</span>(path)</div>
+<p><span class="pill pure">Pure</span> The workbook's sheet names, in order.</p>
+<pre data-lang="python">
+if 'Blocks' in xl.sheets(path):
+    rows = xl.read(path, sheet='Blocks')
+</pre>
+
+<h2 id="private-modules">The private modules</h2>
+
+<p>These turn up in tracebacks. Do not import them.</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Module</th><th>What it is</th></tr></thead>
+<tbody>
+<tr><td><code>_api</code></td><td>Loads the AutoCAD .NET assemblies and exposes their namespaces to the other modules. Importing it outside AutoCAD raises the <code>ImportError</code> the drawing functions pass on.</td></tr>
+<tr><td><code>_atomic</code></td><td>Writes a text file through a temporary file and a rename, so a crash never leaves a half-written settings or data file.</td></tr>
+<tr><td><code>_charts</code></td><td>Draws the bar, line, pie and doughnut SVGs for <code>output.chart_*</code>, coloured from the output window's theme variables.</td></tr>
+<tr><td><code>_datafiles</code></td><td>The file naming and JSON storage behind <code>script.store_data</code>.</td></tr>
+<tr><td><code>_history</code></td><td>The pyACAD console's command history (the up and down arrows).</td></tr>
+<tr><td><code>_log</code></td><td>The level-filtered logger <code>script.get_logger</code> returns.</td></tr>
+<tr><td><code>_markdown</code></td><td>The small markdown converter behind <code>output.print_md</code>, and HTML escaping.</td></tr>
+<tr><td><code>_repl</code></td><td>Runs a line typed in the pyACAD console and echoes a trailing expression's value.</td></tr>
+<tr><td><code>_util</code></td><td>Tree flattening helpers.</td></tr>
+<tr><td><code>_xlsx</code></td><td>The OpenXML building and parsing behind <code>xl</code>.</td></tr>
+</tbody>
+</table>
+</div>

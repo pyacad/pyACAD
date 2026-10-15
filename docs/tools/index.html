@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tools guide - pyACAD tools</title>
+<meta name="description" content="The user manual for every tool on the pyACAD ribbon tab in AutoCAD.">
+<link rel="stylesheet" href="_assets/site.css">
+<link rel="stylesheet" href="_assets/tools.css">
+</head>
+<body data-base="">
+<div class="layout">
+<div class="sidebar">
+  <div class="brand"><a href="index.html"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="26" height="26" aria-hidden="true"><polygon points="157.0,327.8 351.8,327.8 363.1,342.4 363.1,403.3 168.3,403.3 157.0,388.7" fill="#78082A"/><polygon points="157.0,327.8 351.8,327.8 351.8,388.7 157.0,388.7" fill="#B80C40"/><polygon points="51.5,482.0 234.1,157.4 278.7,181.7 290.1,196.3 152.1,496.6 62.8,496.6" fill="#78082A"/><polygon points="51.5,482.0 140.8,482.0 278.7,181.7 234.1,157.4" fill="#E51050"/><polygon points="359.9,482.0 205.7,108.7 217.0,123.3 371.2,496.6" fill="#78082A"/><polygon points="205.7,108.7 201.6,55.9 213.0,70.5 217.0,123.3" fill="#78082A"/><polygon points="201.6,55.9 246.3,15.4 257.6,30.0 213.0,70.5" fill="#78082A"/><polygon points="246.3,15.4 343.7,23.5 355.0,38.1 257.6,30.0" fill="#78082A"/><polygon points="343.7,23.5 388.3,51.9 399.7,66.5 355.0,38.1" fill="#78082A"/><polygon points="388.3,51.9 347.7,76.2 359.1,90.8 399.7,66.5" fill="#78082A"/><polygon points="347.7,76.2 295.0,84.3 306.3,99.0 359.1,90.8" fill="#78082A"/><polygon points="295.0,84.3 449.2,482.0 460.5,496.6 306.3,99.0" fill="#78082A"/><polygon points="449.2,482.0 359.9,482.0 371.2,496.6 460.5,496.6" fill="#78082A"/><polygon points="359.9,482.0 205.7,108.7 201.6,55.9 246.3,15.4 343.7,23.5 388.3,51.9 347.7,76.2 295.0,84.3 449.2,482.0" fill="#E51050"/><polygon points="270.6,39.7 311.2,35.7 297.0,51.9" fill="#1F2329"/></svg><span class="brand-name">pyACAD
+    <span class="brand-sub">Tools guide</span></span></a></div>
+  <div class="search-wrap">
+    <svg class="search-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <circle cx="6" cy="6" r="4.2" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M9.2 9.2 12.5 12.5" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round"/></svg>
+    <input id="search" type="search" placeholder="Search the tools" autocomplete="off"
+           spellcheck="false" aria-label="Search the tools guide">
+    <span class="search-kbd">/</span>
+    <div id="search-results" class="search-results"></div>
+  </div>
+  <nav class="pages">
+<div class="grp">pyACAD</div>
+<a href="settings.html"><img class="nav-icon" src="_assets/icons/settings.png" alt="">Settings</a>
+<a href="shortcuts.html"><img class="nav-icon" src="_assets/icons/shortcuts.png" alt="">Shortcuts</a>
+<a href="console.html"><img class="nav-icon" src="_assets/icons/console.png" alt="">Console</a>
+<a href="reload.html"><img class="nav-icon" src="_assets/icons/reload.png" alt="">Reload</a>
+<div class="grp">Data</div>
+<a href="blocks-to-excel.html"><img class="nav-icon" src="_assets/icons/blocks-to-excel.png" alt="">Blocks to Excel</a>
+<a href="excel-to-blocks.html"><img class="nav-icon" src="_assets/icons/excel-to-blocks.png" alt="">Excel to Blocks</a>
+<a href="block-schedule.html"><img class="nav-icon" src="_assets/icons/block-schedule.png" alt="">Block Schedule</a>
+<a href="find-replace-attributes.html"><img class="nav-icon" src="_assets/icons/find-replace-attributes.png" alt="">Find and Replace Attributes</a>
+<div class="grp">Layers</div>
+<a href="layer-manager.html"><img class="nav-icon" src="_assets/icons/layer-manager.png" alt="">Layer Manager</a>
+<a href="layer-mapper.html"><img class="nav-icon" src="_assets/icons/layer-mapper.png" alt="">Layer Mapper</a>
+<a href="layer-snapshot.html"><img class="nav-icon" src="_assets/icons/layer-snapshot.png" alt="">Layer Snapshot</a>
+<div class="grp">Xrefs</div>
+<a href="xref-manager.html"><img class="nav-icon" src="_assets/icons/xref-manager.png" alt="">Xref Manager</a>
+<a href="xref-repath.html"><img class="nav-icon" src="_assets/icons/xref-repath.png" alt="">Xref Repath</a>
+<div class="grp">Cleanup</div>
+<a href="drawing-cleanup.html"><img class="nav-icon" src="_assets/icons/drawing-cleanup.png" alt="">Drawing Cleanup</a>
+<a href="font-proxy-report.html"><img class="nav-icon" src="_assets/icons/font-proxy-report.png" alt="">Font and Proxy Report</a>
+<div class="grp">Output</div>
+<a href="batch-plot.html"><img class="nav-icon" src="_assets/icons/batch-plot.png" alt="">Batch Plot</a>
+<a href="layout-manager.html"><img class="nav-icon" src="_assets/icons/layout-manager.png" alt="">Layout Manager</a>
+<div class="grp">Takeoff</div>
+<a href="length-takeoff.html"><img class="nav-icon" src="_assets/icons/length-takeoff.png" alt="">Length Takeoff</a>
+<a href="tag-audit.html"><img class="nav-icon" src="_assets/icons/tag-audit.png" alt="">Tag Audit</a>
+<div class="grp">AI (beta)</div>
+<a href="ask-ai.html"><img class="nav-icon" src="_assets/icons/ask-ai.png" alt="">Ask AI</a>
+<a href="ai-settings.html"><img class="nav-icon" src="_assets/icons/ai-settings.png" alt="">AI Settings</a>
+<a href="open-ai-folder.html"><img class="nav-icon" src="_assets/icons/open-ai-folder.png" alt="">Open AI Folder</a>
+</nav>
+  <div class="side-foot">
+    <span>pyACAD 0.1.0</span>
+    <a class="side-link" href="https://docs.pyacad.com/">Authoring guide</a>
+    <button id="theme-toggle" type="button" aria-label="Toggle colour theme">
+      <span>Dark</span></button>
+  </div>
+</div>
+<main class="main">
+<article>
+  <p class="eyebrow">pyACAD tools guide</p><h1>Every button on the pyACAD tab</h1><p class="lead">What each tool does, how to use it, what it will not do, and the other jobs it turns out to be good for. One page per tool, grouped the way the ribbon is.</p>
+  
+<div class="note">
+<span class="note-t">How to read a tool page</span>
+<p>Each page opens with the facts: where the tool sits, what it needs before its button is
+live, its keyboard shortcut and what Shift+Click does. Then what it does, a walkthrough with
+screenshots, the limits worth knowing before you rely on it, and other jobs it is good for.
+Each page ends with the tool's source: every file in its bundle, word for word, since every
+tool here is an ordinary bundle you can read and copy. Alt+Click on any tool opens its
+folder in Explorer.</p>
+</div>
+<h2 id="pyacad">pyACAD<a class="anchor" href="#pyacad">#</a></h2>
+<p class="panel-lead">The tool itself: settings, shortcuts, the console, Reload.</p>
+<p>The first panel is pyACAD itself: the things you set once, and the two developer tools
+that stay useful long after setup. Nothing here touches a drawing. Each button is also an
+AutoCAD command, so you can type it at the command line or put it in a macro.</p>
+<div class="tool-cards"><a class="tool-card" href="settings.html"><img src="_assets/icons/settings.png" alt=""><span class="c-t">Settings</span><span class="c-d">One window over the parts of pyACAD you are meant to change: theme, ribbon hints, where extensions load from, the engine paths, the AI assistant and updates.</span></a>
+<a class="tool-card" href="shortcuts.html"><img src="_assets/icons/shortcuts.png" alt=""><span class="c-t">Shortcuts</span><span class="c-d">The shortcuts and aliases editor: every pyACAD tool that can carry a chord or an alias, what it has now, and fields to change both.</span></a>
+<a class="tool-card" href="console.html"><img src="_assets/icons/console.png" alt=""><span class="c-t">Console</span><span class="c-d">An interactive Python console inside AutoCAD, with the same pyacad library every tool uses.</span></a>
+<a class="tool-card" href="reload.html"><img src="_assets/icons/reload.png" alt=""><span class="c-t">Reload</span><span class="c-d">Rescan every extension folder and rebuild the pyACAD ribbon, without restarting AutoCAD.</span></a></div>
+<h2 id="data">Data<a class="anchor" href="#data">#</a></h2>
+<p class="panel-lead">Block attributes out to Excel and back, schedules, and find and replace across attributes.</p>
+<p>The Data panel is for block attributes: the title block fields, equipment tags, room
+names and door numbers that live inside block references. Take them out to Excel, edit them
+there and put them back; count blocks into a schedule; or find and replace text across every
+attribute at once. Every tool here works on the drawing that is open, and its button is
+greyed until one is.</p>
+<div class="tool-cards"><a class="tool-card" href="blocks-to-excel.html"><img src="_assets/icons/blocks-to-excel.png" alt=""><span class="c-t">Blocks to Excel</span><span class="c-d">Exports block references to an Excel workbook: one row per block with its handle, layer, position, rotation and scale, and one column per attribute tag.</span></a>
+<a class="tool-card" href="excel-to-blocks.html"><img src="_assets/icons/excel-to-blocks.png" alt=""><span class="c-t">Excel to Blocks</span><span class="c-d">Reads a workbook made by Blocks to Excel and writes the attribute values and layers you edited back to the blocks, matched by handle.</span></a>
+<a class="tool-card" href="block-schedule.html"><img src="_assets/icons/block-schedule.png" alt=""><span class="c-t">Block Schedule</span><span class="c-d">Counts block references by name, or by name and layer, in the selection or the whole drawing, and places the schedule as a table or saves it to Excel.</span></a>
+<a class="tool-card" href="find-replace-attributes.html"><img src="_assets/icons/find-replace-attributes.png" alt=""><span class="c-t">Find and Replace Attributes</span><span class="c-d">Replaces text inside block attribute values across the drawing, the selection or blocks you pick, in every tag or just one, with or without matching case.</span></a></div>
+<h2 id="layers">Layers<a class="anchor" href="#layers">#</a></h2>
+<p class="panel-lead">A layer palette, bulk renames and merges from a mapping, and snapshots you can restore.</p>
+<p>The Layers panel keeps layers in hand: a palette that lists them with the everyday
+actions one click away, a mapper that brings a drawing's layers into line with a standard
+from a CSV, and snapshots of which layers are on, frozen and locked that you can put back
+later.</p>
+<div class="tool-cards"><a class="tool-card" href="layer-manager.html"><img src="_assets/icons/layer-manager.png" alt=""><span class="c-t">Layer Manager</span><span class="c-d">A docked list of the drawing&#x27;s layers with a filter box. Pick layers to isolate, freeze, turn off, lock, make current, merge or delete them without opening the Layer Properties Manager.</span></a>
+<a class="tool-card" href="layer-mapper.html"><img src="_assets/icons/layer-mapper.png" alt=""><span class="c-t">Layer Mapper</span><span class="c-d">Applies a layer standard from a CSV with the columns old, new and optionally color and linetype: matching layers are renamed, or merged when the new name already exists, and you tick what to apply.</span></a>
+<a class="tool-card" href="layer-snapshot.html"><img src="_assets/icons/layer-snapshot.png" alt=""><span class="c-t">Layer Snapshot</span><span class="c-d">Saves which layers are on, frozen and locked under a name for this drawing, and puts a saved state back later.</span></a></div>
+<h2 id="xrefs">Xrefs<a class="anchor" href="#xrefs">#</a></h2>
+<p class="panel-lead">Every reference in one list, and broken paths fixed in bulk.</p>
+<p>Two tools for the drawing's external references. Xref Manager does what the External
+References palette does one row at a time (reload, unload, detach, bind) to as many xrefs as
+you tick. Xref Repath rewrites the saved paths of every xref in one pass and shows you each
+old and new path before it touches anything. Both work on the top-level xrefs only: a nested
+xref follows the xref that holds it.</p>
+<div class="tool-cards"><a class="tool-card" href="xref-manager.html"><img src="_assets/icons/xref-manager.png" alt=""><span class="c-t">Xref Manager</span><span class="c-d">Reload, unload, detach or bind several xrefs at once, picked from a list that shows each one&#x27;s status and saved path.</span></a>
+<a class="tool-card" href="xref-repath.html"><img src="_assets/icons/xref-repath.png" alt=""><span class="c-t">Xref Repath</span><span class="c-d">Change every xref&#x27;s saved path in one go: relative, absolute, find and replace, or point them all at one folder, with a preview of each old and new path first.</span></a></div>
+<h2 id="cleanup">Cleanup<a class="anchor" href="#cleanup">#</a></h2>
+<p class="panel-lead">Purge, audit and tidy a drawing in one pass, and find the fonts and proxies that break it.</p>
+<p>Two tools for drawing hygiene. Drawing Cleanup runs the usual tidy-up (purge, audit,
+zero-length and duplicate geometry, ByLayer colour, zoom extents) from one checklist.
+Font and Proxy Report finds what makes a drawing look wrong on someone else's machine:
+objects from software this AutoCAD does not have, and text styles whose font files are
+missing.</p>
+<div class="tool-cards"><a class="tool-card" href="drawing-cleanup.html"><img src="_assets/icons/drawing-cleanup.png" alt=""><span class="c-t">Drawing Cleanup</span><span class="c-d">Purge, audit, delete zero-length and duplicate geometry and zoom extents in one run, from a checklist that remembers your last choice.</span></a>
+<a class="tool-card" href="font-proxy-report.html"><img src="_assets/icons/font-proxy-report.png" alt=""><span class="c-t">Font and Proxy Report</span><span class="c-d">Lists the proxy objects in the drawing and the fonts its text styles name that AutoCAD cannot find, then exports the list to Excel or remaps the missing fonts.</span></a></div>
+<h2 id="output">Output<a class="anchor" href="#output">#</a></h2>
+<p class="panel-lead">Plot many layouts to PDF at once, and manage paper space tabs in bulk.</p>
+<p>Two tools for paper space. Batch Plot turns the layouts you tick into PDFs, one file per
+layout, named the way you choose. Layout Manager does the tab housekeeping AutoCAD makes you
+do one right-click at a time: rename, reorder, copy, delete, and one page setup applied to many
+layouts at once.</p>
+<div class="tool-cards"><a class="tool-card" href="batch-plot.html"><img src="_assets/icons/batch-plot.png" alt=""><span class="c-t">Batch Plot</span><span class="c-d">Plots the layouts you pick to PDF, one file per layout, in a folder you choose, and remembers the folder, the naming and the page setup for next time.</span></a>
+<a class="tool-card" href="layout-manager.html"><img src="_assets/icons/layout-manager.png" alt=""><span class="c-t">Layout Manager</span><span class="c-d">Renames, reorders, copies or deletes paper space layouts, or applies one named page setup to many layouts at once.</span></a></div>
+<h2 id="takeoff">Takeoff<a class="anchor" href="#takeoff">#</a></h2>
+<p class="panel-lead">Measure lengths by layer and check that every tag is where it should be.</p>
+<p>Two checks for building services drawings. Length Takeoff totals run lengths per layer,
+so a duct, pipe or cable layer reads as one figure. Tag Audit checks one attribute across
+your blocks and finds the values used twice, the blanks and the blocks that lack it. Both
+work on what you selected first, or on the whole drawing when nothing is selected, and both
+can hand the result to Excel.</p>
+<div class="tool-cards"><a class="tool-card" href="length-takeoff.html"><img src="_assets/icons/length-takeoff.png" alt=""><span class="c-t">Length Takeoff</span><span class="c-d">Totals the length of lines, arcs, polylines and splines per layer, in the selection or else all of model space, in the drawing&#x27;s units, with an Excel export.</span></a>
+<a class="tool-card" href="tag-audit.html"><img src="_assets/icons/tag-audit.png" alt=""><span class="c-t">Tag Audit</span><span class="c-d">Checks one attribute, TAG by default, across the block references in the selection or the drawing, and lists the values used twice, the blanks and the blocks without it.</span></a></div>
+<h2 id="ai-beta">AI (beta)<a class="anchor" href="#ai-beta">#</a></h2>
+<p class="panel-lead">A chat that writes pyACAD tools for you, and the setup behind it.</p>
+<p>The AI panel is a beta. It puts a chat inside AutoCAD that writes pyACAD tools for you:
+describe the button you want, read what the model proposes, click Create, and the button
+appears on its own <strong>AI</strong> tab. The two small buttons beside it hold the setup
+and the folder the tools land in. It is new and lightly tested, and it is not the only way
+to do this: the same authoring guide the panel gives the model can be copied into any
+assistant you already use.</p>
+<div class="tool-cards"><a class="tool-card" href="ask-ai.html"><img src="_assets/icons/ask-ai.png" alt=""><span class="c-t">Ask AI</span><span class="c-d">Beta. A chat palette that turns a plain-words request into a working pyACAD tool on the ribbon, and revises it when you ask.</span></a>
+<a class="tool-card" href="ai-settings.html"><img src="_assets/icons/ai-settings.png" alt=""><span class="c-t">AI Settings</span><span class="c-d">The provider, endpoint, model and API key Ask AI uses: the Settings window opened on its AI section.</span></a>
+<a class="tool-card" href="open-ai-folder.html"><img src="_assets/icons/open-ai-folder.png" alt=""><span class="c-t">Open AI Folder</span><span class="c-d">Explorer on the folder where Ask AI writes its tools.</span></a></div>
+  
+</article>
+<aside class="toc"></aside>
+</main>
+</div>
+<script src="_assets/search-index.js"></script>
+<script src="_assets/site.js"></script>
+</body>
+</html>

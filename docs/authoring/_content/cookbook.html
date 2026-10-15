@@ -1,0 +1,1302 @@
+<!-- title: Cookbook -->
+<!-- eyebrow: Practice -->
+<!-- lead: Complete, runnable recipes for the jobs an AutoCAD tool actually has to do, each with its sharp edge named. -->
+
+<p>Every recipe on this page is a whole file. Unless it says otherwise, it is the
+<code>script.py</code> of a <code>.pushbutton</code> bundle: make the folder, paste the code,
+click Reload, and the button is on the ribbon and its command (<code>PY</code> plus the title's
+letters) is ready to type. Nothing is elided and nothing is pseudocode. Every
+<code>pyacad</code> function called here exists, with the signature used; the site build checks
+that against the library.</p>
+
+<p>They are built the same way, because tools that touch a drawing have a shape. Read
+something, guard against the case where there is nothing to read, work the answer out in plain
+Python, write it back in as few calls as possible, then say what happened in one line.</p>
+
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 700 176" width="700" role="img"
+     aria-label="The five stages of a tool: read, guard, compute, write, report.">
+  <style>
+    .ck1-t   { font: 12px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--ink); }
+    .ck1-m   { font: 11px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--muted); }
+    .ck1-mono{ font: 11px Consolas, monospace; fill: var(--ink); }
+    .ck1-lbl { font: 10.5px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--muted);
+               text-transform: uppercase; letter-spacing: .07em; }
+    .ck1-box { fill: var(--paper); stroke: var(--line-strong); stroke-width: 1; }
+    .ck1-hot { fill: var(--surface); stroke: var(--accent); stroke-width: 1.4; }
+    .ck1-arw { stroke: var(--frame); stroke-width: 1.25; fill: none; }
+  </style>
+  <defs>
+    <marker id="ck1-a" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path d="M0 0.6 L6.4 3.5 L0 6.4 z" fill="var(--frame)"/>
+    </marker>
+  </defs>
+
+  <text class="ck1-lbl" x="0" y="12">The shape of every recipe below</text>
+
+  <rect class="ck1-box" x="0" y="26" width="118" height="46" rx="4"/>
+  <text class="ck1-t"    x="14" y="46">Read</text>
+  <text class="ck1-mono" x="14" y="63">sel, blocks</text>
+
+  <path class="ck1-arw" d="M120 49 H 142" marker-end="url(#ck1-a)"/>
+
+  <rect class="ck1-box" x="146" y="26" width="118" height="46" rx="4"/>
+  <text class="ck1-t"    x="160" y="46">Guard</text>
+  <text class="ck1-mono" x="160" y="63">if not handles:</text>
+
+  <path class="ck1-arw" d="M266 49 H 288" marker-end="url(#ck1-a)"/>
+
+  <rect class="ck1-hot" x="292" y="26" width="118" height="46" rx="4"/>
+  <text class="ck1-t"    x="306" y="46">Compute</text>
+  <text class="ck1-m"    x="306" y="63">plain Python</text>
+
+  <path class="ck1-arw" d="M412 49 H 434" marker-end="url(#ck1-a)"/>
+
+  <rect class="ck1-box" x="438" y="26" width="118" height="46" rx="4"/>
+  <text class="ck1-t"    x="452" y="46">Write</text>
+  <text class="ck1-mono" x="452" y="63">one batch call</text>
+
+  <path class="ck1-arw" d="M558 49 H 580" marker-end="url(#ck1-a)"/>
+
+  <rect class="ck1-box" x="584" y="26" width="116" height="46" rx="4"/>
+  <text class="ck1-t"    x="598" y="46">Report</text>
+  <text class="ck1-mono" x="598" y="63">toast / output</text>
+
+  <path class="ck1-arw" d="M205 74 V 104" marker-end="url(#ck1-a)"/>
+  <rect class="ck1-box" x="146" y="108" width="118" height="34" rx="4"/>
+  <text class="ck1-m" x="160" y="129">nothing to do</text>
+
+  <path class="ck1-arw" d="M264 125 H 620 V 78" marker-end="url(#ck1-a)"/>
+  <text class="ck1-m" x="288" y="120">one toast, then stop</text>
+
+  <text class="ck1-m" x="0" y="166">A cancelled dialog skips the report too: cancelling is
+    silent, because the user already knows what they did.</text>
+</svg>
+</div>
+<figcaption>The compute step works on handles, dicts and lists, never on AutoCAD objects. That
+is what keeps the middle of a tool short and testable.</figcaption>
+</figure>
+
+<div class="note">
+<span class="note-t">Report with a toast, not a print</span>
+<p>A one-line status belongs in a <code>toast</code>. <code>print()</code> opens the output
+window, so a script whose only output is one <code>print</code> gives the user a window with one
+line in it. Use the output window when you have a report to show, a toast when you have a
+sentence, and a banner when you have one number.</p>
+</div>
+
+<h2>Selecting and editing entities</h2>
+
+<h3>Select everything on chosen layers</h3>
+
+<p>A layer picker, then every object on the picked layers becomes the selection, ready for the
+next command. The one subtlety is the filter: <code>sel.get(layer=...)</code> hands the text to
+AutoCAD's selection filter, where <code>#</code>, <code>@</code>, <code>.</code>,
+<code>*</code>, <code>?</code>, <code>~</code>, <code>[</code>, <code>]</code>,
+<code>-</code> and <code>,</code> are wildcards. A layer called <code>A.WALL</code> would also
+match <code>A-WALL</code>. A backquote in front of a character makes it literal, and a comma
+separates alternatives, so several layers go in one call.</p>
+
+<pre data-lang="python" data-file="script.py">
+"""Selects every object on the layers you pick."""
+from pyacad import forms, layers, sel, toast
+
+SPECIAL = '#@.*?~[]-,`'
+
+
+def literal(name):
+    """A layer name as an AutoCAD wildcard that matches only that name."""
+    return ''.join('`' + c if c in SPECIAL else c for c in name)
+
+
+names = forms.select_from_list(layers.names(), title='Select by layer',
+                               multiselect=True, prompt='Select objects on which layers?')
+if names:
+    handles = sel.get(layer=','.join(literal(name) for name in names))
+    if handles:
+        sel.set_current(handles)
+        toast.success('%d objects selected' % len(handles), ', '.join(names))
+    else:
+        toast.info('Nothing is on those layers')
+</pre>
+
+<p><code>sel.get</code> looks at model space and every layout, but never inside block
+definitions: an object that only exists inside a block is not selectable on its own anyway.
+Add <code>space='model'</code> to keep to model space.</p>
+
+<h3>Change the colour of the selected objects</h3>
+
+<p>Works on the pickfirst set when there is one and asks for a selection when there is not, the
+behaviour people expect from a native command. Each <code>ents.set</code> call is its own
+transaction, so an object AutoCAD refuses to change (one on a locked layer) fails alone and the
+rest still change.</p>
+
+<pre data-lang="python" data-file="script.py">
+"""Sets the colour of the selected objects."""
+from pyacad import ents, forms, sel, toast
+
+COLOURS = [('Red', 1), ('Yellow', 2), ('Green', 3), ('Cyan', 4), ('Blue', 5),
+           ('Magenta', 6), ('White', 7), ('Grey', 8), ('ByLayer', 256), ('ByBlock', 0)]
+
+handles = sel.current() or sel.pick_many('Select objects to recolour: ')
+if handles:
+    colour = forms.select_from_list(COLOURS, title='Change colour')
+    if colour is not None:
+        changed = refused = 0
+        for handle in handles:
+            try:
+                ents.set(handle, color=colour)
+                changed += 1
+            except Exception:           # AutoCAD's eOnLockedLayer, most often
+                refused += 1
+        if refused:
+            toast.warning('%d recoloured, %d refused' % (changed, refused),
+                          'Objects on locked layers cannot change')
+        else:
+            toast.success('%d objects recoloured' % changed)
+</pre>
+
+<p>The guard is <code>colour is not None</code>, not <code>if colour:</code>, because ByBlock
+is colour 0 and would read as false.</p>
+
+<h3>Find and replace text</h3>
+
+<p>Replaces text in single-line and multiline text, in the selection or else the whole
+drawing. <code>ents.get</code> gives a TEXT's string and an MTEXT's raw contents, and
+<code>ents.set(text=...)</code> writes the same field back.</p>
+
+<pre data-lang="python" data-file="script.py">
+"""Find and replace in TEXT and MTEXT."""
+from pyacad import ents, forms, sel, toast
+
+TITLE = 'Replace text'
+
+find = forms.ask_string('Find:', title=TITLE)
+if find:
+    replace = forms.ask_string('Replace "%s" with:' % find, title=TITLE)
+    if replace is not None:
+        handles = sel.current() or sel.get(type=['TEXT', 'MTEXT'])
+        changed = 0
+        for handle in handles:
+            if ents.type_of(handle) not in ('TEXT', 'MTEXT'):
+                continue
+            text = ents.get(handle)['text']
+            new = text.replace(find, replace)
+            if new != text:
+                ents.set(handle, text=new)
+                changed += 1
+        if changed:
+            toast.success('Replaced in %d texts' % changed)
+        else:
+            toast.info('"%s" was not found' % find)
+</pre>
+
+<div class="note warn">
+<span class="note-t">MTEXT contents carry formatting codes</span>
+<p>An MTEXT's contents are the raw string, with codes such as <code>\P</code> for a new
+paragraph and <code>{\fArial|b1;...}</code> for a font change. A word that changes formatting
+half way through is not one run of text in that string, so it will not be found, and a find
+string that looks like a code can damage the formatting. Keep find strings to plain words.</p>
+</div>
+
+<h3>Count entities by type</h3>
+
+<p>A quick census of model space, as a table and a bar chart in the output window.
+<code>ents.type_of</code> needs no transaction, so it is the cheap way to classify thousands of
+handles.</p>
+
+<pre data-lang="python" data-file="script.py">
+"""Counts the entities in model space by DXF type."""
+from collections import Counter
+
+from pyacad import ents, output, toast
+
+counts = Counter(ents.type_of(handle) for handle in ents.iter())
+if not counts:
+    toast.info('Model space is empty')
+else:
+    rows = counts.most_common()
+    output.print_md('## %d entities in model space' % sum(counts.values()))
+    output.print_table(rows, ['Type', 'Count'])
+    top = rows[:12]
+    output.chart_bar([r[0] for r in top], [r[1] for r in top], 'Most common types')
+</pre>
+
+<p>Pass a layout name to <code>ents.iter</code> to count a sheet instead, or
+<code>'BLOCK:Name'</code> to see what a block definition is made of.</p>
+
+<h3>Select blocks by attribute value</h3>
+
+<p>Pick a tag, type part of a value, and every block reference whose attribute contains it is
+selected. <code>blocks.snapshots()</code> reads every reference in one transaction, so the
+filtering is plain Python over dicts.</p>
+
+<pre data-lang="python" data-file="script.py">
+"""Selects block references whose attribute value contains some text."""
+from pyacad import blocks, forms, sel, toast
+
+TITLE = 'Select by attribute'
+
+
+def value_of(ref, tag):
+    """The ref's value for tag, matching the tag in any case; '' when it has none."""
+    for name, value in ref['attributes'].items():
+        if name.upper() == tag.upper():
+            return value
+    return ''
+
+
+refs = blocks.snapshots()
+tags = blocks.attribute_tags(refs)
+if not tags:
+    toast.info('No block in this drawing has attributes')
+else:
+    tag = forms.select_from_list(tags, title=TITLE, prompt='Which attribute?')
+    if tag:
+        text = forms.ask_string('Select blocks whose %s contains:' % tag, title=TITLE)
+        if text:
+            needle = text.lower()
+            hits = [r['handle'] for r in refs if needle in value_of(r, tag).lower()]
+            if hits:
+                sel.set_current(hits)
+                toast.success('%d blocks selected' % len(hits), '%s contains "%s"' % (tag, text))
+            else:
+                toast.info('No %s contains "%s"' % (tag, text))
+</pre>
+
+<h2>Layers</h2>
+
+<h3>Rename layers by pattern</h3>
+
+<p>Pick the layers with a wildcard, say what to replace in their names, see the whole plan,
+then rename. Layer 0, Defpoints and xref layers (the ones with a <code>|</code>) are left out
+before the plan is shown, because AutoCAD would refuse them anyway.</p>
+
+<pre data-lang="python" data-file="script.py">
+"""Renames layers: replaces text in every name that matches a pattern."""
+from pyacad import forms, layers, toast
+
+TITLE = 'Rename layers'
+
+pattern = forms.ask_string('Rename layers matching (* and ? allowed):', '*', TITLE)
+find = pattern and forms.ask_string('Text to replace in those names:', '', TITLE)
+if find:
+    replace = forms.ask_string('Replace "%s" with:' % find, '', TITLE)
+    if replace is not None:
+        plan = []
+        for name in layers.names():
+            if '|' in name or name.lower() in ('0', 'defpoints'):
+                continue
+            if layers.matches(name, pattern):
+                new = name.replace(find, replace)
+                if new != name:
+                    plan.append((name, new))
+        if not plan:
+            toast.info('No layer name would change')
+        else:
+            preview = '\n'.join('%s  -&gt;  %s' % pair for pair in plan[:25])
+            if len(plan) &gt; 25:
+                preview += '\n...and %d more' % (len(plan) - 25)
+            if forms.confirm('Rename %d layers?\n\n%s' % (len(plan), preview), TITLE):
+                failed = []
+                for old, new in plan:
+                    try:
+                        layers.rename(old, new)
+                    except ValueError as error:
+                        failed.append(str(error))
+                if failed:
+                    forms.alert('%d renamed, %d not:\n\n%s'
+                                % (len(plan) - len(failed), len(failed), '\n'.join(failed)), TITLE)
+                else:
+                    toast.success('%d layers renamed' % len(plan))
+</pre>
+
+<p>The pattern match ignores case but <code>str.replace</code> does not, so
+<code>wall</code> will not replace <code>WALL</code>. Two layers whose new names collide fail
+with "already exists", and the alert lists them; merging is a different job
+(<code>layers.merge</code>).</p>
+
+<h3>Freeze layers by prefix</h3>
+
+<p>Asks for a prefix, remembers the last one, and freezes every layer that starts with it. The
+answer goes back into the tool's settings with <code>script.save_config</code>, so the next
+run offers it again.</p>
+
+<pre data-lang="python" data-file="script.py">
+"""Freezes every layer whose name starts with a prefix."""
+from pyacad import forms, layers, script, toast
+
+cfg = script.get_config({'prefix': 'Z-'})
+prefix = forms.ask_string('Freeze every layer starting with:', cfg['prefix'], 'Freeze by prefix')
+if prefix:
+    script.save_config({'prefix': prefix})
+    frozen = layers.freeze(prefix + '*')
+    if frozen:
+        toast.success('%d layers frozen' % frozen, 'Starting with ' + prefix)
+    else:
+        toast.info('Nothing to freeze', 'No thawed layer starts with ' + prefix)
+</pre>
+
+<p>Freezing a layer freezes it everywhere: in model space and in every viewport of every
+layout, which is usually what "freeze it in all layouts" means. The current layer is skipped
+(AutoCAD will not freeze it) and does not count. Freezing in some viewports only is
+VPLAYER's job, which pyacad does not wrap. A prefix that contains <code>*</code> or
+<code>?</code> works as a wildcard, which is a feature.</p>
+
+<h3>Create a standard set of layers</h3>
+
+<p>Creates whichever layers of an office standard are missing and leaves existing ones alone.
+The list lives at the top of the script, where the next person can see and change it.</p>
+
+<pre data-lang="python" data-file="script.py">
+"""Adds the office standard layers this drawing is missing."""
+from pyacad import forms, layers, toast
+
+STANDARD = [
+    # name            colour  linetype
+    ('A-WALL',         1,     'Continuous'),
+    ('A-DOOR',         3,     'Continuous'),
+    ('A-GLAZ',         4,     'Continuous'),
+    ('A-ANNO-TEXT',    2,     'Continuous'),
+    ('A-ANNO-DIMS',    2,     'Continuous'),
+    ('A-HIDDEN',       8,     'HIDDEN'),
+]
+
+created, problems = [], []
+for name, colour, linetype in STANDARD:
+    if layers.exists(name):
+        continue
+    try:
+        layers.create(name, colour, linetype)
+        created.append(name)
+    except ValueError as error:
+        problems.append(str(error))
+
+if problems:
+    forms.alert('Created %d layers. Not created:\n\n%s' % (len(created), '\n'.join(problems)),
+                'Standard layers')
+elif created:
+    toast.success('%d standard layers added' % len(created), ', '.join(created))
+else:
+    toast.info('Every standard layer is already here')
+</pre>
+
+<p><code>layers.create</code> needs the linetype to be loaded in the drawing already and says
+<code>No linetype is named HIDDEN.</code> when it is not. Loading one with
+<code>doc.send_command</code> does not help inside the same run, because the command only runs
+after the script finishes; load linetypes in your template instead.</p>
+
+<h3>Save and restore a layer state per drawing</h3>
+
+<p>A two-button layer state: save every layer's on, frozen and locked flags for this drawing,
+and put them back later. <code>per_document=True</code> keeps one saved state per drawing, so
+saving in one drawing never overwrites another's.</p>
+
+<pre data-lang="python" data-file="script.py">
+"""Saves this drawing's layer state, or restores the saved one."""
+from pyacad import forms, layers, script, toast
+
+TITLE = 'Layer state'
+
+choice = forms.ask_options('Layer state for this drawing', ['Save', 'Restore'], TITLE)
+if choice == 'Save':
+    script.store_data('state', layers.snapshot(), per_document=True)
+    toast.success('Layer state saved', '%d layers' % len(layers.names()))
+elif choice == 'Restore':
+    saved = script.load_data('state', per_document=True)
+    if not saved:
+        toast.info('No layer state saved for this drawing yet')
+    else:
+        changed = layers.restore(saved)
+        toast.success('Layer state restored', '%d layers changed' % changed)
+</pre>
+
+<p>The per-drawing file is keyed on the drawing's full path, so a drawing that is moved or
+renamed starts with nothing saved, and every untitled drawing shares one file. The data lands in
+<code>%APPDATA%\pyACAD\data</code>, per Windows user. <code>layers.restore</code> skips layers
+that have been deleted since and never freezes the current layer.</p>
+
+<h3>Report layers in the output window</h3>
+
+<p>Every layer with its state and how many objects are on it, as a table you can save as HTML.
+The object count is one filtered select-all per layer, so it reuses the <code>literal</code>
+helper from <a href="#select-everything-on-chosen-layers">the first recipe</a> to keep layer
+names from being read as wildcards.</p>
+
+<pre data-lang="python" data-file="script.py">
+"""Layer report: state and object count for every layer."""
+from pyacad import doc, layers, output, sel
+
+SPECIAL = '#@.*?~[]-,`'
+
+
+def literal(name):
+    return ''.join('`' + c if c in SPECIAL else c for c in name)
+
+
+def yes(flag):
+    return 'yes' if flag else ''
+
+
+snapshot = layers.snapshot()
+rows = []
+for name in sorted(snapshot, key=str.lower):
+    state = snapshot[name]
+    rows.append([name, state['color'], state['linetype'], yes(state['is_off']),
+                 yes(state['is_frozen']), yes(state['is_locked']),
+                 len(sel.get(layer=literal(name)))])
+
+output.set_title('Layers: ' + doc.path())
+output.print_md('## %d layers' % len(rows))
+output.print_table(rows, ['Layer', 'Colour', 'Linetype', 'Off', 'Frozen', 'Locked', 'Objects'])
+empty = [r[0] for r in rows if r[-1] == 0]
+if empty:
+    output.print_md('**%d layers hold nothing** in model space or the layouts.' % len(empty))
+</pre>
+
+<p>An empty layer here may still be used inside a block definition, which select-all does not
+see, so "holds nothing" is not the same as "can be purged". <code>audit.purge</code> knows the
+difference.</p>
+
+<h2>Blocks and attributes</h2>
+
+<h3>Count blocks by name to Excel</h3>
+
+<p>One row per block name with its count, written to a workbook beside the drawing.
+<code>blocks.schedule_rows</code> does the counting and sorting; <code>xl.write</code> needs
+no Excel and no extra package.</p>
+
+<pre data-lang="python" data-file="script.py">
+"""Writes a block count (name and number of references) to Excel."""
+import os
+
+from pyacad import blocks, forms, script, toast, xl
+
+refs = blocks.snapshots()
+if not refs:
+    toast.info('No block references in this drawing')
+else:
+    headers, rows = blocks.schedule_rows(refs)
+    drawing = script.get_document_path()
+    if drawing and drawing != 'untitled':
+        suggested = os.path.splitext(drawing)[0] + ' - Block count.xlsx'
+    else:
+        suggested = 'Block count.xlsx'
+    path = forms.save_file('Excel workbook (*.xlsx)|*.xlsx', suggested, 'Save block count')
+    if path:
+        try:
+            if os.path.exists(path):
+                os.remove(path)          # the Save dialog already asked
+            xl.write(path, rows, headers=headers, sheet='Block count')
+            toast.success('%d block names counted' % len(rows), path)
+        except (IOError, OSError) as error:
+            toast.error('Could not write the workbook', 'Is it open in Excel? %s' % error)
+</pre>
+
+<p>The <code>os.remove</code> matters: <code>xl.write</code> into an existing workbook keeps
+its other sheets and replaces only the named one, which is right for a log and wrong for a
+fresh export. <code>blocks.schedule_rows(refs, by_layer=True)</code> adds a Layer column.
+Snapshots leave xref attachments out; <code>blocks.counts()</code> would include them.</p>
+
+<h3>Export the attributes of one block to CSV</h3>
+
+<p>Pick a block, get a CSV with one row per reference and one column per attribute tag, in
+the order the block defines them. CSV opens in Excel, imports into anything, and diffs well in
+version control.</p>
+
+<pre data-lang="python" data-file="script.py">
+"""Exports every reference of one block, with its attributes, to CSV."""
+import csv
+import io
+
+from pyacad import blocks, forms, toast
+
+name = forms.select_from_list(blocks.definitions(), title='Export attributes',
+                              prompt='Export which block?')
+if name:
+    refs = blocks.snapshots(blocks.references(name))
+    tags = blocks.attribute_tags(refs)
+    if not refs:
+        toast.info('%s is not used in this drawing' % name)
+    elif not tags:
+        toast.info('%s has no attributes' % name)
+    else:
+        path = forms.save_file('CSV files (*.csv)|*.csv', name + ' attributes.csv',
+                               'Export attributes')
+        if path:
+            with io.open(path, 'w', newline='', encoding='utf-8-sig') as stream:
+                writer = csv.writer(stream)
+                writer.writerow(['Handle', 'Layer', 'Space'] + tags)
+                for ref in refs:
+                    values = ref['attributes']
+                    writer.writerow([ref['handle'], ref['layer'], ref['space']]
+                                    + [values.get(tag, '') for tag in tags])
+            toast.success('%d %s references exported' % (len(refs), name), path)
+</pre>
+
+<p><code>utf-8-sig</code> writes a byte order mark, which is what makes Excel read accented
+characters correctly when it opens a CSV by double-click. Keep the Handle column: it is how a
+later tool matches rows back to references (the shipped Excel to Blocks tool does exactly that
+with <code>blocks.diff_rows</code>).</p>
+
+<h3>Insert a block at picked points</h3>
+
+<p>Choose a block, then click as many insertion points as you like; Enter or Esc stops. A
+banner holds the instruction on screen while the command line asks for each point.</p>
+
+<pre data-lang="python" data-file="script.py">
+"""Inserts the chosen block at every point you pick."""
+from pyacad import banner, blocks, forms, layers, sel, toast
+
+name = forms.select_from_list(blocks.definitions(), title='Insert block',
+                              prompt='Insert which block?')
+if name:
+    layer = layers.current()
+    placed = 0
+    banner.prompt('Placing %s on %s' % (name, layer), 'Pick points; Enter or Esc to finish')
+    try:
+        while True:
+            point = sel.pick_point('Insertion point for %s: ' % name)
+            if point is None:
+                break
+            blocks.insert(name, point, layer=layer)
+            placed += 1
+    finally:
+        banner.clear()
+    if placed:
+        toast.success('%d %s placed' % (placed, name))
+</pre>
+
+<p>The <code>try</code>/<code>finally</code> is there because a banner from
+<code>banner.prompt</code> stays until it is cleared: without it an error half way would leave
+the instruction on screen. The block goes into the current space with the definition's default
+attribute values; pass <code>attributes={'TAG': 'value'}</code> to fill them, and
+<code>rotation</code> in radians (<code>math.radians(90)</code>).</p>
+
+<h3>Put a block schedule table in the drawing</h3>
+
+<p>Counts the drawing's block references and draws the result as an AutoCAD table at a picked
+point, in the current table style.</p>
+
+<pre data-lang="python" data-file="script.py">
+"""Draws a block count as an AutoCAD table."""
+from pyacad import blocks, sel, toast
+
+refs = blocks.snapshots()
+if not refs:
+    toast.info('No block references to schedule')
+else:
+    headers, rows = blocks.schedule_rows(refs)
+    corner = sel.pick_point('Top left corner of the schedule: ')
+    if corner is not None:
+        blocks.insert_table(corner, headers, rows, title='Block schedule')
+        toast.success('Schedule of %d blocks placed' % len(rows))
+</pre>
+
+<p>The table goes into the current space, so run it on a layout tab to put the schedule on a
+sheet. Columns are sized from the text, and the text height comes from the table style, so set
+up the style (TABLESTYLE) once in your template and every schedule matches.</p>
+
+<h3>Renumber room tags in reading order</h3>
+
+<p>Numbers every <code>TAG-ROOM</code> reference from a starting number, top row first and left
+to right within a row. All the changes go into the drawing in one
+<code>blocks.apply_changes</code> call, which reports any reference it could not change instead
+of stopping.</p>
+
+<pre data-lang="python" data-file="script.py">
+"""Renumbers room tags top to bottom, left to right."""
+from pyacad import blocks, forms, toast
+
+BLOCK = 'TAG-ROOM'
+TAG = 'ROOM_NO'
+ROW = 1000.0        # tags within this height of each other count as one row
+
+refs = [r for r in blocks.snapshots(blocks.references(BLOCK)) if TAG in r['attributes']]
+if not refs:
+    toast.info('No %s with a %s attribute' % (BLOCK, TAG))
+else:
+    start = forms.ask_number('First number', default=101, min_value=0, title='Renumber rooms')
+    if start is not None:
+        refs.sort(key=lambda r: (-round(r['position'][1] / ROW), r['position'][0]))
+        changes = {}
+        for offset, ref in enumerate(refs):
+            changes[ref['handle']] = {'attributes': {TAG: str(int(start) + offset)}}
+        result = blocks.apply_changes(changes)
+        if result['failed']:
+            toast.warning('%d renumbered, %d not' % (result['updated'], len(result['failed'])),
+                          'References on locked layers cannot change')
+        else:
+            toast.success('%d rooms renumbered' % result['updated'])
+</pre>
+
+<p><code>result['updated']</code> counts references whose value actually changed, so running
+the tool twice reports 0 the second time. The tag name must be spelled as the drawing spells it
+(attribute tags are almost always upper case).</p>
+
+<h2>Measuring</h2>
+
+<h3>Total length of polylines on a layer</h3>
+
+<p>Pick a layer and get the total length of every polyline on it, in the drawing's own units,
+as a banner across the bottom of the window. <code>ents.lengths</code> measures them all in one
+transaction.</p>
+
+<pre data-lang="python" data-file="script.py">
+"""Total length of the polylines on one layer."""
+from pyacad import banner, ents, forms, layers, sel, toast, units
+
+SPECIAL = '#@.*?~[]-,`'
+
+
+def literal(name):
+    return ''.join('`' + c if c in SPECIAL else c for c in name)
+
+
+name = forms.select_from_list(layers.names(), title='Polyline length', prompt='Which layer?')
+if name:
+    handles = sel.get(type=['LWPOLYLINE', 'POLYLINE'], layer=literal(name))
+    measured = [r['length'] for r in ents.lengths(handles) if r['length'] is not None]
+    if not measured:
+        toast.info('No polylines on %s' % name)
+    else:
+        unit = units.current()
+        total = sum(measured)
+        detail = '%d polylines on %s' % (len(measured), name)
+        if unit != 'Undefined':
+            detail += ' (%.2f m)' % units.to_metres(total, unit)
+        banner.success(units.format_length(total, unit), detail)
+</pre>
+
+<p><code>units.format_length</code> writes feet and inches for an Inches or Feet drawing
+(<code>148'-3.25"</code>) and the number with its unit otherwise (<code>45230.00 mm</code>).
+A drawing whose INSUNITS is 0 has no units, so it gets the bare number and no metres.</p>
+
+<h3>Length by layer for a selection</h3>
+
+<p>Select pipes, ducts or cable runs, and get a takeoff: pieces and total length per layer.
+<code>ents.length_by_layer</code> does the grouping, so the script is three calls and a
+table.</p>
+
+<pre data-lang="python" data-file="script.py">
+"""Length takeoff by layer for the selected lines, arcs, polylines and splines."""
+from pyacad import ents, output, sel, toast, units
+
+handles = sel.current() or sel.pick_many('Select the runs to measure: ')
+totals = ents.length_by_layer(ents.lengths(handles))
+if not totals:
+    toast.info('Nothing measurable selected', 'Lines, arcs, polylines and splines count')
+else:
+    unit = units.current()
+    rows = [[t['layer'], t['count'], units.format_length(t['length'], unit)] for t in totals]
+    grand = sum(t['length'] for t in totals)
+    output.print_md('## Length takeoff')
+    output.print_table(rows, ['Layer', 'Pieces', 'Length'])
+    output.print_md('**Total:** %s' % units.format_length(grand, unit))
+</pre>
+
+<p>Circles and ellipses are not in <code>ents.LENGTH_TYPES</code>, because a takeoff counts
+runs, not outlines; pass <code>types=('LINE', 'ARC', 'CIRCLE')</code> to
+<code>ents.lengths</code> when you want them.</p>
+
+<h2>Xrefs, layouts and plotting</h2>
+
+<h3>List xrefs with broken paths</h3>
+
+<p>Every xref AutoCAD could not find, with its saved path, in the output window. When all of
+them resolve, a toast says so and no window opens.</p>
+
+<pre data-lang="python" data-file="script.py">
+"""Lists the xrefs whose files cannot be found."""
+from pyacad import output, toast, xrefs
+
+rows = xrefs.list()
+broken = [r for r in rows if r['status'] in ('not-found', 'unresolved')]
+if not rows:
+    toast.info('This drawing has no xrefs')
+elif not broken:
+    toast.success('All %d xrefs resolve' % len(rows))
+else:
+    output.print_md('## %d of %d xrefs cannot be found' % (len(broken), len(rows)))
+    output.print_table(
+        [[r['name'], xrefs.status_label(r['status']), r['path'] or '(no path)',
+          'nested' if r['nested'] else ''] for r in broken],
+        ['Xref', 'Status', 'Saved path', ''])
+    output.print_md('Nested xrefs follow their parent: fix the parent first.')
+</pre>
+
+<p>An unloaded xref is not broken (someone unloaded it on purpose), so <code>'unloaded'</code>
+is left out. <code>path</code> is what is saved in the drawing, which may be relative;
+<code>found_at</code> is where AutoCAD actually loaded a resolved one from.</p>
+
+<h3>Repath xrefs after a server move</h3>
+
+<p>Replace part of every xref path (an old server or drive) with something new. The plan is
+worked out first by the pure <code>xrefs.plan_repath</code>, shown to the user, and only then
+applied. Afterwards <code>xrefs.check_loaded</code> turns "repathed, but the file is still not
+there" into a reported failure, because AutoCAD accepts a path it cannot resolve without a
+word.</p>
+
+<pre data-lang="python" data-file="script.py">
+"""Repaths xrefs: replaces text in their saved paths, after a preview."""
+from pyacad import forms, toast, xrefs
+
+TITLE = 'Repath xrefs'
+
+
+def ask_replacement():
+    """(find, replace) from the user, or None when they cancel."""
+    find = forms.ask_string('Replace this in every xref path:', '', TITLE)
+    if not find:
+        return None
+    replace = forms.ask_string('Replace "%s" with:' % find, '', TITLE)
+    return None if replace is None else (find, replace)
+
+
+def apply(rows, plan):
+    """Repaths every row the plan changes; (name, error) per xref, error None on success."""
+    results = []
+    for row, (old, new, note) in zip(rows, plan):
+        if note:
+            continue
+        try:
+            xrefs.repath(row['name'], new)
+            results.append((row['name'], None))
+        except Exception as error:
+            results.append((row['name'], str(error) or 'failed'))
+    return xrefs.check_loaded(results, xrefs.list())
+
+
+rows = xrefs.list()
+answer = ask_replacement() if rows else None
+if not rows:
+    toast.info('This drawing has no xrefs')
+elif answer:
+    find, replace = answer
+    plan = xrefs.plan_repath(rows, 'replace', find=find, replace=replace)
+    if all(note for old, new, note in plan):
+        toast.info('No xref path contains "%s"' % find)
+    elif forms.confirm(xrefs.format_plan(rows, plan, limit=15), TITLE):
+        results = apply(rows, plan)
+        if any(error for name, error in results):
+            forms.alert(xrefs.summarize(results, 'Repathed', limit=15), TITLE)
+        else:
+            toast.success(xrefs.headline(results, 'Repathed'))
+</pre>
+
+<p>The replace ignores case, as Windows paths do. Nested xrefs are never changed: their path is
+saved in the parent drawing, not in this one. For a whole-drawing move to relative paths,
+<code>xrefs.to_relative()</code> is one call.</p>
+
+<h3>Batch plot layouts to PDF</h3>
+
+<p>Tick the layouts, pick a folder, and each one is plotted to its own PDF named after the
+drawing and the layout, with a progress window that can be cancelled between sheets. A sheet
+that fails is reported at the end rather than stopping the batch.</p>
+
+<pre data-lang="python" data-file="script.py">
+"""Plots the chosen layouts to PDF, one file each."""
+import os
+
+from pyacad import doc, forms, layouts, plot, toast
+
+TITLE = 'Batch plot'
+
+names = layouts.names()
+picked = forms.select_from_list(names, title=TITLE, multiselect=True, checked=names,
+                                prompt='Plot which layouts?')
+if picked:
+    here = doc.path()
+    start = None if here == 'untitled' else os.path.dirname(here)
+    folder = forms.pick_folder('Save the PDFs to', start)
+    if folder:
+        jobs = plot.batch_names(here, picked, folder)
+        done, failed = [], []
+        try:
+            with forms.progress(TITLE) as bar:
+                for index, (layout, target) in enumerate(jobs):
+                    bar.check()
+                    bar.update(float(index) / len(jobs), 'Plotting %s' % layout)
+                    try:
+                        plot.to_pdf(layout, target)
+                        done.append(target)
+                    except Exception as error:
+                        failed.append('%s: %s' % (layout, error))
+        except forms.Cancelled:
+            failed.append('Cancelled after %d of %d' % (len(done), len(jobs)))
+        if failed:
+            forms.alert('%d PDFs written to %s\n\nNot plotted:\n%s'
+                        % (len(done), folder, '\n'.join(failed)), TITLE)
+        else:
+            toast.success('%d PDFs written' % len(done), folder)
+</pre>
+
+<p><code>plot.to_pdf</code> starts from each layout's own page setup and only swaps the device
+to DWG To PDF, so a layout set up for A1 plots on A1. When the layout's paper is not one
+DWG To PDF offers, it keeps the device's default paper; pass <code>paper=</code> (a name from
+<code>plot.papers('DWG To PDF.pc3')</code>) or <code>page_setup=</code> to be explicit. The
+plot is in the foreground, so AutoCAD is busy until each sheet is written.</p>
+
+<h2>Drawing health</h2>
+
+<h3>Purge, clean and audit in one click</h3>
+
+<p>Deletes zero-length lines and polylines, purges everything unused, then queues AUDIT, and
+reports with the same wording as the shipped Drawing Cleanup tool by handing the counts to
+<code>audit.summary</code> and <code>audit.format_report</code>.</p>
+
+<pre data-lang="python" data-file="script.py">
+"""Zero-length cleanup, purge, then AUDIT."""
+from pyacad import audit, forms, toast
+
+if forms.confirm('Delete zero-length geometry, purge everything unused, then run AUDIT?',
+                 'Clean drawing'):
+    erased, skipped = audit.erase(audit.zero_length())
+    purged = audit.purge()
+    audit.audit(fix=True)
+    steps = [('zero_length', {'count': erased, 'skipped': skipped}),
+             ('purge', purged),
+             ('audit', None)]
+    toast.success(audit.summary(steps), audit.format_report(steps))
+</pre>
+
+<p>The order matters: erasing first lets the purge remove a layer or block that only the
+zero-length geometry was keeping alive. <code>audit.audit</code> only queues the command, so it
+runs after the toast, as its own command, and reports on the command line. Everything before
+it is one undo step.</p>
+
+<h3>Delete duplicate geometry, with a confirmation</h3>
+
+<p>Finds entities stacked on top of each other (same space, type, layer and geometry), says how
+many, and deletes every copy but one. Copies on locked layers are left and counted.</p>
+
+<pre data-lang="python" data-file="script.py">
+"""Deletes duplicate entities, keeping one of each."""
+from pyacad import audit, forms, toast
+
+groups = audit.duplicates()
+extras = audit.duplicate_extras(groups)
+if not extras:
+    toast.success('No duplicates found')
+elif forms.confirm('%d duplicate copies in %d groups. Delete them, keeping one of each?'
+                   % (len(extras), len(groups)), 'Duplicates'):
+    erased, skipped = audit.erase(extras)
+    if skipped:
+        toast.warning('%d duplicates deleted' % erased, '%d on locked layers left' % skipped)
+    else:
+        toast.success('%d duplicates deleted' % erased)
+</pre>
+
+<p>Two block references count as duplicates only when their attribute values match too, so two
+tags placed on one point with different numbers are both kept. Only lines, circles, arcs,
+lightweight polylines, text, mtext and block references are compared; see
+<code>audit.geometry_key</code>.</p>
+
+<h2>Button kinds, hooks and panes</h2>
+
+<p>The next four recipes are one small extension: a toggle that switches a save log on and
+off, the hook that writes the log, a smartbutton, and a dock pane. Laid out together it looks
+like this:</p>
+
+<pre data-lang="tree">
+MyTools.extension\
+    hooks\
+        doc-saved.py                 # the save log hook
+    MyTools.tab\
+        Drawing.panel\
+            Save_Log.toggle\
+                bundle.yaml
+                script.py
+                icon.on.png
+                icon.off.png
+            Apply_Standard.smartbutton\
+                script.py
+            Layer_Picker.dockpane\
+                bundle.yaml
+                pane.xaml
+                script.py
+</pre>
+
+<h3>A toggle that remembers its state</h3>
+
+<p>A <code>*.toggle</code> bundle's on or off state (<code>script.get_toggle_state</code>) lasts
+only for the AutoCAD session and starts off. To remember a choice across restarts, keep the real
+value in <code>pyacad.settings</code> under a key you choose, and use the toggle state only to
+show it. A fixed key also lets the hook below read the same value.</p>
+
+<pre data-lang="yaml" data-file="bundle.yaml">
+title: Save Log
+tooltip: Logs every save of every drawing to %APPDATA%\pyACAD\save-log.csv while on.
+</pre>
+
+<pre data-lang="python" data-file="script.py">
+"""Switches the save log on or off; hooks\\doc-saved.py reads the same setting."""
+from pyacad import script, settings, toast
+
+cfg = settings.load('save_log', {'on': False})
+cfg['on'] = not cfg['on']
+settings.save('save_log', cfg)
+script.set_toggle_state(cfg['on'])
+toast.success('Save log is on' if cfg['on'] else 'Save log is off')
+</pre>
+
+<p>The click flips the saved value, not the icon's, so the setting is always what the user last
+chose. The sharp edge is the first session after a restart: the icon starts off even when the
+saved value is on (nothing but the toggle's own script can set its state), and the first click
+turns the log off. Say so in the tooltip if your users will notice, or use
+<code>title_on:</code> and <code>tooltip_on:</code> in bundle.yaml so the on state reads
+differently.</p>
+
+<h3>A hook that logs every save</h3>
+
+<p>A file in the extension's <code>hooks</code> folder named after an event runs every time the
+event fires, with no click. This one appends a CSV line per save while the toggle above is on.
+Hooks run outside any command and must be fast; this one does a settings read and one file
+append.</p>
+
+<pre data-lang="python" data-file="hooks\doc-saved.py">
+"""Appends one CSV line per save while the Save Log toggle is on."""
+import csv
+import datetime
+import io
+import os
+
+from pyacad import script, settings
+
+if settings.load('save_log', {'on': False})['on']:
+    folder = os.path.join(os.environ.get('APPDATA', ''), 'pyACAD')
+    if not os.path.isdir(folder):
+        os.makedirs(folder)
+    drawing = script.get_document_path() or '(no drawing)'
+    with io.open(os.path.join(folder, 'save-log.csv'), 'a', newline='', encoding='utf-8') as stream:
+        csv.writer(stream).writerow([
+            datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            os.environ.get('USERNAME', ''),
+            drawing,
+        ])
+</pre>
+
+<p>Three things make this hook safe. It reads its switch with <code>settings.load</code> and a
+fixed key, not <code>script.get_config</code>, which in a hook would answer for whichever
+button ran last. It uses <code>script.get_document_path()</code>, which never raises. And it
+touches nothing in the drawing, so it needs no <code>doc.lock()</code>. The hook's globals tell
+you the event (<code>__event__['name']</code> is <code>'doc-saved'</code>) but not which drawing
+was saved; the active drawing is the one SAVE and QSAVE just wrote. A hook that raises three
+times in a row is switched off until the next Reload, and its tracebacks go to the pyACAD
+log.</p>
+
+<h3>A smartbutton that disables itself</h3>
+
+<p>A <code>*.smartbutton</code> runs its script once more while the ribbon is built, with
+<code>__selfinit__</code> set to <code>True</code> and a <code>__button__</code> to change its
+own title, tooltip, icon and enabled state. This one applies an office layer standard from a
+CSV on the network, and greys itself out when the CSV is not reachable, so nobody clicks a
+button that cannot work.</p>
+
+<pre data-lang="python" data-file="script.py">
+"""Applies the office layer standard (renames, merges and creates layers)."""
+import io
+import os
+
+STANDARD = r'\\server\cad\standards\layers.csv'
+
+if __selfinit__:
+    if not os.path.isfile(STANDARD):
+        __button__.Enabled = False
+        __button__.Tooltip = 'Layer standard not found at %s. Reload once it is back.' % STANDARD
+else:
+    from pyacad import forms, layers, toast
+
+    with io.open(STANDARD, encoding='utf-8') as stream:
+        mapping = layers.parse_mapping(stream.read())
+    plan = layers.plan_mapping(layers.names(), mapping)
+    work = [step for step in plan if step[0] != 'skip']
+    if not work:
+        toast.success('Layers already follow the standard')
+    elif forms.confirm('\n'.join(layers.describe_action(step) for step in plan[:30]),
+                       'Apply layer standard (%d steps)' % len(work)):
+        failed = []
+        for step in work:
+            try:
+                if step[0] == 'rename':
+                    layers.rename(step[1], step[2])
+                elif step[0] == 'merge':
+                    layers.merge(step[1], step[2])
+                elif step[0] == 'create':
+                    layers.create(step[1], step[2] or 7, step[3] or 'Continuous')
+            except ValueError as error:
+                failed.append(str(error))
+        if failed:
+            forms.alert('\n'.join(failed), 'Some steps failed')
+        else:
+            toast.success('Layer standard applied', '%d steps' % len(work))
+</pre>
+
+<p>The self-init run happens at startup and at every Reload, never again in between, so a file
+that comes back later needs a Reload. Keep self-init cheap: it holds up the ribbon, and a
+check against a server that is down can take seconds. The <code>pyacad</code> import sits in the
+<code>else</code> branch because self-init needs none of it. The CSV format is the one
+<code>layers.parse_mapping</code> reads: <code>old,new[,colour][,linetype]</code>, with
+wildcards in the old name.</p>
+
+<h3>A dock pane with a live layer list</h3>
+
+<p>A <code>*.dockpane</code> is an AutoCAD palette: <code>pane.xaml</code> is its content and
+<code>script.py</code> runs once against it with the loaded root as <code>__pane__</code>
+(<code>Find(name)</code>, <code>Content</code>, <code>Visible</code>, <code>Title</code>). The
+ribbon gets a toggle that shows and hides it. This pane lists the drawing's layers with a filter
+box and makes the chosen one current.</p>
+
+<pre data-lang="text" data-file="pane.xaml">
+&lt;DockPanel xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+           Margin="10"&gt;
+  &lt;TextBox x:Name="Filter" DockPanel.Dock="Top" Padding="4,3" /&gt;
+  &lt;StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Margin="0,8,0,0"&gt;
+    &lt;Button x:Name="MakeCurrent" Content="Make current" Padding="10,3" Margin="0,0,6,0" /&gt;
+    &lt;Button x:Name="Refresh" Content="Refresh" Padding="10,3" /&gt;
+  &lt;/StackPanel&gt;
+  &lt;ListBox x:Name="Names" Margin="0,8,0,0" /&gt;
+&lt;/DockPanel&gt;
+</pre>
+
+<pre data-lang="python" data-file="script.py">
+"""Layer picker palette: filter the layer list, double-click to make one current."""
+from pyacad import doc, layers, toast
+
+pane = __pane__
+box = pane.Find('Filter')
+listing = pane.Find('Names')
+known = []
+
+
+def show(sender=None, args=None):
+    listing.Items.Clear()
+    for name in layers.filter_names(known, box.Text):
+        listing.Items.Add(name)
+
+
+def refresh(sender=None, args=None):
+    del known[:]
+    try:
+        with doc.lock():
+            known.extend(layers.names())
+    except RuntimeError:
+        pass                                  # no drawing open
+    show()
+
+
+def make_current(sender, args):
+    name = listing.SelectedItem
+    if name is None:
+        return
+    try:
+        with doc.lock():
+            layers.set_current(str(name))
+        toast.success('Current layer: %s' % name)
+    except Exception as error:
+        toast.error('Could not make %s current' % name, str(error))
+
+
+box.TextChanged += show
+listing.MouseDoubleClick += make_current
+pane.Find('MakeCurrent').Click += make_current
+pane.Find('Refresh').Click += refresh
+refresh()
+</pre>
+
+<p>Every handler runs long after <code>script.py</code> returned, outside any command, which is
+why each one takes <code>doc.lock()</code> before touching the drawing. The list is read when
+the pane is built and on Refresh; it does not follow you to another drawing on its own. For the
+same reason, do not use <code>script.get_config</code> in a pane: use
+<code>pyacad.settings</code> with your own key. AutoCAD remembers the palette's size, dock side
+and visibility under the folder name, so renaming the folder forgets them.</p>
+
+<h3>A XAML dialog bundle</h3>
+
+<p>When a tool needs three or four answers at once, chained prompts get tedious; a small WPF
+window is the next step. <code>forms.WPFWindow</code> loads a XAML file from the bundle folder,
+gives it pyACAD's window chrome and shows it modally over AutoCAD. This one creates a layer.</p>
+
+<pre data-lang="tree">
+New_Layer.pushbutton\
+    layout.xaml
+    script.py
+</pre>
+
+<pre data-lang="text" data-file="layout.xaml">
+&lt;Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="New layer" Width="320" SizeToContent="Height"
+        WindowStartupLocation="CenterScreen" ResizeMode="NoResize"&gt;
+  &lt;StackPanel Margin="16"&gt;
+    &lt;TextBlock Text="Name" /&gt;
+    &lt;TextBox x:Name="LayerName" Margin="0,4,0,10" /&gt;
+    &lt;TextBlock Text="Colour (1 to 255)" /&gt;
+    &lt;TextBox x:Name="Colour" Text="7" Margin="0,4,0,10" Width="60" HorizontalAlignment="Left" /&gt;
+    &lt;CheckBox x:Name="MakeCurrent" Content="Make it the current layer" IsChecked="True" /&gt;
+    &lt;StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0"&gt;
+      &lt;Button x:Name="OkButton" Content="Create" Width="80" Margin="0,0,8,0" IsDefault="True" /&gt;
+      &lt;Button Content="Cancel" Width="80" IsCancel="True" /&gt;
+    &lt;/StackPanel&gt;
+  &lt;/StackPanel&gt;
+&lt;/Window&gt;
+</pre>
+
+<pre data-lang="python" data-file="script.py">
+"""Creates a layer from a small dialog."""
+from pyacad import forms, layers, toast
+
+win = forms.WPFWindow('layout.xaml')
+
+
+def on_create(sender, args):
+    win.close(True)
+
+
+win['OkButton'].Click += on_create
+
+if win.show_dialog():
+    name = win['LayerName'].Text.strip()
+    try:
+        layers.create(name, int(win['Colour'].Text))
+        if win['MakeCurrent'].IsChecked:
+            layers.set_current(name)
+        toast.success('Layer %s created' % name)
+    except ValueError as error:
+        toast.error('Layer not created', str(error))
+</pre>
+
+<p>Cancel needs no handler: <code>IsCancel="True"</code> closes the window with a false result,
+and so does Esc. <code>int()</code> of something that is not a number raises
+<code>ValueError</code> too, so one <code>except</code> covers a bad colour and a bad name.
+Read the fields after <code>show_dialog()</code> returns; the window's elements stay readable
+after it closes.</p>
+
+<h2>Beyond the ribbon</h2>
+
+<h3>Call a tool from AutoLISP</h3>
+
+<p>Every pushbutton is an AutoCAD command, and AutoLISP can call it as a function:
+<code>(pyacad "PYNAME" args...)</code> runs the script with the arguments in
+<code>__args__</code> and returns whatever the script put in <code>__result__</code>. This
+bundle, <code>Layer_Stats.pushbutton</code>, becomes the command PYLAYERSTATS.</p>
+
+<pre data-lang="python" data-file="script.py">
+"""Counts layers matching a pattern. From LISP: (pyacad "PYLAYERSTATS" "A-*")"""
+from pyacad import layers, script, toast
+
+args = script.get_args()
+pattern = str(args[0]) if args else '*'
+
+snapshot = layers.snapshot()
+matching = sorted(name for name in snapshot if layers.matches(name, pattern))
+frozen = [name for name in matching if snapshot[name]['is_frozen']]
+
+__result__ = {'pattern': pattern, 'count': len(matching),
+              'frozen': len(frozen), 'names': matching}
+
+if not args:                       # clicked on the ribbon: nobody reads __result__
+    toast.info('%d layers match %s' % (len(matching), pattern), '%d frozen' % len(frozen))
+</pre>
+
+<p>On the LISP side a dict comes back as an association list of two-element lists, so
+<code>assoc</code> and <code>cadr</code> read it:</p>
+
+<pre data-lang="text">
+(setq stats (pyacad "PYLAYERSTATS" "A-*"))
+;; (("pattern" "A-*") ("count" 12) ("frozen" 3) ("names" ("A-ANNO" "A-DOOR" ...)))
+(cadr (assoc "frozen" stats))        ; 3
+</pre>
+
+<p><code>__result__</code> must be something JSON can hold (dicts, lists, strings, numbers,
+<code>True</code>, <code>False</code>, <code>None</code>); anything else, or a script that
+fails, returns nil and logs why. A single value comes back bare: a script that sets
+<code>__result__ = 12</code> returns 12. Strings from LISP arrive as <code>str</code>, integers
+as <code>int</code> and reals as <code>float</code>. Typed at the command line through
+<code>PYACAD</code> (<code>PYACAD</code>, then <code>PYLAYERSTATS A-*</code>), every argument
+arrives as a string.</p>
+
+<h3>A CPython tool with pandas</h3>
+
+<p>The default engine is IronPython, which runs inside AutoCAD with no install but cannot load
+compiled packages such as numpy and pandas. A bundle that needs them declares
+<code>engine: cpython</code> and runs on the 64-bit Python installed on the machine; the
+<code>pyacad</code> library works the same there. This one builds a block-by-layer pivot with
+pandas and saves it to Excel.</p>
+
+<pre data-lang="yaml" data-file="bundle.yaml">
+title: Block Pivot
+tooltip: Block counts by layer as an Excel pivot. Needs pandas and openpyxl.
+engine: cpython
+</pre>
+
+<pre data-lang="python" data-file="script.py">
+"""Block references counted by block and layer, saved to Excel with pandas."""
+import pandas as pd
+
+from pyacad import blocks, forms, toast
+
+refs = blocks.snapshots()
+if not refs:
+    toast.info('No block references in this drawing')
+else:
+    frame = pd.DataFrame([{'Block': r['name'], 'Layer': r['layer']} for r in refs])
+    pivot = pd.crosstab(frame['Block'], frame['Layer'])
+    pivot['Total'] = pivot.sum(axis=1)
+    pivot = pivot.sort_values('Total', ascending=False)
+    path = forms.save_file('Excel workbook (*.xlsx)|*.xlsx', 'Block pivot.xlsx',
+                           'Save block pivot')
+    if path:
+        pivot.to_excel(path, sheet_name='Pivot')
+        toast.success('%d blocks by %d layers' % (len(pivot), len(pivot.columns) - 1), path)
+</pre>
+
+<p>Install the packages into the same Python pyACAD finds (<code>py -m pip install pandas
+openpyxl</code>), then Reload. The first CPython tool in a session takes a moment while the
+interpreter starts; after that it stays loaded until AutoCAD closes, so changes to an installed
+package need an AutoCAD restart. Values from the library are plain Python
+(<code>blocks.snapshots</code> returns dicts of <code>str</code> and <code>float</code>), so they
+go straight into a DataFrame. A CPython bundle cannot share module state with IronPython
+ones: each engine has its own interpreter, so pass data between them through files or
+<code>pyacad.settings</code>, not module globals.</p>
+
+<h3>A long job with progress and cancel</h3>
+
+<p>The batch functions take <code>progress</code> and <code>cancelled</code> callbacks and call
+them every 200 items. Wire them to <code>forms.progress</code> and a long measurement gets a
+moving bar and a working Cancel button, with no loop of your own.</p>
+
+<pre data-lang="python" data-file="script.py">
+"""Measures every line, arc, polyline and spline in the drawing, with a cancellable bar."""
+from pyacad import ents, forms, output, sel, toast, units
+
+handles = sel.get(type=list(ents.LENGTH_TYPES))
+if not handles:
+    toast.info('Nothing to measure')
+else:
+    stopped = []
+
+    with forms.progress('Measuring %d curves' % len(handles)) as bar:
+        def report(index, total):
+            if not bar.update(float(index) / total, 'Measured %d of %d' % (index, total)):
+                stopped.append(True)
+
+        rows = ents.lengths(handles, progress=report, cancelled=lambda: bool(stopped))
+
+    totals = ents.length_by_layer(rows)
+    unit = units.current()
+    output.print_md('## Length by layer' + (' (cancelled part way)' if stopped else ''))
+    output.print_table([[t['layer'], t['count'], units.format_length(t['length'], unit)]
+                        for t in totals], ['Layer', 'Pieces', 'Length'])
+    if stopped:
+        toast.info('Cancelled', 'Measured %d of %d before you stopped' % (len(rows), len(handles)))
+</pre>
+
+<p><code>bar.update</code> both moves the bar and lets the window handle a Cancel click, and
+it returns <code>False</code> once Cancel was clicked; the lambda passes that on, and
+<code>ents.lengths</code> stops at its next check and returns what it measured so far. Functions
+that write behave the same way and keep what they did, except <code>layers.merge</code>, which
+rolls back. When your own loop does the work, call <code>bar.check()</code> each time round and
+catch <code>forms.Cancelled</code> instead, as the batch plot recipe does.</p>

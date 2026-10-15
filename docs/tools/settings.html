@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Settings - pyACAD tools</title>
+<meta name="description" content="One window over the parts of pyACAD you are meant to change: theme, ribbon hints, where extensions load from, the engine paths, the AI assistant and updates.">
+<link rel="stylesheet" href="_assets/site.css">
+<link rel="stylesheet" href="_assets/tools.css">
+</head>
+<body data-base="">
+<div class="layout">
+<div class="sidebar">
+  <div class="brand"><a href="index.html"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="26" height="26" aria-hidden="true"><polygon points="157.0,327.8 351.8,327.8 363.1,342.4 363.1,403.3 168.3,403.3 157.0,388.7" fill="#78082A"/><polygon points="157.0,327.8 351.8,327.8 351.8,388.7 157.0,388.7" fill="#B80C40"/><polygon points="51.5,482.0 234.1,157.4 278.7,181.7 290.1,196.3 152.1,496.6 62.8,496.6" fill="#78082A"/><polygon points="51.5,482.0 140.8,482.0 278.7,181.7 234.1,157.4" fill="#E51050"/><polygon points="359.9,482.0 205.7,108.7 217.0,123.3 371.2,496.6" fill="#78082A"/><polygon points="205.7,108.7 201.6,55.9 213.0,70.5 217.0,123.3" fill="#78082A"/><polygon points="201.6,55.9 246.3,15.4 257.6,30.0 213.0,70.5" fill="#78082A"/><polygon points="246.3,15.4 343.7,23.5 355.0,38.1 257.6,30.0" fill="#78082A"/><polygon points="343.7,23.5 388.3,51.9 399.7,66.5 355.0,38.1" fill="#78082A"/><polygon points="388.3,51.9 347.7,76.2 359.1,90.8 399.7,66.5" fill="#78082A"/><polygon points="347.7,76.2 295.0,84.3 306.3,99.0 359.1,90.8" fill="#78082A"/><polygon points="295.0,84.3 449.2,482.0 460.5,496.6 306.3,99.0" fill="#78082A"/><polygon points="449.2,482.0 359.9,482.0 371.2,496.6 460.5,496.6" fill="#78082A"/><polygon points="359.9,482.0 205.7,108.7 201.6,55.9 246.3,15.4 343.7,23.5 388.3,51.9 347.7,76.2 295.0,84.3 449.2,482.0" fill="#E51050"/><polygon points="270.6,39.7 311.2,35.7 297.0,51.9" fill="#1F2329"/></svg><span class="brand-name">pyACAD
+    <span class="brand-sub">Tools guide</span></span></a></div>
+  <div class="search-wrap">
+    <svg class="search-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <circle cx="6" cy="6" r="4.2" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M9.2 9.2 12.5 12.5" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round"/></svg>
+    <input id="search" type="search" placeholder="Search the tools" autocomplete="off"
+           spellcheck="false" aria-label="Search the tools guide">
+    <span class="search-kbd">/</span>
+    <div id="search-results" class="search-results"></div>
+  </div>
+  <nav class="pages">
+<div class="grp">pyACAD</div>
+<a href="settings.html" class="active"><img class="nav-icon" src="_assets/icons/settings.png" alt="">Settings</a>
+<a href="shortcuts.html"><img class="nav-icon" src="_assets/icons/shortcuts.png" alt="">Shortcuts</a>
+<a href="console.html"><img class="nav-icon" src="_assets/icons/console.png" alt="">Console</a>
+<a href="reload.html"><img class="nav-icon" src="_assets/icons/reload.png" alt="">Reload</a>
+<div class="grp">Data</div>
+<a href="blocks-to-excel.html"><img class="nav-icon" src="_assets/icons/blocks-to-excel.png" alt="">Blocks to Excel</a>
+<a href="excel-to-blocks.html"><img class="nav-icon" src="_assets/icons/excel-to-blocks.png" alt="">Excel to Blocks</a>
+<a href="block-schedule.html"><img class="nav-icon" src="_assets/icons/block-schedule.png" alt="">Block Schedule</a>
+<a href="find-replace-attributes.html"><img class="nav-icon" src="_assets/icons/find-replace-attributes.png" alt="">Find and Replace Attributes</a>
+<div class="grp">Layers</div>
+<a href="layer-manager.html"><img class="nav-icon" src="_assets/icons/layer-manager.png" alt="">Layer Manager</a>
+<a href="layer-mapper.html"><img class="nav-icon" src="_assets/icons/layer-mapper.png" alt="">Layer Mapper</a>
+<a href="layer-snapshot.html"><img class="nav-icon" src="_assets/icons/layer-snapshot.png" alt="">Layer Snapshot</a>
+<div class="grp">Xrefs</div>
+<a href="xref-manager.html"><img class="nav-icon" src="_assets/icons/xref-manager.png" alt="">Xref Manager</a>
+<a href="xref-repath.html"><img class="nav-icon" src="_assets/icons/xref-repath.png" alt="">Xref Repath</a>
+<div class="grp">Cleanup</div>
+<a href="drawing-cleanup.html"><img class="nav-icon" src="_assets/icons/drawing-cleanup.png" alt="">Drawing Cleanup</a>
+<a href="font-proxy-report.html"><img class="nav-icon" src="_assets/icons/font-proxy-report.png" alt="">Font and Proxy Report</a>
+<div class="grp">Output</div>
+<a href="batch-plot.html"><img class="nav-icon" src="_assets/icons/batch-plot.png" alt="">Batch Plot</a>
+<a href="layout-manager.html"><img class="nav-icon" src="_assets/icons/layout-manager.png" alt="">Layout Manager</a>
+<div class="grp">Takeoff</div>
+<a href="length-takeoff.html"><img class="nav-icon" src="_assets/icons/length-takeoff.png" alt="">Length Takeoff</a>
+<a href="tag-audit.html"><img class="nav-icon" src="_assets/icons/tag-audit.png" alt="">Tag Audit</a>
+<div class="grp">AI (beta)</div>
+<a href="ask-ai.html"><img class="nav-icon" src="_assets/icons/ask-ai.png" alt="">Ask AI</a>
+<a href="ai-settings.html"><img class="nav-icon" src="_assets/icons/ai-settings.png" alt="">AI Settings</a>
+<a href="open-ai-folder.html"><img class="nav-icon" src="_assets/icons/open-ai-folder.png" alt="">Open AI Folder</a>
+</nav>
+  <div class="side-foot">
+    <span>pyACAD 0.1.0</span>
+    <a class="side-link" href="https://docs.pyacad.com/">Authoring guide</a>
+    <button id="theme-toggle" type="button" aria-label="Toggle colour theme">
+      <span>Dark</span></button>
+  </div>
+</div>
+<main class="main">
+<article>
+  <div class="hero"><img class="hero-icon" src="_assets/icons/settings.png" alt=""><div><p class="eyebrow">pyACAD panel</p><h1>Settings</h1><p class="lead">One window over the parts of pyACAD you are meant to change: theme, ribbon hints, where extensions load from, the engine paths, the AI assistant and updates.</p></div></div><div class="facts"><div class="fact"><span class="fact-k">On the ribbon</span><span class="fact-v">Button, pyACAD panel</span></div><div class="fact"><span class="fact-k">Needs</span><span class="fact-v">Nothing</span></div><div class="fact"><span class="fact-k">Command</span><span class="fact-v"><code>PYSETTINGS</code></span></div><div class="fact"><span class="fact-k">Shortcut</span><span class="fact-v">None set (bind one in Shortcuts)</span></div></div>
+  <h2 id="what-it-does">What it does<a class="anchor" href="#what-it-does" aria-label="Link to this section">#</a></h2>
+<p>pyACAD keeps its configuration in one JSON file, <code>%APPDATA%\pyACAD\config.json</code>.
+Most of that file is maintained by pyACAD itself. Settings is the window over the keys a
+person is meant to change, so nobody has to open the file in a text editor to switch the
+theme or add an extension folder. The command is <code>PYSETTINGS</code>.</p>
+
+
+
+<h2 id="how-to-use-it">How to use it<a class="anchor" href="#how-to-use-it" aria-label="Link to this section">#</a></h2>
+<ol class="steps">
+  <li>Click <strong>Settings</strong> (or type <code>PYSETTINGS</code>). The window opens with
+    the current values. It is taller than most screens allow, so it scrolls.</li>
+  <li><strong>Appearance.</strong> <strong>Theme</strong> is Follow AutoCAD (the default),
+    Light or Dark, and sets the colours of pyACAD's own windows, toasts and icons. Two
+    checkboxes control the hints after button captions: a mark after a tool that has a
+    keyboard shortcut (on by default, a filled dot) and a mark after a tool that has a
+    Shift+Click action (off by default, an upward arrow). The box beside each checkbox is the
+    glyph it draws; leave it empty for the default glyph. The checkbox is the only off
+    switch.</li>
+  <li><strong>Shortcuts.</strong> One checkbox, <strong>Allow shortcuts without Ctrl or
+    Alt</strong>, off by default. Off, every chord must carry Ctrl or Alt. On, a bare letter
+    can be bound, and it then swallows that key everywhere in AutoCAD while the drawing
+    window has focus.</li>
+  <li><strong>Where extensions are loaded from.</strong> Add or remove folders pyACAD scans for
+    <code>*.extension</code> folders. Two locations are scanned whether listed or not:
+    <code>%APPDATA%\pyACAD\extensions</code>, where the installer puts the shipped extension,
+    and <code>%PROGRAMDATA%\pyACAD\extensions</code> when it exists and only administrators can
+    write to it.</li>
+  <li><strong>Engines.</strong> The <code>pyacadlib</code> folder and a CPython executable.
+    Leave both empty to let pyACAD find them. CPython is only used by bundles that declare
+    <code>engine: cpython</code>. A wrong <code>pyacadlib</code> folder stops pyACAD loading
+    at all, so empty is safer than a guess.</li>
+  <li><strong>AI assistant (beta).</strong> The provider, base URL, model, API key (with
+    <strong>Test</strong>) and longest answer the Ask AI panel uses. The
+    <a href="ai-settings.html">AI Settings</a> page covers this section in full.</li>
+  <li><strong>Updates.</strong> Where this pyACAD stands against the latest release, with
+    <strong>Check now</strong>, <strong>Release page</strong> and <strong>Skip this
+    version</strong> (saved at once, without waiting for Save). Two switches, both on by
+    default: check for a new release once a day, and download it and install it when
+    AutoCAD closes.</li>
+  <li>Click <strong>Save</strong>. If an engine path changed, a toast says AutoCAD needs
+    restarting. Otherwise pyACAD asks whether to reload now; Yes rebuilds the ribbon so the
+    changes show straight away, No leaves them for the next Reload.</li>
+</ol>
+
+<h2 id="good-to-know-limits">Good to know / limits<a class="anchor" href="#good-to-know-limits" aria-label="Link to this section">#</a></h2>
+<ul>
+  <li>Which tool holds which chord is not edited here. That is the
+    <a href="shortcuts.html">Shortcuts</a> editor's job.</li>
+  <li>Engine paths take effect only after AutoCAD restarts. A Reload cannot swap a Python
+    engine under a running ribbon. A <code>*.lib</code> folder added inside an extension
+    folder also needs a restart; a new extension folder needs only a Reload.</li>
+  <li>The window rewrites only the keys it shows. Shortcut overrides and the sizes other
+    dialogs remember stay in the file untouched.</li>
+  <li>Cancel, or closing the window, says nothing and changes nothing.</li>
+  <li>The update check is one anonymous request to GitHub a day. A downloaded installer runs
+    only when its SHA-256 matches the release's, and only after AutoCAD has closed.</li>
+  <li>An update replaces <code>pyACAD.extension</code> whole. Anything you added to or edited
+    inside it is first copied to a dated backup, and buttons and panels you added move to
+    <code>My pyACAD.extension</code>, where they keep their place on the pyACAD tab because
+    tabs and panels with the same names merge on the ribbon. Keep your own tools there from
+    the start.</li>
+</ul>
+
+<h2 id="other-uses">Other uses<a class="anchor" href="#other-uses" aria-label="Link to this section">#</a></h2>
+<ul>
+  <li>Point pyACAD at a shared network folder of extensions so a whole team gets the same
+    tools, and keep your own experiments in a second, local folder.</li>
+  <li>Turn the Shift+Click arrow on while you learn the tab, then off again once you know
+    which tools carry a second action.</li>
+  <li>Copy the version line at the bottom (which pyACAD, for which AutoCAD, and where its
+    runtime lives) into any bug report. pyACAD writes the same line to
+    <code>%APPDATA%\pyACAD\logs\pyACAD.log</code> at every start.</li>
+</ul>
+
+<p>Every key the window writes is described in the authoring guide's
+<a href="https://docs.pyacad.com/settings.html">config.json reference</a>, which is where to
+look if you would rather edit the file directly.</p>
+<h2 id="source">Source<a class="anchor" href="#source" aria-label="Link to this section">#</a></h2>
+<p>The tool's own files, word for word as shipped in <code>pyACAD.panel/Settings.pushbutton</code>. Every pyACAD tool is an ordinary bundle: copy these into your own extension and change what you like.</p>
+<div class="code src"><div class="code-head"><span><code>script.py</code> <span class="src-note">Runs on a click.</span> <a href="https://github.com/pyacad/pyACAD/blob/main/extensions/pyACAD.extension/pyACAD.tab/pyACAD.panel/Settings.pushbutton/script.py" rel="noopener">View on GitHub</a></span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-c"># -*- coding: utf-8 -*-</span>
+<span class="tok-s">&quot;&quot;&quot;Edits everything in config.json a person is meant to change, in a window.
+
+The Shortcuts editor still owns which tool has which chord, and the pane registry
+still owns which panel holds which slot, so neither is edited here. This covers
+the rest: theme, the two ribbon hints, whether a bare key may be a shortcut,
+where extensions load from, and the two engine paths.
+
+Most of it shows after a Reload, which this offers. The engine paths cannot be
+picked up by a Reload at all, so that case says restart instead of pretending.
+&quot;&quot;&quot;</span>
+
+<span class="tok-k">import</span> clr
+
+clr.AddReference(<span class="tok-s">&#x27;PyAcad.Runtime&#x27;</span>)
+<span class="tok-k">from</span> PyAcad.Runtime.Forms <span class="tok-k">import</span> SettingsDialog
+
+<span class="tok-k">from</span> pyacad <span class="tok-k">import</span> forms, script, toast
+
+
+<span class="tok-k">def</span> run():
+    <span class="tok-k">try</span>:
+        outcome = SettingsDialog.ShowAndSave()
+    <span class="tok-k">except</span> Exception <span class="tok-k">as</span> error:
+        script.get_logger().error(<span class="tok-s">&#x27;settings not saved: %s&#x27;</span> % error)
+        toast.error(<span class="tok-s">&#x27;Could not save your settings&#x27;</span>, str(error))
+        <span class="tok-k">return</span>
+
+    <span class="tok-k">if</span> outcome == SettingsDialog.Outcome.Cancelled:
+        <span class="tok-k">return</span>                                  <span class="tok-c"># cancelled: say nothing</span>
+
+    <span class="tok-k">if</span> outcome == SettingsDialog.Outcome.NeedsRestart:
+        toast.warning(<span class="tok-s">&#x27;Settings saved&#x27;</span>,
+                      <span class="tok-s">&#x27;The engine paths changed, so AutoCAD needs restarting&#x27;</span>)
+        <span class="tok-k">return</span>
+
+    <span class="tok-k">if</span> forms.confirm(<span class="tok-s">&#x27;Reload pyACAD now so the changes show?&#x27;</span>, <span class="tok-s">&#x27;Settings saved&#x27;</span>):
+        script.reload_pyacad()
+        <span class="tok-c"># The ribbon rebuilding behind the dialog is easy to miss, and a reload</span>
+        <span class="tok-c"># that says nothing reads as a reload that did not happen.</span>
+        toast.success(<span class="tok-s">&#x27;Settings saved&#x27;</span>, <span class="tok-s">&#x27;pyACAD reloaded, so they show now&#x27;</span>)
+    <span class="tok-k">else</span>:
+        toast.success(<span class="tok-s">&#x27;Settings saved&#x27;</span>, <span class="tok-s">&#x27;They show after the next Reload&#x27;</span>)
+
+
+<span class="tok-k">if</span> <span class="tok-s">&#x27;__commandpath__&#x27;</span> <span class="tok-k">in</span> globals():
+    run()</code></pre></div>
+<div class="code src"><div class="code-head"><span><code>bundle.yaml</code> <span class="src-note">The bundle contract: the keys pyACAD reads for this tool.</span> <a href="https://github.com/pyacad/pyACAD/blob/main/extensions/pyACAD.extension/pyACAD.tab/pyACAD.panel/Settings.pushbutton/bundle.yaml" rel="noopener">View on GitHub</a></span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-k">title</span>: Settings
+<span class="tok-k">tooltip</span>: Theme, ribbon hints, where extensions load from, and the engine paths. Everything pyACAD keeps in config.json that you are meant to change.</code></pre></div>
+  <div class="pagenav">
+<span></span>
+<a class="next" href="shortcuts.html"><span class="dir">Next</span><span class="ttl">Shortcuts</span></a>
+</div>
+</article>
+<aside class="toc"><div class="toc-head">On this page</div>
+<a href="#what-it-does">What it does</a>
+<a href="#how-to-use-it">How to use it</a>
+<a href="#good-to-know-limits">Good to know / limits</a>
+<a href="#other-uses">Other uses</a>
+<a href="#source">Source</a>
+</aside>
+</main>
+</div>
+<script src="_assets/search-index.js"></script>
+<script src="_assets/site.js"></script>
+</body>
+</html>

@@ -1,0 +1,852 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The script environment - pyACAD authoring</title>
+<meta name="description" content="What the runtime does between the click and the first line of your code, every global it hands you, and every rule that follows from it.">
+<link rel="stylesheet" href="_assets/site.css">
+</head>
+<body data-base="">
+<div class="layout">
+<div class="sidebar">
+  <div class="brand"><a href="index.html"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="26" height="26" aria-hidden="true"><polygon points="157.0,327.8 351.8,327.8 363.1,342.4 363.1,403.3 168.3,403.3 157.0,388.7" fill="#78082A"/><polygon points="157.0,327.8 351.8,327.8 351.8,388.7 157.0,388.7" fill="#B80C40"/><polygon points="51.5,482.0 234.1,157.4 278.7,181.7 290.1,196.3 152.1,496.6 62.8,496.6" fill="#78082A"/><polygon points="51.5,482.0 140.8,482.0 278.7,181.7 234.1,157.4" fill="#E51050"/><polygon points="359.9,482.0 205.7,108.7 217.0,123.3 371.2,496.6" fill="#78082A"/><polygon points="205.7,108.7 201.6,55.9 213.0,70.5 217.0,123.3" fill="#78082A"/><polygon points="201.6,55.9 246.3,15.4 257.6,30.0 213.0,70.5" fill="#78082A"/><polygon points="246.3,15.4 343.7,23.5 355.0,38.1 257.6,30.0" fill="#78082A"/><polygon points="343.7,23.5 388.3,51.9 399.7,66.5 355.0,38.1" fill="#78082A"/><polygon points="388.3,51.9 347.7,76.2 359.1,90.8 399.7,66.5" fill="#78082A"/><polygon points="347.7,76.2 295.0,84.3 306.3,99.0 359.1,90.8" fill="#78082A"/><polygon points="295.0,84.3 449.2,482.0 460.5,496.6 306.3,99.0" fill="#78082A"/><polygon points="449.2,482.0 359.9,482.0 371.2,496.6 460.5,496.6" fill="#78082A"/><polygon points="359.9,482.0 205.7,108.7 201.6,55.9 246.3,15.4 343.7,23.5 388.3,51.9 347.7,76.2 295.0,84.3 449.2,482.0" fill="#E51050"/><polygon points="270.6,39.7 311.2,35.7 297.0,51.9" fill="#1F2329"/></svg><span class="brand-name">pyACAD
+    <span class="brand-sub">Tool authoring guide</span></span></a></div>
+  <div class="search-wrap">
+    <svg class="search-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <circle cx="6" cy="6" r="4.2" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M9.2 9.2 12.5 12.5" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round"/></svg>
+    <input id="search" type="search" placeholder="Search the docs" autocomplete="off"
+           spellcheck="false" aria-label="Search the documentation">
+    <span class="search-kbd">/</span>
+    <div id="search-results" class="search-results"></div>
+  </div>
+  <nav class="pages">
+<div class="grp">Start</div>
+<a href="overview.html"><span class="num">01</span>How pyACAD works</a>
+<a href="quickstart.html"><span class="num">02</span>Your first button</a>
+<div class="grp">Bundles</div>
+<a href="anatomy.html"><span class="num">03</span>Anatomy of an extension</a>
+<a href="buttons.html"><span class="num">04</span>Buttons, stacks and pulldowns</a>
+<a href="bundle-yaml.html"><span class="num">05</span>The bundle.yaml reference</a>
+<a href="icons.html"><span class="num">06</span>Icons</a>
+<a href="shortcuts.html"><span class="num">07</span>Shortcuts and keytips</a>
+<a href="click-actions.html"><span class="num">08</span>Click actions and config.py</a>
+<a href="hooks.html"><span class="num">09</span>Hooks</a>
+<div class="grp">Scripts</div>
+<a href="script-environment.html" class="active"><span class="num">10</span>The script environment</a>
+<a href="user-interface.html"><span class="num">11</span>Talking to the user</a>
+<a href="settings.html"><span class="num">12</span>Settings and per-tool state</a>
+<a href="commands.html"><span class="num">13</span>AutoCAD commands and AutoLISP</a>
+<a href="command-line.html"><span class="num">14</span>pyacad.exe and headless runs</a>
+<div class="grp">Reference</div>
+<a href="api-reference.html"><span class="num">15</span>Python API reference</a>
+<div class="grp">Practice</div>
+<a href="cookbook.html"><span class="num">16</span>Cookbook</a>
+<a href="ai-assistant.html"><span class="num">17</span>Writing tools with an AI assistant</a>
+<a href="troubleshooting.html"><span class="num">18</span>Troubleshooting</a>
+<a href="style-guide.html"><span class="num">19</span>Style guide for tools</a>
+</nav>
+  <div class="side-foot">
+    <span>pyACAD 0.1.0</span>
+    <button id="theme-toggle" type="button" aria-label="Toggle colour theme">
+      <span>Dark</span></button>
+  </div>
+</div>
+<main class="main">
+<article>
+  <p class="eyebrow">Scripts</p>
+  <h1>The script environment</h1>
+  <p class="lead">What the runtime does between the click and the first line of your code, every global it hands you, and every rule that follows from it.</p>
+  <p>A pyACAD script is not run the way a file is run from a terminal. There is no argument
+vector, no interpreter start-up and no process boundary. Your file is compiled and executed
+inside a scope the runtime prepares for it, on AutoCAD's own UI thread, usually inside an
+AutoCAD command, by an interpreter that has been alive since the first script of the
+session.</p>
+
+<p>Almost every surprise in authoring comes from one of those facts. This page covers all of
+them.</p>
+
+<h2 id="what-happens-when-you-click">What happens when you click<a class="anchor" href="#what-happens-when-you-click" aria-label="Link to this section">#</a></h2>
+
+<p>A click does not run your script. It sends your bundle's AutoCAD command to the drawing,
+and the command runs it (see <a href="commands.html">AutoCAD commands and AutoLISP</a>). From
+there the path is short and the same every time.</p>
+
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 700 404" width="700" role="img"
+     aria-label="The stages between a ribbon click and the end of a script run.">
+  <style>
+    .se1-t   { font: 12px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--ink); }
+    .se1-m   { font: 11px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--muted); }
+    .se1-mono{ font: 11.5px Consolas, monospace; fill: var(--ink); }
+    .se1-lbl { font: 10.5px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--muted);
+               text-transform: uppercase; letter-spacing: .07em; }
+    .se1-box { fill: var(--paper); stroke: var(--line-strong); stroke-width: 1; }
+    .se1-hot { fill: var(--surface); stroke: var(--accent); stroke-width: 1.4; }
+    .se1-arw { stroke: var(--frame); stroke-width: 1.25; fill: none; }
+  </style>
+  <defs>
+    <marker id="se1-a" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path d="M0 0.6 L6.4 3.5 L0 6.4 z" fill="var(--frame)"/>
+    </marker>
+  </defs>
+
+  <text class="se1-lbl" x="0" y="12">Runtime</text>
+  <text class="se1-lbl" x="292" y="12">What it means for you</text>
+
+  <rect class="se1-box" x="0" y="22" width="262" height="30" rx="4"/>
+  <text class="se1-t" x="14" y="41">Click, chord, typed or (pyacad ...)</text>
+  <text class="se1-m" x="292" y="41">Shift+Click sends the CFG twin and runs config.py.</text>
+  <path class="se1-arw" d="M131 52 V 62" marker-end="url(#se1-a)"/>
+
+  <rect class="se1-hot" x="0" y="64" width="262" height="30" rx="4"/>
+  <text class="se1-t" x="14" y="83">AutoCAD starts the command</text>
+  <text class="se1-m" x="292" y="83">Document locked, undo group opened, pickfirst kept.</text>
+  <path class="se1-arw" d="M131 94 V 104" marker-end="url(#se1-a)"/>
+
+  <rect class="se1-box" x="0" y="106" width="262" height="30" rx="4"/>
+  <text class="se1-t" x="14" y="125">Host version gate</text>
+  <text class="se1-m" x="292" y="125">min_host_version / max_host_version, else a toast.</text>
+  <path class="se1-arw" d="M131 136 V 146" marker-end="url(#se1-a)"/>
+
+  <rect class="se1-box" x="0" y="148" width="262" height="30" rx="4"/>
+  <text class="se1-t" x="14" y="167">Run gate</text>
+  <text class="se1-m" x="292" y="167">One pyACAD script at a time, process-wide.</text>
+  <path class="se1-arw" d="M131 178 V 188" marker-end="url(#se1-a)"/>
+
+  <rect class="se1-box" x="0" y="190" width="262" height="30" rx="4"/>
+  <text class="se1-t" x="14" y="209">before-command event</text>
+  <text class="se1-m" x="292" y="209">Hooks for it run now, with your bundle key.</text>
+  <path class="se1-arw" d="M131 220 V 230" marker-end="url(#se1-a)"/>
+
+  <rect class="se1-hot" x="0" y="232" width="262" height="30" rx="4"/>
+  <text class="se1-t" x="14" y="251">Fresh scope, globals set</text>
+  <text class="se1-mono" x="292" y="251">__file__ __commandpath__ __args__ ...</text>
+  <path class="se1-arw" d="M131 262 V 272" marker-end="url(#se1-a)"/>
+
+  <rect class="se1-box" x="0" y="274" width="262" height="30" rx="4"/>
+  <text class="se1-t" x="14" y="293">Search paths set, cache pruned</text>
+  <text class="se1-m" x="292" y="293">Your bundle and lib modules are re-read.</text>
+  <path class="se1-arw" d="M131 304 V 314" marker-end="url(#se1-a)"/>
+
+  <rect class="se1-hot" x="0" y="316" width="262" height="30" rx="4"/>
+  <text class="se1-t" x="14" y="335">script.py executed from source</text>
+  <text class="se1-m" x="292" y="335">Top to bottom. Never imported, always fresh.</text>
+  <path class="se1-arw" d="M131 346 V 356" marker-end="url(#se1-a)"/>
+
+  <rect class="se1-box" x="0" y="358" width="262" height="30" rx="4"/>
+  <text class="se1-t" x="14" y="377">Teardown in a finally</text>
+  <text class="se1-m" x="292" y="377">Progress closed, after-command raised, gate freed.</text>
+</svg>
+</div>
+<figcaption>Every command run walks the same stages. An error anywhere after the scope is set
+is formatted, written to the output window and the log, and the teardown still happens. The
+scope is discarded at the end: nothing you define survives to the next run.</figcaption>
+</figure>
+
+<h2 id="where-scripts-run">Where scripts run<a class="anchor" href="#where-scripts-run" aria-label="Link to this section">#</a></h2>
+
+<p>A bundle's <code>script.py</code> is not the only Python pyACAD runs. Each kind of run gets
+a slightly different set of globals and a different relationship with the drawing:</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Run</th><th>When</th><th>In a command?</th></tr></thead>
+<tbody>
+<tr><td>A bundle's <code>script.py</code></td><td>Click, chord, typed command, macro,
+    <code>PYACAD</code>, <code>(pyacad ...)</code></td><td>Yes (see below)</td></tr>
+<tr><td>A bundle's <code>config.py</code></td><td>Shift+Click, or its <code>CFG</code>
+    command</td><td>Yes</td></tr>
+<tr><td>A <code>*.smartbutton</code>'s selfinit run</td><td>Every ribbon build, before any
+    click</td><td>No</td></tr>
+<tr><td>A <code>*.dockpane</code>'s <code>script.py</code></td><td>Once, when its palette is
+    built (boot and every Reload)</td><td>No</td></tr>
+<tr><td><code>hooks\&lt;event&gt;.py</code></td><td>When the AutoCAD event fires</td>
+    <td>No</td></tr>
+<tr><td><code>startup.py</code></td><td>Boot and every Reload, before the ribbon builds</td>
+    <td>No</td></tr>
+<tr><td>A script under <a href="command-line.html"><code>pyacad run</code></a></td><td>In AutoCAD
+    Core Console</td><td>Yes, inside <code>PYACADRUN</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Two exceptions to the first row. A bundle whose command name was taken (see
+<a href="commands.html">AutoCAD commands and AutoLISP</a>) has no command, so its click runs
+the script directly under a document lock: locked, but with no undo group of its own. And
+<code>(pyacad ...)</code> runs the script from inside the LISP call rather than as a separate
+command.</p>
+
+<h2 id="the-injected-globals">The injected globals<a class="anchor" href="#the-injected-globals" aria-label="Link to this section">#</a></h2>
+
+<p>These are every name the runtime sets in a scope. Anything else you see is something you
+defined or something Python provides.</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Name</th><th>Type</th><th>What it holds</th></tr></thead>
+<tbody>
+<tr><td><code>__file__</code></td><td>str</td>
+    <td>Full path of the file being executed. On a Shift+Click run this is the
+    <code>config.py</code>, not <code>script.py</code>.</td></tr>
+<tr><td><code>__name__</code></td><td>str</td>
+    <td>Always <code>'__main__'</code>, on both engines, in every kind of run.</td></tr>
+<tr><td><code>__commandpath__</code></td><td>str</td>
+    <td>The bundle folder: where <code>icon.png</code>, your data files and your bundle-local
+    modules live. For a file run by <code>PYACAD</code> or <code>pyacad run</code>, the
+    file's folder.</td></tr>
+<tr><td><code>__title__</code></td><td>str</td>
+    <td>The resolved title (<code>bundle.yaml</code>, then <code>__title__</code> in the
+    script, then the folder name), flattened to one line. It stays the button's title on a
+    Shift+Click run. For a file run by path, the file name without <code>.py</code>.</td></tr>
+<tr><td><code>__args__</code></td><td>sequence</td>
+    <td>The arguments of a <code>PYACAD</code> line or a <code>(pyacad ...)</code> call, an
+    empty list for a click, a chord or a typed command, and the words after
+    <code>--</code> under <code>pyacad run</code>. It is a .NET list or array, not a Python
+    <code>list</code>; <code>script.get_args()</code> returns a real one.</td></tr>
+<tr><td><code>__result__</code></td><td>you set it</td>
+    <td>Not set by the runtime but read back: set it to a JSON-friendly value and
+    <code>(pyacad ...)</code> returns it to AutoLISP, or <code>pyacad run</code> writes it to
+    <code>results.json</code>. Ignored on a click.</td></tr>
+<tr><td><code>__selfinit__</code></td><td>bool</td>
+    <td><code>False</code> on every command run, click and Shift+Click alike.
+    <code>True</code> only on a <code>*.smartbutton</code>'s extra ribbon-build run.</td></tr>
+<tr><td><code>__button__</code></td><td>proxy</td>
+    <td>Only on that selfinit run: <code>Title</code>, <code>Enabled</code>,
+    <code>Tooltip</code> and <code>SetIcon(path)</code> on the ribbon item.</td></tr>
+<tr><td><code>__pane__</code></td><td>proxy</td>
+    <td>Only in a <code>*.dockpane</code>'s <code>script.py</code>: <code>Find(name)</code>,
+    <code>Content</code>, <code>Title</code>, <code>BundleKey</code> and
+    <code>Visible</code> over the palette.</td></tr>
+<tr><td><code>__event__</code></td><td>dict</td>
+    <td>Only in a hook: <code>name</code> (the event, such as <code>doc-saved</code>) and
+    <code>command</code> (the bundle key, for <code>before-command</code> and
+    <code>after-command</code>).</td></tr>
+<tr><td><code>__runner__</code></td><td>bool</td>
+    <td><code>True</code> only under <code>pyacad run</code> (including the
+    <code>startup.py</code> it starts). Check it before any prompt in a script that may run
+    headless.</td></tr>
+<tr><td><code>__model__</code>, <code>__models__</code>, <code>__run_dir__</code></td><td>str, sequence, str</td>
+    <td>Only under <code>pyacad run</code>: the open drawing, every drawing in the run, and
+    the run folder. See <a href="command-line.html">pyacad.exe and headless runs</a>.</td></tr>
+<tr><td><code>__pyacad__</code></td><td>host object</td>
+    <td>The runtime host singleton, your door back into the C# side. Everywhere.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Which run gets which:</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Run</th><th>Globals</th></tr></thead>
+<tbody>
+<tr><td>Command (<code>script.py</code> or <code>config.py</code>)</td>
+    <td><code>__file__ __commandpath__ __title__ __args__ __selfinit__ __runner__ __pyacad__</code></td></tr>
+<tr><td>Smartbutton selfinit</td>
+    <td><code>__file__ __selfinit__ __button__ __runner__ __pyacad__</code>. No
+    <code>__commandpath__</code>, <code>__title__</code> or <code>__args__</code>.</td></tr>
+<tr><td>Dock pane script</td>
+    <td><code>__file__ __commandpath__ __title__ __pane__ __runner__ __pyacad__</code></td></tr>
+<tr><td>Hook</td><td><code>__file__ __event__ __runner__ __pyacad__</code></td></tr>
+<tr><td><code>startup.py</code></td><td><code>__file__ __runner__ __pyacad__</code></td></tr>
+<tr><td><code>pyacad run</code></td>
+    <td><code>__file__ __commandpath__ __title__ __args__ __selfinit__ __runner__ __pyacad__
+    __model__ __models__ __run_dir__</code></td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Every run also gets <code>__name__</code>. A missing name raises <code>NameError</code>
+like any other, which is why a file shared between a command and something else should test
+with <code>'__commandpath__' in globals()</code> rather than read it.</p>
+
+<p>You can see them at once. This is one of the few scripts where <code>print</code> is the
+right call, because opening the output window is the point of it:</p>
+
+<div class="code"><div class="code-head"><span>Probe.pushbutton\script.py</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-s">&quot;&quot;&quot;Prints the environment the runtime handed this script.&quot;&quot;&quot;</span>
+print(<span class="tok-s">&#x27;__file__        %s&#x27;</span> % __file__)
+print(<span class="tok-s">&#x27;__commandpath__ %s&#x27;</span> % __commandpath__)
+print(<span class="tok-s">&#x27;__title__       %s&#x27;</span> % __title__)
+print(<span class="tok-s">&#x27;__args__        %r&#x27;</span> % list(__args__))
+print(<span class="tok-s">&#x27;__selfinit__    %s&#x27;</span> % __selfinit__)
+print(<span class="tok-s">&#x27;__runner__      %s&#x27;</span> % __runner__)
+print(<span class="tok-s">&#x27;version         %s&#x27;</span> % __pyacad__.Version)
+print(<span class="tok-s">&#x27;drawing         %s&#x27;</span> % __pyacad__.ActiveDocumentPath)
+print(<span class="tok-s">&#x27;dark theme      %s&#x27;</span> % __pyacad__.IsDarkTheme)
+print(<span class="tok-s">&#x27;__name__        %r&#x27;</span> % __name__)</code></pre></div>
+
+<h3 id="the-pyacad-host">The __pyacad__ host<a class="anchor" href="#the-pyacad-host" aria-label="Link to this section">#</a></h3>
+
+<p><code>__pyacad__</code> is the same object <code>script.get_host()</code> returns, so you
+rarely touch the global directly. Its members:</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Member</th><th>Does</th></tr></thead>
+<tbody>
+<tr><td><code>.Version</code></td><td>The pyACAD version, such as <code>0.1.0</code>.</td></tr>
+<tr><td><code>.ActiveDocumentPath</code></td><td>The active drawing's full path,
+    <code>'untitled'</code> when it was never saved, <code>None</code> with no drawing
+    open.</td></tr>
+<tr><td><code>.IsDarkTheme</code></td><td>True when AutoCAD's UI is dark. Theme your own
+    dialogs with this.</td></tr>
+<tr><td><code>.IsRunner</code></td><td>True under <code>pyacad run</code>.</td></tr>
+<tr><td><code>.ScriptPath</code>, <code>.CommandPath</code>, <code>.CommandTitle</code>,
+    <code>.CommandBundleKey</code></td><td>The current (or most recent) command's script,
+    bundle folder, title and bundle key. Toggle state is keyed on the bundle key.</td></tr>
+<tr><td><code>.WriteHtml(html)</code></td><td>Appends an HTML fragment to the output
+    window, opening it if needed.</td></tr>
+<tr><td><code>.HasOpenOutput</code></td><td>True once this run has opened an output
+    window.</td></tr>
+<tr><td><code>.SetOutputTitle(title)</code></td><td>Renames the output window away from
+    <code>pyACAD - &lt;title&gt;</code>.</td></tr>
+<tr><td><code>.SaveOutput(path)</code></td><td>Writes the output window's transcript to a
+    standalone HTML file.</td></tr>
+<tr><td><code>.Progress(fraction, label)</code></td><td>Shows or updates the output window's
+    progress bar, fraction 0 to 1.</td></tr>
+<tr><td><code>.ElementLink(item, label)</code></td><td>HTML for a link that selects an
+    object in the drawing (a handle string, an <code>ObjectId</code> or a
+    <code>Handle</code>).</td></tr>
+<tr><td><code>.GetToggleState()</code> / <code>.SetToggleState(on)</code></td><td>The running
+    toggle bundle's session flag.</td></tr>
+<tr><td><code>.GetEnvVar(name)</code> / <code>.SetEnvVar(name, value)</code></td><td>A
+    session-scoped, case-insensitive store shared by every script. Setting
+    <code>None</code> removes the entry.</td></tr>
+<tr><td><code>.LogMessage(level, source, message)</code></td><td>One line in the pyACAD
+    log.</td></tr>
+<tr><td><code>.LogSource</code></td><td>The label log lines carry while a hook,
+    <code>startup.py</code> or a dock pane script runs.</td></tr>
+<tr><td><code>.Reload()</code></td><td>Rescans the extension folders and rebuilds the
+    ribbon.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p><code>.SetCommandContext(...)</code> and <code>.SetCurrentOutput(...)</code> also exist and
+belong to the runtime. Calling either from a script points the host at the wrong tool.</p>
+
+<p>Prefer the Python wrappers in <code>pyacad.script</code>:</p>
+
+<div class="code"><div class="code-head"><span>python</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-k">from</span> pyacad <span class="tok-k">import</span> script
+
+script.get_host()            <span class="tok-c"># the __pyacad__ object, even outside a script scope</span>
+script.get_script_path()     <span class="tok-c"># the running command&#x27;s script.py</span>
+script.get_command_path()    <span class="tok-c"># its bundle folder</span>
+script.get_title()           <span class="tok-c"># its resolved title</span>
+script.get_args()            <span class="tok-c"># __args__ as a Python list, [] when none</span>
+script.get_document_path()   <span class="tok-c"># active drawing path, &#x27;untitled&#x27;, or None</span>
+script.get_host_version()    <span class="tok-c"># &#x27;0.1.0&#x27;</span>
+script.is_dark_theme()       <span class="tok-c"># bool</span>
+script.is_runner()           <span class="tok-c"># bool, True under pyacad run</span>
+script.reload_pyacad()       <span class="tok-c"># rescan and rebuild the ribbon, no restart</span></code></pre></div>
+
+<div class="note">
+<span class="note-t">Outside a command they go stale, not blank</span>
+<p>The host keeps the context of the most recent command. Hooks, <code>startup.py</code>,
+smartbutton selfinit runs and the console set none of their own, so
+<code>script.get_title()</code> there returns whatever command ran last, or
+<code>None</code> if none has. Trust these only inside a command.</p>
+</div>
+
+<h2 id="name-is-main"><code>__name__</code> is <code>'__main__'</code><a class="anchor" href="#name-is-main" aria-label="Link to this section">#</a></h2>
+
+<p>A hosted scope has no <code>__name__</code> of its own, so <code>if __name__ ==
+'__main__':</code> would be false and the body of such a script would silently never run. Both
+engines therefore set the name before your first statement, and the familiar guard works.</p>
+
+<p>It also means the guard never <em>excludes</em> anything here. A module you want to import
+from elsewhere belongs in a separate file beside <code>script.py</code>, which imports it.
+Module-level code is the shorter and more common style; every shipped bundle uses it.</p>
+
+<div class="do-dont">
+<div class="do"><div class="dd-t">Do</div>
+<pre><span class="tok-s">&quot;&quot;&quot;Counts the selected objects.&quot;&quot;&quot;</span>
+<span class="tok-k">from</span> pyacad <span class="tok-k">import</span> sel, toast
+
+handles = sel.current()
+toast.info(<span class="tok-s">&#x27;%d selected&#x27;</span> % len(handles))</pre>
+</div>
+<div class="dont"><div class="dd-t">Don't</div>
+<pre><span class="tok-s">&quot;&quot;&quot;Counts the selected objects.&quot;&quot;&quot;</span>
+<span class="tok-k">from</span> pyacad <span class="tok-k">import</span> sel, toast
+
+<span class="tok-k">def</span> main():
+    toast.info(<span class="tok-s">&#x27;%d selected&#x27;</span> % len(sel.current()))
+
+<span class="tok-c"># nothing calls main(), so nothing happens</span></pre>
+</div>
+</div>
+
+<h2 id="sys-exit">sys.exit()<a class="anchor" href="#sys-exit" aria-label="Link to this section">#</a></h2>
+
+<p>Both engines treat <code>sys.exit()</code> as a script saying "stop here", not as a crash:
+no traceback, and the run counts as a success. <code>sys.exit(0)</code> is the same.
+<code>sys.exit('message')</code> or a non-zero code is a failure reported in your own words
+(<code>Script exited with code 2.</code> for a number), which <code>(pyacad ...)</code> and
+<code>pyacad run</code> see as a failed run.</p>
+
+<div class="code"><div class="code-head"><span>python</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-k">import</span> sys
+<span class="tok-k">from</span> pyacad <span class="tok-k">import</span> sel, toast
+
+handles = sel.current()
+<span class="tok-k">if</span> <span class="tok-k">not</span> handles:
+    toast.info(<span class="tok-s">&#x27;Nothing selected&#x27;</span>, <span class="tok-s">&#x27;Select the blocks first, then run this again.&#x27;</span>)
+    sys.exit()</code></pre></div>
+
+<h2 id="choosing-an-engine">Choosing an engine<a class="anchor" href="#choosing-an-engine" aria-label="Link to this section">#</a></h2>
+
+<p>The engine is chosen per bundle when the bundle is parsed:</p>
+
+<ol>
+  <li>The <code>engine:</code> key in the bundle's <code>bundle.yaml</code>.</li>
+  <li>The <code>engine:</code> key in the extension's <code>extension.yaml</code>, a default
+    for every bundle, hook and <code>startup.py</code> in it.</li>
+  <li><code>ironpython</code>.</li>
+</ol>
+
+<div class="code"><div class="code-head"><span>Quantities.pushbutton\bundle.yaml</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-k">title</span>: Quantities
+<span class="tok-k">engine</span>: cpython</code></pre></div>
+
+<p>Hooks and <code>startup.py</code> have no <code>bundle.yaml</code>, so they always use the
+extension's engine. Files run by path (<code>PYACAD</code>, <code>(pyacad ...)</code> with a
+path, <code>pyacad run</code>) always use IronPython.</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>&nbsp;</th><th><code>ironpython</code></th><th><code>cpython</code></th></tr></thead>
+<tbody>
+<tr><td><strong>Version</strong></td><td>IronPython 3.4 (3.4.2)</td><td>The installed CPython,
+    3.7 to 3.13, 64-bit</td></tr>
+<tr><td><strong>Ships with pyACAD</strong></td><td>Yes, with its standard library</td>
+    <td>No, it finds an installed Python</td></tr>
+<tr><td><strong>Hosting</strong></td><td>The DLR, one engine per session</td>
+    <td>Python.NET 3.0.5, one interpreter per process</td></tr>
+<tr><td><strong>Created</strong></td><td>On first use</td><td>On the first run of a CPython
+    script</td></tr>
+<tr><td><strong>Per run</strong></td><td>A fresh scope</td><td>A fresh scope</td></tr>
+<tr><td><strong>AutoCAD assemblies</strong></td><td>Referenced up front:
+    <code>acdbmgd</code>, <code>accoremgd</code>, <code>acmgd</code>, <code>AdWindows</code>
+    (those the host has loaded)</td><td>Not referenced by the engine; call
+    <code>clr.AddReference('acdbmgd')</code> before importing <code>Autodesk.AutoCAD</code>
+    in your own code (the <code>pyacad</code> modules do this for you)</td></tr>
+<tr><td><strong>Compiled packages (numpy, pandas)</strong></td><td>No</td><td>Yes</td></tr>
+<tr><td><strong>Shut down</strong></td><td>With the session</td><td>Never, only with the
+    process</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>The CPython DLL is looked for in three places, in order: the <code>"cpython"</code> key in
+<code>%APPDATA%\pyACAD\config.json</code>, then the <code>PYACAD_CPYTHON</code> environment
+variable, then the registry under <code>SOFTWARE\Python\PythonCore</code>, current user before
+local machine. The first two may name a <code>python3XX.dll</code> or the folder that holds one.
+The registry scan takes the newest of 3.7 to 3.13 and skips 32-bit and ARM64 installs, which
+cannot load into 64-bit AutoCAD. If nothing is found, the first CPython run fails with
+<em>No CPython found. Install Python 3 (python.org) or set the "cpython" key in
+%APPDATA%\pyACAD\config.json to a python3XX.dll or install dir.</em></p>
+
+<p>Because the interpreter starts once and never stops, changing the <code>"cpython"</code>
+key takes effect at the next AutoCAD start, not on Reload. The Settings window says so.</p>
+
+<div class="note trap">
+<span class="note-t">A typo in <code>engine:</code> ships a broken button</span>
+<p>The value is matched, case-insensitively, against exactly <code>ironpython</code> and
+<code>cpython</code>, and only when a script is about to run. <code>engine: python3</code>
+gives a button that looks normal and fails on every click with <code>Unknown engine
+'python3'.</code> in the output window and the log.</p>
+</div>
+
+<h2 id="module-search-paths">Module search paths<a class="anchor" href="#module-search-paths" aria-label="Link to this section">#</a></h2>
+
+<p>Two sets of folders combine on every run. The <strong>per-run</strong> set is the bundle's
+own folder plus its extension's <code>lib\</code> folder when there is one (for a hook, the
+<code>hooks\</code> folder plus <code>lib\</code>; for <code>startup.py</code>, the extension
+folder plus <code>lib\</code>). The <strong>engine-wide</strong> set is the bundled standard
+library, which only IronPython sees, the folder holding the <code>pyacad</code> package, and
+every <code>*.lib</code> folder found under the extension roots.</p>
+
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 700 306" width="700" role="img"
+     aria-label="Module search path order compared for the IronPython and CPython engines.">
+  <style>
+    .se2-t   { font: 11.5px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--ink); }
+    .se2-m   { font: 10.5px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--muted); }
+    .se2-mono{ font: 11px Consolas, monospace; fill: var(--ink); }
+    .se2-lbl { font: 10.5px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--muted);
+               text-transform: uppercase; letter-spacing: .07em; }
+    .se2-box { fill: var(--paper); stroke: var(--line-strong); stroke-width: 1; }
+    .se2-hot { fill: var(--surface); stroke: var(--accent); stroke-width: 1.4; }
+    .se2-dim { fill: none; stroke: var(--line); stroke-width: 1; stroke-dasharray: 3 3; }
+  </style>
+  <defs>
+    <marker id="se2-a" markerWidth="7" markerHeight="7" refX="6" refY="3.5" orient="auto">
+      <path d="M0 0.6 L6.4 3.5 L0 6.4 z" fill="var(--frame)"/>
+    </marker>
+  </defs>
+
+  <text class="se2-lbl" transform="translate(11,196) rotate(-90)">Searched first</text>
+  <path d="M20 24 V 218" stroke="var(--frame)" stroke-width="1.25" marker-end="url(#se2-a)"/>
+
+  <text class="se2-t" x="36" y="14" font-weight="600">IronPython</text>
+  <rect class="se2-box" x="36" y="24" width="300" height="28" rx="3"/>
+  <text class="se2-mono" x="48" y="42">engine defaults</text>
+  <rect class="se2-box" x="36" y="58" width="300" height="28" rx="3"/>
+  <text class="se2-mono" x="48" y="76">&lt;runtime&gt;\lib</text>
+  <text class="se2-m"    x="230" y="76">bundled stdlib</text>
+  <rect class="se2-box" x="36" y="92" width="300" height="28" rx="3"/>
+  <text class="se2-mono" x="48" y="110">pyacadlib</text>
+  <rect class="se2-box" x="36" y="126" width="300" height="28" rx="3"/>
+  <text class="se2-mono" x="48" y="144">every *.lib folder</text>
+  <rect class="se2-hot" x="36" y="160" width="300" height="28" rx="3"/>
+  <text class="se2-mono" x="48" y="178">&lt;bundle folder&gt;</text>
+  <rect class="se2-hot" x="36" y="194" width="300" height="28" rx="3"/>
+  <text class="se2-mono" x="48" y="212">&lt;extension&gt;\lib</text>
+
+  <text class="se2-m" x="36" y="244">Your folders come after the stdlib:</text>
+  <text class="se2-m" x="36" y="260">a module named os.py stays harmless.</text>
+
+  <line x1="356" y1="0" x2="356" y2="270" stroke="var(--line)" stroke-width="1"/>
+
+  <text class="se2-t" x="382" y="14" font-weight="600">CPython</text>
+  <rect class="se2-box" x="382" y="24" width="300" height="28" rx="3"/>
+  <text class="se2-mono" x="394" y="42">pyacadlib</text>
+  <rect class="se2-box" x="382" y="58" width="300" height="28" rx="3"/>
+  <text class="se2-mono" x="394" y="76">every *.lib folder</text>
+  <rect class="se2-hot" x="382" y="92" width="300" height="28" rx="3"/>
+  <text class="se2-mono" x="394" y="110">&lt;bundle folder&gt;</text>
+  <rect class="se2-hot" x="382" y="126" width="300" height="28" rx="3"/>
+  <text class="se2-mono" x="394" y="144">&lt;extension&gt;\lib</text>
+  <rect class="se2-box" x="382" y="160" width="300" height="62" rx="3"/>
+  <text class="se2-mono" x="394" y="180">the interpreter's own sys.path</text>
+  <text class="se2-m"    x="394" y="198">CPython stdlib, then site-packages</text>
+  <text class="se2-m"    x="394" y="214">(the bundled &lt;runtime&gt;\lib is never added)</text>
+
+  <text class="se2-m" x="382" y="244">Your folders come first: a module named</text>
+  <text class="se2-m" x="382" y="260">json.py in a bundle shadows the real one.</text>
+
+  <rect class="se2-dim" x="0" y="272" width="700" height="30" rx="4"/>
+  <text class="se2-t" x="14" y="292">Both engines drop your bundle and lib modules from the cache before every run.</text>
+</svg>
+</div>
+<figcaption>The two engines order the same folders differently. The consequence is
+CPython-only, and it is a shadowing hazard.</figcaption>
+</figure>
+
+<div class="note warn">
+<span class="note-t">Do not name a module after a stdlib module on CPython</span>
+<p>Your bundle folder and <code>lib\</code> are searched ahead of the interpreter's own
+<code>sys.path</code>, so a <code>json.py</code>, <code>types.py</code> or
+<code>select.py</code> beside your script is imported instead of the real one, by your code
+and by anything else that imports it during the run. Prefix your modules, or put them in a
+package folder with a name you own.</p>
+</div>
+
+<p>Both engines put the search paths, <code>sys.stdout</code> and <code>sys.stderr</code>
+back after every run, so one run never leaks its folders or its output into the next. If the
+<code>pyacad</code> package cannot be found at all, the runtime logs it at boot and
+<code>import pyacad</code> fails for every script.</p>
+
+<h3 id="lib-folders">*.lib folders<a class="anchor" href="#lib-folders" aria-label="Link to this section">#</a></h3>
+
+<p>A folder named <code>Something.lib</code> beside your <code>*.extension</code> folders,
+directly under an extension root, is a library extension: the folder itself joins the
+engine-wide search path, so <code>Something.lib\acme_geometry.py</code> is importable as
+<code>acme_geometry</code> from every extension, every hook and both engines.</p>
+
+<div class="code"><div class="code-head"><span>folders</span><button class="copy-btn" type="button">Copy</button></div><pre><code>D:\CadTools\                        an extension root
+  <span class="tok-f">Acme.lib</span>\
+    acme_geometry.py                import acme_geometry, from anywhere
+    acme_standards\__init__.py      import acme_standards
+  <span class="tok-f">Acme.extension</span>\
+    lib\
+      acme_local.py                 only this extension&#x27;s bundles, hooks and <span class="tok-k">startup.py</span>
+    <span class="tok-f">Acme.tab</span>\...</code></pre></div>
+
+<p>The engine-wide paths are fixed when an engine is created, so adding or removing a
+<code>*.lib</code> folder needs an AutoCAD restart; Reload toasts <em>Library extensions
+changed</em> to say so. Editing a file already inside one needs a Reload.</p>
+
+<h2 id="the-module-cache-and-the-edit-loop">The module cache and the edit loop<a class="anchor" href="#the-module-cache-and-the-edit-loop" aria-label="Link to this section">#</a></h2>
+
+<p>Before every run that has per-run search paths, the engine deletes from
+<code>sys.modules</code> every module whose file sits under the bundle folder or the
+extension's <code>lib\</code> folder. <code>script.py</code> itself is never cached: it is read
+and executed from source on every run, never imported. Together that gives an edit loop with
+no ceremony in the common case.</p>
+
+<figure>
+<div class="fig-frame">
+<svg viewBox="0 0 700 236" width="700" role="img"
+     aria-label="Three columns showing which edits need nothing, which need Reload, and which need a restart.">
+  <style>
+    .se3-t   { font: 11.5px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--ink); }
+    .se3-m   { font: 10.5px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--muted); }
+    .se3-mono{ font: 11px Consolas, monospace; fill: var(--ink); }
+    .se3-h   { font: 11.5px 'Segoe UI Variable Text','Segoe UI',sans-serif; fill: var(--ink);
+               font-weight: 600; }
+    .se3-box { fill: var(--paper); stroke: var(--line-strong); stroke-width: 1; }
+    .se3-hd  { fill: var(--surface); stroke: var(--line-strong); stroke-width: 1; }
+    .se3-acc { fill: var(--accent); }
+  </style>
+
+  <text class="se3-m" x="0" y="12">You edited &#8230;</text>
+
+  <rect class="se3-box" x="0" y="22" width="216" height="168" rx="4"/>
+  <rect class="se3-hd"  x="0" y="22" width="216" height="34" rx="4"/>
+  <rect class="se3-acc" x="0" y="22" width="3.5" height="34"/>
+  <text class="se3-h"    x="14" y="44">Just run it again</text>
+  <text class="se3-mono" x="14" y="80">script.py</text>
+  <text class="se3-mono" x="14" y="102">config.py</text>
+  <text class="se3-mono" x="14" y="124">modules in the bundle</text>
+  <text class="se3-mono" x="14" y="146">modules in &lt;ext&gt;\lib</text>
+  <text class="se3-m"    x="14" y="170">Dropped from the cache</text>
+  <text class="se3-m"    x="14" y="184">before every run.</text>
+
+  <rect class="se3-box" x="242" y="22" width="216" height="168" rx="4"/>
+  <rect class="se3-hd"  x="242" y="22" width="216" height="34" rx="4"/>
+  <rect class="se3-acc" x="242" y="22" width="3.5" height="34"/>
+  <text class="se3-h"    x="256" y="44">Reload</text>
+  <text class="se3-mono" x="256" y="80">bundle.yaml, new bundles</text>
+  <text class="se3-mono" x="256" y="102">icons, new hooks, pane.xaml</text>
+  <text class="se3-mono" x="256" y="124">files inside a *.lib</text>
+  <text class="se3-mono" x="256" y="146">the pyacad library</text>
+  <text class="se3-m"    x="256" y="170">Rescan, plus a cache drop</text>
+  <text class="se3-m"    x="256" y="184">for pyacadlib and *.lib.</text>
+
+  <rect class="se3-box" x="484" y="22" width="216" height="168" rx="4"/>
+  <rect class="se3-hd"  x="484" y="22" width="216" height="34" rx="4"/>
+  <rect class="se3-acc" x="484" y="22" width="3.5" height="34"/>
+  <text class="se3-h"    x="498" y="44">Restart AutoCAD</text>
+  <text class="se3-mono" x="498" y="80">a *.lib added or removed</text>
+  <text class="se3-mono" x="498" y="102">the "cpython" key</text>
+  <text class="se3-mono" x="498" y="124">the "pyacadlib" key</text>
+  <text class="se3-mono" x="498" y="146">the pyACAD runtime</text>
+  <text class="se3-m"    x="498" y="170">Fixed when the engine</text>
+  <text class="se3-m"    x="498" y="184">or the process starts.</text>
+
+  <text class="se3-m" x="0" y="220">The standard library is never invalidated on either engine, and never needs to be.</text>
+</svg>
+</div>
+<figcaption>The first column is where you will spend your day. Script and bundle-module edits
+need no Reload.</figcaption>
+</figure>
+
+<div class="note">
+<span class="note-t">Cached modules keep their state</span>
+<p>The flip side of the cache: a module in <code>pyacadlib</code> or a <code>*.lib</code>
+folder is imported once and kept until Reload, so a module-level variable there survives from
+one run to the next. That is handy for a cache and a trap for anything that should start
+fresh. For deliberate session state, use <code>script.get_envvar()</code> and
+<code>script.set_envvar()</code>. Each engine has its own cache: IronPython and CPython never
+share a module.</p>
+</div>
+
+<h2 id="importing">Importing<a class="anchor" href="#importing" aria-label="Link to this section">#</a></h2>
+
+<p><code>import pyacad</code> gives you one public name, <code>pyacad.__version__</code>. There
+are no re-exports and no automatic submodule imports, so you always name what you want.
+Every shipped bundle uses the same style: <code>from pyacad import</code> with the modules in
+alphabetical order, at module level, right after the docstring.</p>
+
+<div class="do-dont">
+<div class="do"><div class="dd-t">Do</div>
+<pre><span class="tok-s">&quot;&quot;&quot;Exports block attributes to Excel.&quot;&quot;&quot;</span>
+<span class="tok-k">from</span> pyacad <span class="tok-k">import</span> blocks, forms, toast, xl</pre>
+</div>
+<div class="dont"><div class="dd-t">Don't</div>
+<pre><span class="tok-s">&quot;&quot;&quot;Exports block attributes to Excel.&quot;&quot;&quot;</span>
+<span class="tok-k">import</span> pyacad
+pyacad.blocks.references()   <span class="tok-c"># AttributeError</span></pre>
+</div>
+</div>
+
+<p>What an import needs depends on the module:</p>
+
+<div class="table-scroll">
+<table>
+<thead><tr><th>Modules</th><th>Needs at import time</th><th>Consequence</th></tr></thead>
+<tbody>
+<tr><td><code>doc</code>, <code>sel</code>, <code>ents</code>, <code>layers</code>,
+    <code>blocks</code>, <code>xrefs</code>, <code>layouts</code>, <code>plot</code>,
+    <code>audit</code>, <code>lisp</code>, <code>units</code>, <code>settings</code>,
+    <code>output</code>, <code>xl</code></td>
+    <td>Nothing beyond the standard library</td>
+    <td>They import the AutoCAD API (or the runtime) inside the functions that need it, so
+    they import anywhere, including a unit test with no AutoCAD. Their pure functions work
+    there too; an API function raises <code>ImportError</code> when called outside
+    AutoCAD.</td></tr>
+<tr><td><code>script</code>, <code>toast</code>, <code>forms</code>, <code>banner</code></td>
+    <td>The <code>PyAcad.Runtime</code> assembly</td>
+    <td>Always present wherever a pyACAD script runs.</td></tr>
+</tbody>
+</table>
+</div>
+
+<p>Outside AutoCAD the API error reads <code>pyacad: could not load the AutoCAD .NET API
+(acdbmgd, acmgd, accoremgd). This module only works inside an AutoCAD session running
+pyACAD.</code> Underscored modules (<code>_api</code>, <code>_xlsx</code>, <code>_repl</code>
+and the rest) are implementation and change without notice.</p>
+
+<h2 id="document-context">Document context<a class="anchor" href="#document-context" aria-label="Link to this section">#</a></h2>
+
+<p>AutoCAD lets code change a drawing only while that drawing is locked. A pyACAD command
+gets the lock and an undo group from AutoCAD before your first line, so inside a command you
+just open a transaction:</p>
+
+<div class="code"><div class="code-head"><span>python</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-k">from</span> pyacad <span class="tok-k">import</span> doc
+
+<span class="tok-k">with</span> doc.transaction() <span class="tok-k">as</span> tr:        <span class="tok-c"># commits on success, aborts if the block raises</span>
+    db = doc.database()
+    ...</code></pre></div>
+
+<p>Several runs are <strong>not</strong> commands: hooks, <code>startup.py</code>, a dock
+pane's <code>script.py</code> and every event handler it wires up, a smartbutton's selfinit
+run, the interactive console, and any modeless window you leave open after your script
+returns. Code there that writes to the drawing must take the lock itself, and gets no undo
+group of its own:</p>
+
+<div class="code"><div class="code-head"><span>Layer_Panel.dockpane\script.py</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-k">from</span> pyacad <span class="tok-k">import</span> doc, layers
+
+<span class="tok-k">def</span> on_freeze(sender, args):
+    <span class="tok-k">with</span> doc.lock():                 <span class="tok-c"># a palette click is not a command</span>
+        layers.freeze(__pane__.Find(<span class="tok-s">&#x27;Filter&#x27;</span>).Text)
+
+__pane__.Find(<span class="tok-s">&#x27;Freeze&#x27;</span>).Click += on_freeze</code></pre></div>
+
+<p>Reading does not need the lock. With no drawing open, <code>doc.active()</code> (and
+everything built on it) raises <code>RuntimeError('No drawing is open.')</code>; a ribbon
+click in that state never reaches your script, it toasts <em>Open a drawing first.</em>
+instead.</p>
+
+<p>For command-line prompts, <code>pyacad.sel</code> wraps the Editor:
+<code>sel.pick_one()</code>, <code>sel.pick_many()</code> and <code>sel.pick_point()</code>
+return handles and points, and <code>None</code> or <code>[]</code> on Esc. Handles are hex
+strings and points are <code>(x, y, z)</code> tuples throughout the library.</p>
+
+<h2 id="one-script-at-a-time">One script at a time<a class="anchor" href="#one-script-at-a-time" aria-label="Link to this section">#</a></h2>
+
+<p>A long script pumps the Windows message loop so AutoCAD can repaint, and pumping
+dispatches queued input, including another click on a ribbon button. Rather than run two
+scripts over one drawing, the runtime holds a process-wide gate. A second run while one is
+going is refused with a toast, <em>&lt;title&gt; is still running</em>, <em>Wait for it to
+finish, then try again.</em> <code>(pyacad ...)</code> gets <code>nil</code> in that case, and
+hooks skip their run (it is logged) rather than share the engine, except
+<code>before-command</code> and <code>after-command</code>, which fire around the very run
+that holds the gate.</p>
+
+<p>Pumping happens only when you report progress, through <code>output.progress()</code>
+or a <code>forms.progress()</code> window. A loop that never reports never repaints, and
+Windows marks AutoCAD "Not Responding" after a few seconds.</p>
+
+<div class="code"><div class="code-head"><span>python</span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-k">from</span> pyacad <span class="tok-k">import</span> forms, layers
+
+names = layers.names()
+<span class="tok-k">with</span> forms.progress(<span class="tok-s">&#x27;Checking layers&#x27;</span>) <span class="tok-k">as</span> p:
+    <span class="tok-k">for</span> i, name <span class="tok-k">in</span> enumerate(names):
+        p.check()                                   <span class="tok-c"># raises forms.Cancelled on Cancel</span>
+        p.update(float(i) / len(names), <span class="tok-s">&#x27;Layer %d of %d&#x27;</span> % (i + <span class="tok-n">1</span>, len(names)))
+        ...</code></pre></div>
+
+<h2 id="output-and-errors">Output and errors<a class="anchor" href="#output-and-errors" aria-label="Link to this section">#</a></h2>
+
+<p>The output window is created <strong>lazily, on the first write</strong>, and is titled
+<code>pyACAD - &lt;title&gt;</code>. It is an HTML window when the WebView2 runtime is
+installed and a plain text window otherwise. A script that writes nothing shows no window at
+all, which is exactly what you want from a tool that just did its job.</p>
+
+<div class="do-dont">
+<div class="do"><div class="dd-t">Do</div>
+<pre><span class="tok-k">from</span> pyacad <span class="tok-k">import</span> toast
+
+toast.success(<span class="tok-s">&#x27;Exported 412 blocks&#x27;</span>, path)</pre>
+</div>
+<div class="dont"><div class="dd-t">Don't</div>
+<pre>print(<span class="tok-s">&#x27;Exported 412 blocks&#x27;</span>)
+<span class="tok-c"># opens a whole window to say one line</span></pre>
+</div>
+</div>
+
+<p>Use <code>pyacad.toast</code> for one-line statuses, the output window for real reports,
+and say nothing on a cancel. See <a href="user-interface.html">Talking to the user</a>.</p>
+
+<p>An uncaught exception is formatted by the engine that raised it and written to the output
+window in the error colour and to <code>%APPDATA%\pyACAD\logs\pyACAD.log</code>. The traceback
+is also kept for the session, which is what the Ask AI panel's <em>Send last error to AI</em>
+uses. You do not need a top-level <code>try</code> to see a traceback; add one only when you
+can turn the failure into a better sentence.</p>
+
+<p>Whatever happens, the runtime closes any progress window your script left open, so a
+crashed script cannot leave AutoCAD behind a modal dialog. Your own <code>try/finally</code>
+(or the <code>with</code> block) is the first line of defence; this is the backstop.</p>
+
+<h2 id="threading">Threading<a class="anchor" href="#threading" aria-label="Link to this section">#</a></h2>
+
+<div class="note trap">
+<span class="note-t">Do not start threads that touch the drawing</span>
+<p>Your script runs on AutoCAD's UI thread, and the AutoCAD .NET API is single-threaded. A
+worker thread calling into a database, a document or the editor corrupts state or crashes
+AutoCAD, sometimes at once and sometimes on a later unrelated operation. CPython adds a second
+limit: one interpreter, one lock, one run at a time process-wide.</p>
+</div>
+
+<p>If a job is slow, the answer is progress reporting and a cancel check, not concurrency. Work
+that really belongs off the main thread belongs in another process: write the input to disk,
+run something external, read the result back. For a batch over many drawings, that process is
+<a href="command-line.html"><code>pyacad run</code></a>.</p>
+
+<h2 id="encoding">Encoding<a class="anchor" href="#encoding" aria-label="Link to this section">#</a></h2>
+
+<ul>
+  <li>Save scripts as UTF-8. IronPython reads <code>script.py</code> as Python 3 does, UTF-8
+    unless a coding line says otherwise; the shipped scripts start with
+    <code># -*- coding: utf-8 -*-</code>.</li>
+  <li>On CPython, and for <code>bundle.yaml</code> and <code>extension.yaml</code> on both
+    engines, pyACAD honours a byte-order mark, then tries strict UTF-8, and only falls back to
+    the Windows ANSI code page when the bytes are not valid UTF-8, so a title saved by an old
+    editor keeps its accents.</li>
+  <li>Output written with <code>print</code> reaches the output window as UTF-8 on both
+    engines.</li>
+</ul>
+
+<div class="cards">
+  <a href="commands.html"><span class="c-t">AutoCAD commands and AutoLISP</span>
+    <span class="c-d">How every tool becomes a command, and (pyacad ...).</span></a>
+  <a href="settings.html"><span class="c-t">Settings and per-tool state</span>
+    <span class="c-d">Where a tool keeps what the user chose.</span></a>
+  <a href="troubleshooting.html"><span class="c-t">Troubleshooting</span>
+    <span class="c-d">Failure modes, their log lines, and what to do about them.</span></a>
+</div>
+  <div class="pagenav">
+<a href="hooks.html"><span class="dir">Previous</span><span class="ttl">Hooks</span></a>
+<a class="next" href="user-interface.html"><span class="dir">Next</span><span class="ttl">Talking to the user</span></a>
+</div>
+</article>
+<aside class="toc"><div class="toc-head">On this page</div>
+<a href="#what-happens-when-you-click">What happens when you click</a>
+<a href="#where-scripts-run">Where scripts run</a>
+<a href="#the-injected-globals">The injected globals</a>
+<a href="#the-pyacad-host" class="h3">The __pyacad__ host</a>
+<a href="#name-is-main">__name__ is &#x27;__main__&#x27;</a>
+<a href="#sys-exit">sys.exit()</a>
+<a href="#choosing-an-engine">Choosing an engine</a>
+<a href="#module-search-paths">Module search paths</a>
+<a href="#lib-folders" class="h3">*.lib folders</a>
+<a href="#the-module-cache-and-the-edit-loop">The module cache and the edit loop</a>
+<a href="#importing">Importing</a>
+<a href="#document-context">Document context</a>
+<a href="#one-script-at-a-time">One script at a time</a>
+<a href="#output-and-errors">Output and errors</a>
+<a href="#threading">Threading</a>
+<a href="#encoding">Encoding</a>
+</aside>
+</main>
+</div>
+<script src="_assets/search-index.js"></script>
+<script src="_assets/site.js"></script>
+</body>
+</html>

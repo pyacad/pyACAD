@@ -1,0 +1,276 @@
+<p>The Data panel is for block attributes: the title block fields, equipment tags, room
+names and door numbers that live inside block references. Take them out to Excel, edit them
+there and put them back; count blocks into a schedule; or find and replace text across every
+attribute at once. Every tool here works on the drawing that is open, and its button is
+greyed until one is.</p>
+
+<section id="blocks-to-excel" title="Blocks to Excel" kind="Button"
+         bundle="Data.panel/Blocks_to_Excel.pushbutton"
+         summary="Exports block references to an Excel workbook: one row per block with its handle, layer, position, rotation and scale, and one column per attribute tag."
+         needs="An open drawing; optionally a selection"
+         shortcut="None set (bind one in Shortcuts)">
+
+<h2>What it does</h2>
+<p>Writes one row per block reference to a new <code>.xlsx</code> workbook, on a sheet called
+<strong>Blocks</strong>. With block references selected it exports just those; with nothing
+selected it exports every block reference in model space and on every layout. The workbook
+is made to be edited and read back by <a href="excel-to-blocks.html">Excel to Blocks</a>,
+which matches rows to blocks by their handle. The command is
+<code>PYBLOCKSTOEXCEL</code>.</p>
+
+<p>The columns, in this order:</p>
+<ul>
+  <li><strong>Handle</strong>: the reference's handle, which identifies it in this
+    drawing.</li>
+  <li><strong>Block</strong>: the block name. A dynamic block reports its definition's real
+    name, not the anonymous <code>*U</code> copy AutoCAD makes.</li>
+  <li><strong>Layer</strong>, and <strong>Space</strong>: <code>Model</code> or the layout's
+    name.</li>
+  <li><strong>X</strong>, <strong>Y</strong>, <strong>Z</strong>: the insertion point.</li>
+  <li><strong>Rotation</strong> in degrees, 0 up to 360.</li>
+  <li><strong>Scale</strong>: one number when the X, Y and Z scales are equal, else
+    <code>x, y, z</code> as text.</li>
+  <li>Then one column per attribute tag found on any exported block, in the order the
+    drawing holds them. Tags that differ only in case share a column. A block without that
+    tag has an empty cell.</li>
+</ul>
+<p>Rows are sorted by block name, then by handle. The header row is bold.</p>
+
+<figure data-shot="blocks-to-excel-workbook" data-wide>
+<figcaption>A workbook from Blocks to Excel open in Excel: the fixed columns, then one
+column per attribute tag.</figcaption>
+</figure>
+
+<h2>How to use it</h2>
+<ol class="steps">
+  <li>Select the block references to export, or clear the selection to export the whole
+    drawing.</li>
+  <li>Click <strong>Blocks to Excel</strong> (or type <code>PYBLOCKSTOEXCEL</code>).</li>
+  <li>Pick where to save. The suggested name is
+    <code><em>drawing</em> - Blocks.xlsx</code> beside the drawing (<code>Drawing -
+    Blocks.xlsx</code> for a drawing never saved). Choosing an existing file replaces it.</li>
+  <li>A toast says how many references were exported, and where.</li>
+</ol>
+
+<h2>Good to know / limits</h2>
+<ul>
+  <li>Only references placed directly in model space or on a layout are exported. Blocks
+    nested inside other blocks are not.</li>
+  <li>Xref attachments are never included, even when selected.</li>
+  <li>A selection with no block references in it exports nothing, and the toast says to clear
+    the selection to export the whole drawing.</li>
+  <li>If the file is open in Excel, Windows will not let it be replaced: the tool says so.
+    Close it and run again.</li>
+  <li>Constant attributes (fixed in the block definition) are not stored on the reference,
+    so they do not appear. A block with two attributes of the same tag shows only one
+    value.</li>
+  <li>Handles belong to one drawing. The workbook is for reading back into the drawing it
+    came from, or a Save As copy of it.</li>
+</ul>
+
+<h2>Other uses</h2>
+<ul>
+  <li>A quick register of equipment tags, door numbers or title block fields, without setting
+    up a data extraction.</li>
+  <li>Check positions and rotations at a glance: sort the X column, filter on a layer, look
+    for a scale that is not 1.</li>
+  <li>Hand a list of tagged items to someone who does not have AutoCAD.</li>
+</ul>
+</section>
+
+<section id="excel-to-blocks" title="Excel to Blocks" kind="Button"
+         bundle="Data.panel/Excel_to_Blocks.pushbutton"
+         summary="Reads a workbook made by Blocks to Excel and writes the attribute values and layers you edited back to the blocks, matched by handle."
+         needs="An open drawing, and a workbook from Blocks to Excel"
+         shortcut="None set (bind one in Shortcuts)">
+
+<h2>What it does</h2>
+<p>The return trip. It reads the workbook, finds each row's block reference by its
+<strong>Handle</strong>, compares the row with the block as it is now, and writes back what
+you changed: attribute values, and the layer. Before anything changes it says how much will
+change and asks. The command is <code>PYEXCELTOBLOCKS</code>.</p>
+
+<figure data-shot="excel-to-blocks-confirm">
+<figcaption>The question before anything is written: how many block references, attribute
+values and layer changes.</figcaption>
+</figure>
+
+<h2>How to use it</h2>
+<ol class="steps">
+  <li>Export with <a href="blocks-to-excel.html">Blocks to Excel</a> and edit the workbook:
+    change attribute values, or type another layer name in the Layer column. Save it and
+    close Excel.</li>
+  <li>With the same drawing open, click <strong>Excel to Blocks</strong> (or type
+    <code>PYEXCELTOBLOCKS</code>) and pick the workbook.</li>
+  <li>Read the question, for example <em>Update 12 block references: 30 attribute values,
+    2 layer changes?</em>, and click Yes.</li>
+  <li>A toast says how many were updated. If rows were skipped or blocks could not be
+    changed, a dialog lists them, with a <strong>Copy</strong> button for the full list.</li>
+  <li>Not what you wanted? <code>U</code> takes the update back.</li>
+</ol>
+
+<h2>What goes back, and what does not</h2>
+<ul>
+  <li>It reads the sheet called <strong>Blocks</strong>, or the first sheet when there is no
+    such sheet.</li>
+  <li>Columns are found by their header text, so you may reorder them, hide them, or delete
+    the ones you do not need. Only <strong>Handle</strong> is required.</li>
+  <li>An attribute column is written to every listed block that has that tag. A changed cell
+    is a change, and an emptied cell clears the value. A tag column the block does not have
+    is ignored: this tool cannot add attributes.</li>
+  <li>A filled-in <strong>Layer</strong> cell that differs moves the block to that layer. The
+    layer must already exist. An empty Layer cell leaves the block where it is.</li>
+  <li><strong>Block</strong>, <strong>Space</strong>, <strong>X</strong>, <strong>Y</strong>,
+    <strong>Z</strong>, <strong>Rotation</strong> and <strong>Scale</strong> are read-only:
+    edits there are ignored.</li>
+  <li>Rows whose handle is no longer a block reference in the drawing are skipped and listed.
+    Rows with no handle are ignored.</li>
+  <li>A block on a locked layer, or moved to a layer that does not exist, is left as it was
+    and listed with the reason; the rest still go in.</li>
+</ul>
+
+<h2>Good to know / limits</h2>
+<ul>
+  <li>Use a workbook only on the drawing it came from. Handles are numbered per drawing, so a
+    handle from another drawing can belong to an unrelated block here, and that block would
+    be updated if it has the same tags.</li>
+  <li>Excel converts what you type. Type <code>007</code> into a General cell and it stores
+    the number 7, which is what comes back. Format a column as Text before typing values with
+    leading zeros, long numbers or anything that looks like a date.</li>
+  <li>When every row already matches the drawing, it says <em>Nothing to update</em> and
+    changes nothing.</li>
+  <li>A file that is not an <code>.xlsx</code>, is damaged, or is locked by Excel is reported,
+    and nothing changes.</li>
+</ul>
+
+<h2>Other uses</h2>
+<ul>
+  <li>Renumber a set of tags in Excel with a fill-down series, then write them back in one
+    go.</li>
+  <li>Fill in a title block field on every layout from one column.</li>
+  <li>Sort blocks onto the right layers from a spreadsheet: filter by block name, fill the
+    Layer column, run.</li>
+</ul>
+</section>
+
+<section id="block-schedule" title="Block Schedule" kind="Button"
+         bundle="Data.panel/Block_Schedule.pushbutton"
+         summary="Counts block references by name, or by name and layer, in the selection or the whole drawing, and places the schedule as a table or saves it to Excel."
+         needs="An open drawing; optionally a selection"
+         shortcut="None set (bind one in Shortcuts)">
+
+<h2>What it does</h2>
+<p>Counts block references and writes the result as a schedule: one row per block name (or
+per block name and layer), its count, and a <strong>Total</strong> row at the bottom. The
+schedule goes either into the drawing as an AutoCAD table or into an Excel workbook. The
+command is <code>PYBLOCKSCHEDULE</code>.</p>
+
+<figure data-shot="block-schedule-table" data-wide>
+<figcaption>A block schedule placed as a table titled Block Schedule, counted by block name
+and layer, with the Total row.</figcaption>
+</figure>
+
+<h2>How to use it</h2>
+<ol class="steps">
+  <li>Select the block references to count, or clear the selection to count every one in
+    model space and on every layout.</li>
+  <li>Click <strong>Block Schedule</strong> (or type <code>PYBLOCKSCHEDULE</code>).</li>
+  <li>Choose how to count: <strong>Block name</strong>, or <strong>Block name and
+    layer</strong>. The question says how many references it found.</li>
+  <li>Choose where the schedule goes: <strong>Table in the drawing</strong> or <strong>Excel
+    workbook</strong>.</li>
+  <li>For a table, pick its top left corner. It goes into the current space (model space, or
+    the layout you are on) in the drawing's current table style, with a title row, a header
+    row and columns sized to their text.</li>
+  <li>For a workbook, pick where to save. The suggested name is
+    <code><em>drawing</em> - Block Schedule.xlsx</code>, and the sheet is called
+    <strong>Schedule</strong>.</li>
+</ol>
+
+<figure data-shot="block-schedule-options">
+<figcaption>The two quick choices: count by block name or by name and layer, then a table or
+a workbook.</figcaption>
+</figure>
+
+<h2>Good to know / limits</h2>
+<ul>
+  <li>The table is a snapshot. It does not update when blocks are added or erased: run the
+    tool again and delete the old table.</li>
+  <li>Rows are sorted by block name, then layer, ignoring case. Dynamic blocks count under
+    their real name, so every variation of one dynamic block is one row.</li>
+  <li>Only references placed directly in model space or on a layout count. Blocks nested
+    inside other blocks do not, and xrefs are never counted.</li>
+  <li>The table's look (fonts, text height, borders) comes from the current table style. Make
+    the style you want current first.</li>
+  <li>If the workbook is open in Excel it cannot be replaced; close it and run again.</li>
+</ul>
+
+<h2>Other uses</h2>
+<ul>
+  <li>A fixture, equipment or furniture count for one floor: select that floor's area and
+    count just the selection.</li>
+  <li>Count by name and layer to find blocks on the wrong layer: a name that appears on two
+    layers stands out.</li>
+  <li>Check a drawing before issue: the schedule shows stray blocks you did not expect.</li>
+</ul>
+</section>
+
+<section id="find-replace-attributes" title="Find and Replace Attributes" kind="Button"
+         bundle="Data.panel/Find_Replace_Attributes.pushbutton"
+         summary="Replaces text inside block attribute values across the drawing, the selection or blocks you pick, in every tag or just one, with or without matching case."
+         needs="An open drawing"
+         shortcut="None set (bind one in Shortcuts)">
+
+<h2>What it does</h2>
+<p>Replaces one piece of text with another inside attribute values, in the block references
+you choose, in every attribute or only in one tag. AutoCAD's FIND can search attribute text
+too, but it cannot keep to one tag. The text is plain text, never a pattern, so a
+<code>*</code> or a <code>.</code> means itself. The command is
+<code>PYFINDANDREPLACEATTRIBUTES</code>.</p>
+
+<h2>How to use it</h2>
+<ol class="steps">
+  <li>Optionally select the block references to work on.</li>
+  <li>Click <strong>Find and Replace Attributes</strong>.</li>
+  <li>Type the text to find. Your last search is filled in.</li>
+  <li>Type what to put instead. Leave it empty to remove the text.</li>
+  <li>Choose where: <strong>Selection</strong> (offered when something is selected, with how
+    many objects), <strong>Whole drawing</strong>, or <strong>Pick blocks</strong> to select
+    them at the command line now.</li>
+  <li>Choose which attribute: <strong>Every tag</strong>, or one tag from the list of tags
+    those blocks carry. The list has a search box.</li>
+  <li>Choose <strong>Ignore case</strong> or <strong>Match case</strong>. Your last choice is
+    offered first.</li>
+  <li>The changes are made straight away, and a toast says how many values changed in how
+    many block references. <code>U</code> takes them back.</li>
+</ol>
+
+<figure data-shot="find-replace-attributes-tag">
+<figcaption>Choosing which attribute to replace in: Every tag, or one of the tags the chosen
+blocks carry.</figcaption>
+</figure>
+
+<h2>Good to know / limits</h2>
+<ul>
+  <li>There is no preview: the replacement happens as soon as you choose the case option. Run
+    <a href="blocks-to-excel.html">Blocks to Excel</a> first if you want to see what is there,
+    and rely on <code>U</code> if the result is wrong.</li>
+  <li>It replaces every occurrence inside a value, not just whole values. Replacing
+    <code>1</code> with <code>2</code> turns <code>101</code> into <code>202</code>.</li>
+  <li>Blocks on locked layers are left alone, and the toast says how many could not be
+    changed.</li>
+  <li>The find and replace text and the case choice are remembered under
+    <code>%APPDATA%\pyACAD\settings</code>, for every drawing.</li>
+  <li>Only references placed directly in model space or on a layout are searched (or those you
+    select or pick). Xrefs and blocks nested inside other blocks are not.</li>
+  <li>Plain text in the drawing (TEXT, MTEXT) is not touched: only attribute values.</li>
+</ul>
+
+<h2>Other uses</h2>
+<ul>
+  <li>Change a project number or revision letter in every title block at once, in the one
+    tag that holds it.</li>
+  <li>Rename a room or system prefix across all the tags that carry it.</li>
+  <li>Remove a stray suffix, such as <code>-OLD</code>, by replacing it with nothing.</li>
+</ul>
+</section>

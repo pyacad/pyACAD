@@ -1,0 +1,181 @@
+<p>Two checks for building services drawings. Length Takeoff totals run lengths per layer,
+so a duct, pipe or cable layer reads as one figure. Tag Audit checks one attribute across
+your blocks and finds the values used twice, the blanks and the blocks that lack it. Both
+work on what you selected first, or on the whole drawing when nothing is selected, and both
+can hand the result to Excel.</p>
+
+<section id="length-takeoff" title="Length Takeoff" kind="Button"
+         bundle="Takeoff.panel/Length_Takeoff.pushbutton"
+         summary="Totals the length of lines, arcs, polylines and splines per layer, in the selection or else all of model space, in the drawing's units, with an Excel export."
+         needs="An open drawing; select first to measure only part of it">
+
+<h2>What it does</h2>
+<p>Measures every line, arc, polyline (lightweight, old-style 2D and 3D) and spline in the
+selection, adds the lengths up per layer, and shows the totals in the drawing's units. With
+nothing selected it measures everything in model space. Other objects in the selection
+(circles, text, blocks) are passed over.</p>
+
+<p>The window reads like this, layers sorted by name:</p>
+<pre><code>Model space: 312.48 m in 57 objects on 4 layers.
+
+M-DUCT-SUPPLY    148.20 m  (21)
+M-DUCT-RETURN    96.75 m  (14)
+P-PIPE-CW    52.03 m  (17)
+P-PIPE-HW    15.50 m  (5)</code></pre>
+<p>The number in brackets is how many objects make up that total. The window lists the
+first 20 layers; the export and the copy carry all of them.</p>
+
+<figure data-shot="length-takeoff-window" data-wide>
+<figcaption>Length Takeoff's totals per layer, with Export to Excel, Copy and Close.</figcaption>
+</figure>
+
+<h2>How to use it</h2>
+<ol class="steps">
+  <li>Select the objects to measure, or select nothing to measure all of model space. A
+    window or a crossing over one floor, or a Quick Select by layer, both work.</li>
+  <li>Click <strong>Length Takeoff</strong>, or type <code>PYLENGTHTAKEOFF</code>.</li>
+  <li>Read the totals. Then pick <strong>Export to Excel</strong>, <strong>Copy</strong> or
+    <strong>Close</strong>.</li>
+  <li><strong>Export to Excel</strong> asks where to save, suggesting
+    <code>&lt;drawing&gt; - Length Takeoff.xlsx</code> beside the drawing. An existing file of
+    that name is replaced, not added to.</li>
+  <li><strong>Copy</strong> puts the same table on the clipboard, tab separated, ready to
+    paste into Excel or an estimate.</li>
+</ol>
+
+<h2>The table</h2>
+<p>The Excel sheet is called <strong>Takeoff</strong>. The clipboard copy has the same
+columns:</p>
+<div class="table-scroll"><table>
+  <thead><tr><th>Column</th><th>Holds</th></tr></thead>
+  <tbody>
+    <tr><td>Layer</td><td>The layer name. The last row is <strong>Total</strong>.</td></tr>
+    <tr><td>Objects</td><td>How many objects were measured on that layer.</td></tr>
+    <tr><td>Length (<em>unit</em>)</td><td>The total as a number in drawing units, rounded to
+      six decimals, so Excel can add it up. The header carries the unit, such as
+      <code>Length (mm)</code>, or just <code>Length</code> when the drawing's units are
+      undefined.</td></tr>
+    <tr><td>Length</td><td>The same total as text, as the window shows it.</td></tr>
+  </tbody>
+</table></div>
+
+<h2>Units</h2>
+<p>Lengths are read in drawing units and labelled from the drawing's insertion units
+(INSUNITS). Inches and feet show as feet and inches, such as <code>152'-3.50"</code>; metric
+and the other units as a number and a short label, such as <code>45.20 m</code>, always to
+two decimal places. A drawing whose units are undefined shows bare numbers. Nothing is
+converted: if a drawing is drawn in millimetres but INSUNITS says metres, the label is wrong
+and the figures are not.</p>
+
+<h2>Limitations</h2>
+<ul>
+  <li>With nothing selected only model space is measured, even when you are on a layout
+    tab.</li>
+  <li>Objects inside blocks and xrefs are not measured: a run drawn as a block counts as
+    nothing. Explode it, or measure in the source drawing.</li>
+  <li>Circles and ellipses are not counted.</li>
+  <li>Lengths are true lengths along the object, in 3D. A line or 3D polyline that rises
+    measures its sloped length, not its length in plan.</li>
+  <li>Grouping is by layer only, not by colour, linetype or size. Keep each system on its
+    own layer to get one figure per system.</li>
+  <li>An object AutoCAD cannot measure is left out of the totals, and a toast says how many
+    there were.</li>
+</ul>
+
+<h2>Other uses</h2>
+<ul>
+  <li>Cable tray, conduit or sprinkler main lengths for a quick quantity before the proper
+    takeoff.</li>
+  <li>Perimeter of walls drawn as polylines on their own layer.</li>
+  <li>A check that a layer you think is empty really holds nothing measurable, or how many
+    stray objects sit on it.</li>
+</ul>
+</section>
+
+<section id="tag-audit" title="Tag Audit" kind="Button"
+         bundle="Takeoff.panel/Tag_Audit.pushbutton"
+         summary="Checks one attribute, TAG by default, across the block references in the selection or the drawing, and lists the values used twice, the blanks and the blocks without it."
+         needs="An open drawing with attributed blocks; select first to check only some">
+
+<h2>What it does</h2>
+<p>Reads one attribute from every block reference in the selection, or with nothing selected,
+every block reference in model space and every layout. It reports three things:</p>
+<ul>
+  <li><strong>Duplicates</strong>: values two or more blocks share. Values are compared
+    trimmed and ignoring case, so <code>AHU-1</code> and <code>ahu-1 </code> are the same
+    tag.</li>
+  <li><strong>Blanks</strong>: blocks that have the attribute but no value in it (or only
+    spaces).</li>
+  <li><strong>Missing</strong>: blocks that do not have that attribute at all.</li>
+</ul>
+<p>If there is nothing to report, a toast says "Every TAG is filled in and unique" and the
+tool ends.</p>
+
+<figure data-shot="tag-audit-summary" data-wide>
+<figcaption>Tag Audit's summary: the duplicate values with their counts, then the blanks and the blocks without the attribute, with Select them, Export to Excel, Copy report and Close.</figcaption>
+</figure>
+
+<h2>How to use it</h2>
+<ol class="steps">
+  <li>Select the blocks to check, or select nothing to check the whole drawing.</li>
+  <li>Click <strong>Tag Audit</strong>, or type <code>PYTAGAUDIT</code>.</li>
+  <li>Pick the attribute to audit. The list holds every attribute tag those blocks carry, in
+    the order the drawing holds them. <code>TAG</code> is picked to start with when one of
+    them has it.</li>
+  <li>Read the summary. It names up to eight duplicate values with how many blocks share
+    each (<code>AHU-1  x2</code>), then how many blocks have a blank value and how many lack
+    the attribute, each broken down by block name.</li>
+  <li>Pick what next:
+    <ul>
+      <li><strong>Select them</strong> makes the blocks with a duplicate or blank value the
+        current selection, so you can find and fix them. Blocks that lack the attribute are
+        not selected, since they are usually other kinds of block. This choice is offered only
+        when there are duplicates or blanks.</li>
+      <li><strong>Export to Excel</strong> asks where to save, suggesting
+        <code>&lt;drawing&gt; - Tag Audit.xlsx</code> beside the drawing. An existing file of
+        that name is replaced.</li>
+      <li><strong>Copy report</strong> puts every finding on the clipboard, tab
+        separated.</li>
+    </ul></li>
+</ol>
+
+<h2>The findings table</h2>
+<p>The export (sheet <strong>Tag Audit</strong>) and the copy have one row per offending
+block: duplicates first, grouped by value, then blanks, then missing.</p>
+<div class="table-scroll"><table>
+  <thead><tr><th>Column</th><th>Holds</th></tr></thead>
+  <tbody>
+    <tr><td>Issue</td><td><code>Duplicate</code>, <code>Blank</code> or
+      <code>Missing</code></td></tr>
+    <tr><td>Value</td><td>The shared value, for a duplicate; empty otherwise</td></tr>
+    <tr><td>Handle</td><td>The block reference's handle</td></tr>
+    <tr><td>Block</td><td>The block name (a dynamic block's own name, not its anonymous
+      one)</td></tr>
+    <tr><td>Layer</td><td>The block reference's layer</td></tr>
+    <tr><td>Space</td><td><code>Model</code> or the layout's name</td></tr>
+  </tbody>
+</table></div>
+
+<h2>Limitations</h2>
+<ul>
+  <li>With nothing selected, every block reference in the drawing counts, and every one
+    without the attribute (title blocks, north arrows, symbols) is listed as missing. Select
+    the equipment first, or ignore the Missing rows, when that list is long.</li>
+  <li>Block references nested inside other blocks, and xref attachments, are not
+    checked.</li>
+  <li>Constant attributes are not read: a block whose tag is a constant attribute is listed
+    as missing it.</li>
+  <li>One attribute per run. To check two, run the tool twice.</li>
+  <li>The tool reports and selects; it does not renumber or fill in values.</li>
+</ul>
+
+<h2>Other uses</h2>
+<ul>
+  <li>Room numbers, door numbers or panel circuit labels: any attribute that should be
+    unique.</li>
+  <li>Sheet numbers in title blocks. Every layout is checked, so two sheets carrying the same
+    number in one drawing show up as a duplicate.</li>
+  <li>Check that every block of one kind is labelled: select them all with Quick Select, run
+    the audit, and the blanks are the ones still to do.</li>
+</ul>
+</section>

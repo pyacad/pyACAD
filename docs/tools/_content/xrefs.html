@@ -1,0 +1,172 @@
+<p>Two tools for the drawing's external references. Xref Manager does what the External
+References palette does one row at a time (reload, unload, detach, bind) to as many xrefs as
+you tick. Xref Repath rewrites the saved paths of every xref in one pass and shows you each
+old and new path before it touches anything. Both work on the top-level xrefs only: a nested
+xref follows the xref that holds it.</p>
+
+<section id="xref-manager" title="Xref Manager" kind="Button"
+         bundle="Xrefs.panel/Xref_Manager.pushbutton"
+         summary="Reload, unload, detach or bind several xrefs at once, picked from a list that shows each one's status and saved path."
+         needs="An open drawing (the button is greyed without one)">
+
+<h2>What it does</h2>
+<p>Lists every top-level xref in the drawing, sorted by name, with its status and the path
+saved in the drawing. You tick the ones to work on, pick one action, and the tool applies it
+to each xref in turn. One xref that fails does not stop the others: they are all tried, and
+the ones that did not work are listed at the end with the reason.</p>
+
+<p>Each line of the list reads like this:</p>
+<pre><code>Site  [loaded]  ..\Xref\site.dwg
+Grid  [not found, overlay]  P:\Jobs\1234\Xref\grid.dwg
+Logo  [unloaded]  .\logo.dwg</code></pre>
+<p>The word in brackets is the xref's status: <strong>loaded</strong>,
+<strong>unloaded</strong>, <strong>not found</strong> (the file is not at the saved path or
+on any search path), <strong>unresolved</strong> or <strong>unreferenced</strong> (attached
+but with no reference left in the drawing). An xref attached as an overlay also says
+<strong>overlay</strong>. An xref with no saved path shows <code>(no path)</code>.</p>
+
+<figure data-shot="xref-manager-list" data-wide>
+<figcaption>The Xref Manager list: each xref with its status and saved path, two of them ticked.</figcaption>
+</figure>
+
+<h2>How to use it</h2>
+<ol class="steps">
+  <li>Click <strong>Xref Manager</strong>, or type <code>PYXREFMANAGER</code>. If the drawing
+    has no xrefs a toast says so and nothing opens.</li>
+  <li>Tick the xrefs to work on. The search box narrows a long list. Click OK.</li>
+  <li>Pick what should happen to them: <strong>Reload</strong>, <strong>Unload</strong>,
+    <strong>Detach</strong> or <strong>Bind</strong>.</li>
+  <li>For <strong>Bind</strong>, pick how. <strong>Bind</strong> keeps each xref's layers and
+    styles apart, renamed in the <code>Site$0$Walls</code> pattern. <strong>Insert</strong>
+    merges them into the drawing's own layers and styles, the way the INSERT command does.</li>
+  <li>Detach and Bind ask once more before they start, because both take the xref out of
+    its file's control.</li>
+  <li>The tool works through the list. When every xref worked, a toast says so (for example
+    "Reloaded 3 xrefs"). When some failed, the toast says how many of how many, and a window
+    lists each failure with its reason. That window shows the first 15; its
+    <strong>Copy</strong> button puts all of them on the clipboard.</li>
+</ol>
+
+<figure data-shot="xref-manager-actions">
+<figcaption>The action choice: Reload, Unload, Detach or Bind for the ticked xrefs.</figcaption>
+</figure>
+
+<h2>Limitations</h2>
+<ul>
+  <li>Nested xrefs are not listed. Reload, unload or bind the xref that holds them.</li>
+  <li>Only a loaded xref can be bound. An unloaded or missing one is reported as not done,
+    with its status as the reason; reload it (or fix its path with Xref Repath) first.</li>
+  <li>AutoCAD reloads an xref whose file it cannot find without raising an error. The tool
+    reads every xref's status again after a Reload, so one that is still not loaded is
+    reported as failed, for example <code>not found at ..\Xref\site.dwg</code>, rather than
+    counted as done.</li>
+  <li>One action per run. To reload some xrefs and unload others, run the tool twice.</li>
+  <li>The tool does not attach or overlay new xrefs. Use XATTACH for that. Images, PDF
+    underlays and other attachments are not listed: only DWG xrefs.</li>
+</ul>
+
+<h2>Good to know</h2>
+<p>A ribbon click sends the <code>PYXREFMANAGER</code> command to the drawing, so the whole
+run is one command and a single <code>U</code> takes it back, Detach and Bind included.
+Undo is the only way back from either.</p>
+<p>The list is a quick status report in its own right: open it, read it, and press Cancel.
+Nothing changes until you pick an action.</p>
+
+<h2>Other uses</h2>
+<ul>
+  <li>Unload the heavy backgrounds before you work on your own layers, and reload them all
+    in one pass before you plot.</li>
+  <li>Reload every xref after a consultant issues new backgrounds, and see at once which
+    ones did not come back.</li>
+  <li>Bind the xrefs into a copy of the drawing for an archive or a transmittal that must
+    open without its reference files.</li>
+</ul>
+</section>
+
+<section id="xref-repath" title="Xref Repath" kind="Button"
+         bundle="Xrefs.panel/Xref_Repath.pushbutton"
+         summary="Change every xref's saved path in one go: relative, absolute, find and replace, or point them all at one folder, with a preview of each old and new path first."
+         needs="An open drawing with xrefs (saved, for relative and absolute)">
+
+<h2>What it does</h2>
+<p>Works out a new saved path for each top-level xref in one of four ways, shows you the
+whole plan, and applies it only when you say yes:</p>
+<div class="table-scroll"><table>
+  <thead><tr><th>Mode</th><th>What it does to each path</th><th>Left alone when</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Make relative</strong></td>
+      <td>Relative to the drawing's folder: <code>.\xref.dwg</code> beside the drawing,
+        <code>..\Xref\site.dwg</code> from a sibling folder.</td>
+      <td>It is already relative, or it is on another drive or network share.</td></tr>
+    <tr><td><strong>Make absolute</strong></td>
+      <td>Resolved against the drawing's folder into a full path.</td>
+      <td>It is already absolute.</td></tr>
+    <tr><td><strong>Find and replace in paths</strong></td>
+      <td>Every occurrence of the text you type is replaced, ignoring case.</td>
+      <td>The text is not in its path.</td></tr>
+    <tr><td><strong>Point all at a folder</strong></td>
+      <td>The path becomes <code>&lt;folder&gt;\&lt;the xref's file name&gt;</code>.</td>
+      <td>That file is not in the folder, or the xref already points there.</td></tr>
+  </tbody>
+</table></div>
+<p>An xref with no saved path is always left alone. After the change, each xref is reloaded
+from its new path. An xref that was unloaded keeps its new path and stays unloaded until you
+reload it.</p>
+
+<h2>How to use it</h2>
+<ol class="steps">
+  <li>Click <strong>Xref Repath</strong>, or type <code>PYXREFREPATH</code>.</li>
+  <li>Pick the mode.</li>
+  <li>Answer what the mode needs. <strong>Make relative</strong> and <strong>Make
+    absolute</strong> need nothing more, but the drawing must have been saved: a toast says
+    "Save the drawing first" otherwise. <strong>Find and replace</strong> asks for the text to
+    find, then the text to put in its place (leave it empty to delete the text).
+    <strong>Point all at a folder</strong> opens a folder picker, starting in the drawing's
+    folder.</li>
+  <li>Read the preview. It lists each change as the xref's name with a <code>from</code>
+    line and a <code>to</code> line, then every xref left alone with the reason. It shows 12 of
+    each; <strong>Copy</strong> puts the full plan on the clipboard. Click OK.</li>
+  <li>If there is anything to change, confirm <strong>Repath ... as shown?</strong> If the
+    plan changes nothing, the tool stops after the preview.</li>
+  <li>A toast reports the result, for example "Repathed 4 xrefs" with "2 left as they were"
+    under it. Failures open a window with the reasons, as in Xref Manager.</li>
+</ol>
+
+<figure data-shot="xref-repath-preview" data-wide>
+<figcaption>The repath preview: each change with its from and to path, then the xrefs left alone and why.</figcaption>
+</figure>
+
+<h2>Limitations</h2>
+<ul>
+  <li>Nested xrefs are never repathed: they follow their parent. Open the parent drawing and
+    repath there.</li>
+  <li>AutoCAD accepts a path it cannot resolve without an error. After the repath the tool
+    reads the statuses again: an xref that was loaded and is not loaded now is reported as
+    failed. In the find and replace and folder modes, which are meant to fix paths, an xref
+    that was missing and is still missing is reported too. The new path stays in place
+    either way; Undo puts the old one back.</li>
+  <li><strong>Make absolute</strong> resolves a bare file name such as <code>site.dwg</code>
+    against the drawing's folder, even if AutoCAD had found that file on a support or
+    project path. Check the preview for those.</li>
+  <li><strong>Make relative</strong> cannot make a path on another drive or share relative,
+    since there is no relative path between them. Those are listed as left alone.</li>
+  <li>Find and replace works on the whole path, folders and file name alike, so a short
+    search such as <code>A</code> changes more than you meant. Read the preview.</li>
+</ul>
+
+<h2>Good to know</h2>
+<p>The whole repath is one AutoCAD command, so one <code>U</code> undoes every path it
+changed. Images, PDF underlays and other attachments are not touched: only DWG xrefs.</p>
+
+<h2>Other uses</h2>
+<ul>
+  <li>The project moved to a new server: find <code>\\oldserver\projects</code>, replace
+    with <code>\\newserver\projects</code>.</li>
+  <li>Make every path relative before you zip the project for a consultant, so the xrefs
+    resolve wherever they unzip it.</li>
+  <li>Swap a whole set of backgrounds for another issue: keep each issue in its own folder
+    with the same file names (<code>Issue B\site.dwg</code>, <code>Issue C\site.dwg</code>)
+    and point all at the new folder. Any file the new folder lacks is reported and left on
+    the old path.</li>
+</ul>
+</section>

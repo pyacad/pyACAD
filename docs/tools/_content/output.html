@@ -1,0 +1,172 @@
+<p>Two tools for paper space. Batch Plot turns the layouts you tick into PDFs, one file per
+layout, named the way you choose. Layout Manager does the tab housekeeping AutoCAD makes you
+do one right-click at a time: rename, reorder, copy, delete, and one page setup applied to many
+layouts at once.</p>
+
+<section id="batch-plot" title="Batch Plot" kind="Button"
+         bundle="Output.panel/Batch_Plot.pushbutton"
+         summary="Plots the layouts you pick to PDF, one file per layout, in a folder you choose, and remembers the folder, the naming and the page setup for next time."
+         needs="An open drawing with at least one layout (the button is greyed without a drawing)">
+
+<h2>What it does</h2>
+<p>Plots each ticked paper space layout to its own PDF with AutoCAD's
+<code>DWG To PDF.pc3</code>, in the foreground, one after another. A layout that fails does
+not stop the rest; the failures are listed at the end. The folder, the naming pattern and the
+page setup you used are remembered and offered first next time.</p>
+
+<figure data-shot="batch-plot-layouts" data-wide>
+<figcaption>Batch Plot's layout list, every layout ticked, in tab order.</figcaption>
+</figure>
+
+<h2>How to use it</h2>
+<ol class="steps">
+  <li>Click <strong>Batch Plot</strong>, or type <code>PYBATCHPLOT</code>. A drawing with only
+    the model tab gets a toast instead.</li>
+  <li>Untick the layouts you do not want. They are listed in tab order and all start
+    ticked.</li>
+  <li>Pick the folder for the PDFs. The picker starts in the folder you used last time, else
+    the drawing's own folder.</li>
+  <li>Pick the naming. The three choices are shown as real file names for the first layout
+    you ticked, the one you used last time first:
+    <div class="table-scroll"><table>
+      <thead><tr><th>Pattern</th><th>Example for <code>Level 2.dwg</code>, layout <code>A-201</code></th></tr></thead>
+      <tbody>
+        <tr><td><code>{drawing} - {layout}.pdf</code></td><td><code>Level 2 - A-201.pdf</code></td></tr>
+        <tr><td><code>{layout}.pdf</code></td><td><code>A-201.pdf</code></td></tr>
+        <tr><td><code>{drawing}_{layout}.pdf</code></td><td><code>Level 2_A-201.pdf</code></td></tr>
+      </tbody>
+    </table></div></li>
+  <li>If the drawing has named page setups for paper space, pick one, or <strong>Each
+    layout's own settings</strong>. A drawing without any skips this question.</li>
+  <li>If any of the PDFs already exist in the folder, confirm that they may be replaced.</li>
+  <li>A progress window shows "Plotting A-201 (2 of 6)". <strong>Cancel</strong> stops after
+    the layout being plotted.</li>
+  <li>A toast reports "Plotted 6 layouts to PDF" with the folder. If some failed, a window
+    lists each layout with the reason, and <strong>Copy</strong> puts the list on the
+    clipboard.</li>
+</ol>
+
+<figure data-shot="batch-plot-naming">
+<figcaption>The naming choice, shown as the file names the first layout would get.</figcaption>
+</figure>
+
+<h2>What goes into each PDF</h2>
+<p>Each plot starts from the layout's own plot settings, or from the page setup you picked
+(the layouts themselves are not changed). Then a few settings are always overridden:</p>
+<ul>
+  <li>The device is always <code>DWG To PDF.pc3</code>, whatever the layout or page setup
+    names.</li>
+  <li>The paper size is kept when <code>DWG To PDF.pc3</code> offers the same paper; when it
+    does not, the device's default paper is used, without a warning.</li>
+  <li>The plot area is the layout, <strong>scaled to fit</strong>, centred, with no
+    rotation. A layout set up at 1:1 therefore plots fitted to the printable area, not at an
+    exact 1:1.</li>
+</ul>
+<p>The plot style table, lineweights and the other settings come from the layout or page
+setup unchanged.</p>
+
+<h2>Limitations</h2>
+<ul>
+  <li>PDF only, through <code>DWG To PDF.pc3</code>. To plot to a printer or another PC3, use
+    PUBLISH.</li>
+  <li>One PDF per layout. There is no option to combine them into one multi-sheet PDF.</li>
+  <li>The model tab is not offered. Only paper space layouts plot.</li>
+  <li>Only the open drawing. To plot many drawings, run the tool in each.</li>
+  <li>Scale, rotation and centring are fixed, as described above. A page setup that relies
+    on a set scale or a 90 degree rotation will not plot the way it does from PLOT.</li>
+  <li>A PDF that is open in a viewer cannot be replaced; that layout is listed as
+    failed.</li>
+</ul>
+
+<h2>Good to know</h2>
+<p>Characters Windows does not allow in a file name (<code>&lt; &gt; : " / \ | ? *</code>)
+become <code>_</code>. Two layouts never write the same file: if their names collide, the
+second gets <code>(2)</code> before <code>.pdf</code>. An unsaved drawing is called
+<code>untitled</code> in the name.</p>
+<p>Background plotting is switched off for the run (BACKGROUNDPLOT is set to 0) and put back
+afterwards, so each PDF is finished before the next starts.</p>
+<p>The remembered choices are stored in
+<code>%APPDATA%\pyACAD\settings\cfg_pyacad_tab_output_panel_batch_plot_pushbutton.json</code>.
+There is no Shift+Click action; delete that file to forget them.</p>
+
+<h2>Other uses</h2>
+<ul>
+  <li>Name layouts by sheet number and use <code>{layout}.pdf</code>: the PDFs come out named
+    exactly like the sheets.</li>
+  <li>Keep a "Check print" page setup and pick it for quick review sets, without touching
+    the layouts' own settings.</li>
+</ul>
+</section>
+
+<section id="layout-manager" title="Layout Manager" kind="Button"
+         bundle="Output.panel/Layout_Manager.pushbutton"
+         summary="Renames, reorders, copies or deletes paper space layouts, or applies one named page setup to many layouts at once."
+         needs="An open drawing with at least one layout (the button is greyed without a drawing)">
+
+<h2>What it does</h2>
+<p>One action per run, picked from the first window:</p>
+<ul>
+  <li><strong>Rename</strong> one layout.</li>
+  <li><strong>Reorder</strong>: move one layout to a new position among the tabs.</li>
+  <li><strong>Copy</strong> one layout, with everything drawn on it and its plot
+    settings.</li>
+  <li><strong>Delete</strong> several layouts at once.</li>
+  <li><strong>Apply page setup</strong>: make one named page setup the plot settings of
+    every layout you tick.</li>
+</ul>
+<p>Each run is one AutoCAD command, so a single <code>U</code> takes the change back.</p>
+
+<figure data-shot="layout-manager-actions">
+<figcaption>Layout Manager's first window: the five actions.</figcaption>
+</figure>
+
+<h2>How to use it</h2>
+<ol class="steps">
+  <li>Click <strong>Layout Manager</strong>, or type <code>PYLAYOUTMANAGER</code>, and pick an
+    action.</li>
+  <li><strong>Rename.</strong> Pick the layout (the current one is picked to start with) and
+    type the new name. A name another layout already has is refused; a change of case alone
+    is allowed.</li>
+  <li><strong>Reorder.</strong> Pick the layout from the numbered list, then type its new
+    position, from 1 to the number of layouts. Position 1 is the first tab after Model.</li>
+  <li><strong>Copy.</strong> Pick the layout and type a name for the copy. The suggestion is
+    the source name with <code>(2)</code>; a name already in use gains a counter the way
+    AutoCAD's own Move or Copy does, so copying <code>A1 (2)</code> again gives
+    <code>A1 (3)</code>.</li>
+  <li><strong>Delete.</strong> Tick the layouts and confirm. Everything drawn on them goes
+    with them. If the current layout is among them, the drawing switches to Model first.</li>
+  <li><strong>Apply page setup.</strong> Pick a named page setup, then tick the layouts to
+    apply it to (all start ticked).</li>
+  <li>A toast confirms the change, for example "Moved A-301 to position 2".</li>
+</ol>
+
+<figure data-shot="layout-manager-page-setup" data-wide>
+<figcaption>Apply page setup: the layouts to apply the chosen page setup to, all ticked.</figcaption>
+</figure>
+
+<h2>Limitations</h2>
+<ul>
+  <li>The model tab cannot be renamed, moved, copied or deleted, and is not listed.</li>
+  <li>Delete refuses to remove every layout: a drawing keeps at least one. Untick one and run
+    it again.</li>
+  <li>Apply page setup offers only page setups made for paper space, and creates none. If the
+    drawing has none, a toast tells you to make one with PAGESETUP first. It is all or
+    nothing: if one layout cannot take the setup, none is changed.</li>
+  <li>Reorder moves one layout per run. Copy makes one copy per run.</li>
+  <li>Page setups from other drawings are not offered. Import them with PSETUPIN first.</li>
+</ul>
+
+<h2>Good to know</h2>
+<p>If an action fails, a toast says "Could not ..." with AutoCAD's reason, and the log at
+<code>%APPDATA%\pyACAD\logs\pyACAD.log</code> has the detail. Delete reports each layout it
+could not remove and still removes the rest.</p>
+
+<h2>Other uses</h2>
+<ul>
+  <li>After you bring in sheets with Layout from Template, apply the office page setup to
+    all of them in one go before you run Batch Plot.</li>
+  <li>Copy a finished sheet as the starting point for the next one: title block, viewports
+    and all.</li>
+  <li>Clear out the default Layout1 and Layout2 tabs a template left behind.</li>
+</ul>
+</section>

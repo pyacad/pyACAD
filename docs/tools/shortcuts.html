@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shortcuts - pyACAD tools</title>
+<meta name="description" content="The shortcuts and aliases editor: every pyACAD tool that can carry a chord or an alias, what it has now, and fields to change both.">
+<link rel="stylesheet" href="_assets/site.css">
+<link rel="stylesheet" href="_assets/tools.css">
+</head>
+<body data-base="">
+<div class="layout">
+<div class="sidebar">
+  <div class="brand"><a href="index.html"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="26" height="26" aria-hidden="true"><polygon points="157.0,327.8 351.8,327.8 363.1,342.4 363.1,403.3 168.3,403.3 157.0,388.7" fill="#78082A"/><polygon points="157.0,327.8 351.8,327.8 351.8,388.7 157.0,388.7" fill="#B80C40"/><polygon points="51.5,482.0 234.1,157.4 278.7,181.7 290.1,196.3 152.1,496.6 62.8,496.6" fill="#78082A"/><polygon points="51.5,482.0 140.8,482.0 278.7,181.7 234.1,157.4" fill="#E51050"/><polygon points="359.9,482.0 205.7,108.7 217.0,123.3 371.2,496.6" fill="#78082A"/><polygon points="205.7,108.7 201.6,55.9 213.0,70.5 217.0,123.3" fill="#78082A"/><polygon points="201.6,55.9 246.3,15.4 257.6,30.0 213.0,70.5" fill="#78082A"/><polygon points="246.3,15.4 343.7,23.5 355.0,38.1 257.6,30.0" fill="#78082A"/><polygon points="343.7,23.5 388.3,51.9 399.7,66.5 355.0,38.1" fill="#78082A"/><polygon points="388.3,51.9 347.7,76.2 359.1,90.8 399.7,66.5" fill="#78082A"/><polygon points="347.7,76.2 295.0,84.3 306.3,99.0 359.1,90.8" fill="#78082A"/><polygon points="295.0,84.3 449.2,482.0 460.5,496.6 306.3,99.0" fill="#78082A"/><polygon points="449.2,482.0 359.9,482.0 371.2,496.6 460.5,496.6" fill="#78082A"/><polygon points="359.9,482.0 205.7,108.7 201.6,55.9 246.3,15.4 343.7,23.5 388.3,51.9 347.7,76.2 295.0,84.3 449.2,482.0" fill="#E51050"/><polygon points="270.6,39.7 311.2,35.7 297.0,51.9" fill="#1F2329"/></svg><span class="brand-name">pyACAD
+    <span class="brand-sub">Tools guide</span></span></a></div>
+  <div class="search-wrap">
+    <svg class="search-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <circle cx="6" cy="6" r="4.2" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M9.2 9.2 12.5 12.5" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round"/></svg>
+    <input id="search" type="search" placeholder="Search the tools" autocomplete="off"
+           spellcheck="false" aria-label="Search the tools guide">
+    <span class="search-kbd">/</span>
+    <div id="search-results" class="search-results"></div>
+  </div>
+  <nav class="pages">
+<div class="grp">pyACAD</div>
+<a href="settings.html"><img class="nav-icon" src="_assets/icons/settings.png" alt="">Settings</a>
+<a href="shortcuts.html" class="active"><img class="nav-icon" src="_assets/icons/shortcuts.png" alt="">Shortcuts</a>
+<a href="console.html"><img class="nav-icon" src="_assets/icons/console.png" alt="">Console</a>
+<a href="reload.html"><img class="nav-icon" src="_assets/icons/reload.png" alt="">Reload</a>
+<div class="grp">Data</div>
+<a href="blocks-to-excel.html"><img class="nav-icon" src="_assets/icons/blocks-to-excel.png" alt="">Blocks to Excel</a>
+<a href="excel-to-blocks.html"><img class="nav-icon" src="_assets/icons/excel-to-blocks.png" alt="">Excel to Blocks</a>
+<a href="block-schedule.html"><img class="nav-icon" src="_assets/icons/block-schedule.png" alt="">Block Schedule</a>
+<a href="find-replace-attributes.html"><img class="nav-icon" src="_assets/icons/find-replace-attributes.png" alt="">Find and Replace Attributes</a>
+<div class="grp">Layers</div>
+<a href="layer-manager.html"><img class="nav-icon" src="_assets/icons/layer-manager.png" alt="">Layer Manager</a>
+<a href="layer-mapper.html"><img class="nav-icon" src="_assets/icons/layer-mapper.png" alt="">Layer Mapper</a>
+<a href="layer-snapshot.html"><img class="nav-icon" src="_assets/icons/layer-snapshot.png" alt="">Layer Snapshot</a>
+<div class="grp">Xrefs</div>
+<a href="xref-manager.html"><img class="nav-icon" src="_assets/icons/xref-manager.png" alt="">Xref Manager</a>
+<a href="xref-repath.html"><img class="nav-icon" src="_assets/icons/xref-repath.png" alt="">Xref Repath</a>
+<div class="grp">Cleanup</div>
+<a href="drawing-cleanup.html"><img class="nav-icon" src="_assets/icons/drawing-cleanup.png" alt="">Drawing Cleanup</a>
+<a href="font-proxy-report.html"><img class="nav-icon" src="_assets/icons/font-proxy-report.png" alt="">Font and Proxy Report</a>
+<div class="grp">Output</div>
+<a href="batch-plot.html"><img class="nav-icon" src="_assets/icons/batch-plot.png" alt="">Batch Plot</a>
+<a href="layout-manager.html"><img class="nav-icon" src="_assets/icons/layout-manager.png" alt="">Layout Manager</a>
+<div class="grp">Takeoff</div>
+<a href="length-takeoff.html"><img class="nav-icon" src="_assets/icons/length-takeoff.png" alt="">Length Takeoff</a>
+<a href="tag-audit.html"><img class="nav-icon" src="_assets/icons/tag-audit.png" alt="">Tag Audit</a>
+<div class="grp">AI (beta)</div>
+<a href="ask-ai.html"><img class="nav-icon" src="_assets/icons/ask-ai.png" alt="">Ask AI</a>
+<a href="ai-settings.html"><img class="nav-icon" src="_assets/icons/ai-settings.png" alt="">AI Settings</a>
+<a href="open-ai-folder.html"><img class="nav-icon" src="_assets/icons/open-ai-folder.png" alt="">Open AI Folder</a>
+</nav>
+  <div class="side-foot">
+    <span>pyACAD 0.1.0</span>
+    <a class="side-link" href="https://docs.pyacad.com/">Authoring guide</a>
+    <button id="theme-toggle" type="button" aria-label="Toggle colour theme">
+      <span>Dark</span></button>
+  </div>
+</div>
+<main class="main">
+<article>
+  <div class="hero"><img class="hero-icon" src="_assets/icons/shortcuts.png" alt=""><div><p class="eyebrow">pyACAD panel</p><h1>Shortcuts</h1><p class="lead">The shortcuts and aliases editor: every pyACAD tool that can carry a chord or an alias, what it has now, and fields to change both.</p></div></div><div class="facts"><div class="fact"><span class="fact-k">On the ribbon</span><span class="fact-v">Button, pyACAD panel</span></div><div class="fact"><span class="fact-k">Needs</span><span class="fact-v">Nothing</span></div><div class="fact"><span class="fact-k">Command</span><span class="fact-v"><code>PYSHORTCUTS</code></span></div><div class="fact"><span class="fact-k">Shortcut</span><span class="fact-v">None set (bind one here)</span></div></div>
+  <h2 id="what-it-does">What it does<a class="anchor" href="#what-it-does" aria-label="Link to this section">#</a></h2>
+<p>Any pyACAD tool can have a keyboard shortcut and short aliases to type. The shipped tools
+come with no shortcuts bound, so you choose your own, and with an alias each, like
+<code>BX</code> for Blocks to Excel, which you can change. This editor lists every tool that
+can take them, from every loaded extension, grouped by panel and searchable, and lets you set,
+clear or restore each one. Your choices are stored in <code>config.json</code> under
+<code>shortcuts.bindings</code> and <code>aliases</code>; a tool's own defaults (its
+<code>shortcut:</code> and <code>alias:</code> in <code>bundle.yaml</code>) are never touched,
+so a reset always has something to go back to. The command is
+<code>PYSHORTCUTS</code>.</p>
+
+
+
+<h2 id="how-to-use-it">How to use it<a class="anchor" href="#how-to-use-it" aria-label="Link to this section">#</a></h2>
+<ol class="steps">
+  <li>Click <strong>Shortcuts</strong>. Type in the search box to narrow the list: it matches
+    the tool's title, its panel's title, its command, and the chord and aliases it has.</li>
+  <li>Click the field on a row and press the keys you want, for example
+    <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd>. The field shows the chord and the row reads
+    <em>custom</em>. A chord pyACAD cannot use is refused and the field goes back to what it
+    was.</li>
+  <li><kbd>Backspace</kbd> in a field clears the binding, and the row reads
+    <em>disabled</em> if the tool had a default of its own. <kbd>Esc</kbd> leaves the field as
+    it was.</li>
+  <li>A chord already held by a tool earlier in ribbon order is flagged under the later row:
+    <em>conflicts with</em> and the other tool's name. Save stays greyed until every conflict
+    is resolved.</li>
+  <li>Type in the <strong>Alias</strong> field to change a tool's aliases, for example
+    <code>BX</code>, or <code>BX, B2X</code> for two. Clear it to have none. An alias that
+    another tool holds, that is in your <code>acad.pgp</code> (like <code>CO</code> for COPY),
+    or that AutoCAD already has as a command is flagged in red under the row, and Save stays
+    greyed: your existing keystrokes keep their meaning.</li>
+  <li>A customised row of a tool that ships its own default has a small reset arrow that puts
+    the default back. <strong>Restore All Defaults</strong> at the bottom does it for every
+    row at once.</li>
+  <li>Click <strong>Save</strong> (enabled once something changed). pyACAD reloads so the new
+    chords and aliases are live straight away, and a toast confirms it.</li>
+</ol>
+
+<h2 id="good-to-know-limits">Good to know / limits<a class="anchor" href="#good-to-know-limits" aria-label="Link to this section">#</a></h2>
+<ul>
+  <li>A chord always runs the tool's primary action, never its Shift+Click one, and it sends
+    the tool's command exactly as a click does.</li>
+  <li>Chords fire only when the AutoCAD window is in front and the keyboard focus is not in a
+    text box, so typing at the command line or in a palette's filter box is never
+    hijacked.</li>
+  <li>A pyACAD chord wins over an AutoCAD keyboard shortcut on the same keys. Bind
+    <kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>S</kbd> and Save As is gone from the keyboard until you
+    clear it.</li>
+  <li>Unless Settings allows bare keys, a chord must include Ctrl or Alt.</li>
+  <li>Dock panels (Layer Manager, Ask AI) are not listed: they are reached with their keytip
+    (<kbd>Alt</kbd>, then the letters shown on the ribbon).</li>
+  <li>Bindings are keyed by the tool's folder path inside its extension. Moving a tool to
+    another panel drops its override.</li>
+  <li>Saving writes the bindings of the tools that are loaded now. If an extension folder is
+    missing when you save (an unplugged network drive, say), the chords you had given its
+    tools are dropped.</li>
+</ul>
+
+<h2 id="other-uses">Other uses<a class="anchor" href="#other-uses" aria-label="Link to this section">#</a></h2>
+<ul>
+  <li>Give the two or three tools you use daily a chord each, so they are a keypress away
+    without leaving the drawing.</li>
+  <li>Find out whether any extension you installed binds a chord you rely on: search for the
+    chord's letter and read the rows.</li>
+</ul>
+<h2 id="source">Source<a class="anchor" href="#source" aria-label="Link to this section">#</a></h2>
+<p>The tool's own files, word for word as shipped in <code>pyACAD.panel/Shortcuts.pushbutton</code>. Every pyACAD tool is an ordinary bundle: copy these into your own extension and change what you like.</p>
+<div class="code src"><div class="code-head"><span><code>script.py</code> <span class="src-note">Runs on a click.</span> <a href="https://github.com/pyacad/pyACAD/blob/main/extensions/pyACAD.extension/pyACAD.tab/pyACAD.panel/Shortcuts.pushbutton/script.py" rel="noopener">View on GitHub</a></span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-s">&quot;&quot;&quot;View and change pyACAD keyboard shortcuts and aliases (writes config.json overrides).&quot;&quot;&quot;</span>
+<span class="tok-k">import</span> clr
+
+clr.AddReference(<span class="tok-s">&#x27;PyAcad.Runtime&#x27;</span>)
+<span class="tok-k">from</span> PyAcad.Runtime.Forms <span class="tok-k">import</span> ShortcutsDialog
+
+<span class="tok-k">from</span> pyacad <span class="tok-k">import</span> toast
+
+<span class="tok-k">if</span> ShortcutsDialog.ShowAndSave():
+    __pyacad__.Reload()
+    toast.success(<span class="tok-s">&#x27;Shortcuts and aliases saved and applied.&#x27;</span>)</code></pre></div>
+<div class="code src"><div class="code-head"><span><code>bundle.yaml</code> <span class="src-note">The bundle contract: the keys pyACAD reads for this tool.</span> <a href="https://github.com/pyacad/pyACAD/blob/main/extensions/pyACAD.extension/pyACAD.tab/pyACAD.panel/Shortcuts.pushbutton/bundle.yaml" rel="noopener">View on GitHub</a></span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-k">title</span>: Shortcuts
+<span class="tok-k">tooltip</span>: View and change keyboard shortcuts, and the short aliases you type to run each tool</code></pre></div>
+  <div class="pagenav">
+<a href="settings.html"><span class="dir">Previous</span><span class="ttl">Settings</span></a>
+<a class="next" href="console.html"><span class="dir">Next</span><span class="ttl">Console</span></a>
+</div>
+</article>
+<aside class="toc"><div class="toc-head">On this page</div>
+<a href="#what-it-does">What it does</a>
+<a href="#how-to-use-it">How to use it</a>
+<a href="#good-to-know-limits">Good to know / limits</a>
+<a href="#other-uses">Other uses</a>
+<a href="#source">Source</a>
+</aside>
+</main>
+</div>
+<script src="_assets/search-index.js"></script>
+<script src="_assets/site.js"></script>
+</body>
+</html>

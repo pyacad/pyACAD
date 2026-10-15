@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Block Schedule - pyACAD tools</title>
+<meta name="description" content="Counts block references by name, or by name and layer, in the selection or the whole drawing, and places the schedule as a table or saves it to Excel.">
+<link rel="stylesheet" href="_assets/site.css">
+<link rel="stylesheet" href="_assets/tools.css">
+</head>
+<body data-base="">
+<div class="layout">
+<div class="sidebar">
+  <div class="brand"><a href="index.html"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="26" height="26" aria-hidden="true"><polygon points="157.0,327.8 351.8,327.8 363.1,342.4 363.1,403.3 168.3,403.3 157.0,388.7" fill="#78082A"/><polygon points="157.0,327.8 351.8,327.8 351.8,388.7 157.0,388.7" fill="#B80C40"/><polygon points="51.5,482.0 234.1,157.4 278.7,181.7 290.1,196.3 152.1,496.6 62.8,496.6" fill="#78082A"/><polygon points="51.5,482.0 140.8,482.0 278.7,181.7 234.1,157.4" fill="#E51050"/><polygon points="359.9,482.0 205.7,108.7 217.0,123.3 371.2,496.6" fill="#78082A"/><polygon points="205.7,108.7 201.6,55.9 213.0,70.5 217.0,123.3" fill="#78082A"/><polygon points="201.6,55.9 246.3,15.4 257.6,30.0 213.0,70.5" fill="#78082A"/><polygon points="246.3,15.4 343.7,23.5 355.0,38.1 257.6,30.0" fill="#78082A"/><polygon points="343.7,23.5 388.3,51.9 399.7,66.5 355.0,38.1" fill="#78082A"/><polygon points="388.3,51.9 347.7,76.2 359.1,90.8 399.7,66.5" fill="#78082A"/><polygon points="347.7,76.2 295.0,84.3 306.3,99.0 359.1,90.8" fill="#78082A"/><polygon points="295.0,84.3 449.2,482.0 460.5,496.6 306.3,99.0" fill="#78082A"/><polygon points="449.2,482.0 359.9,482.0 371.2,496.6 460.5,496.6" fill="#78082A"/><polygon points="359.9,482.0 205.7,108.7 201.6,55.9 246.3,15.4 343.7,23.5 388.3,51.9 347.7,76.2 295.0,84.3 449.2,482.0" fill="#E51050"/><polygon points="270.6,39.7 311.2,35.7 297.0,51.9" fill="#1F2329"/></svg><span class="brand-name">pyACAD
+    <span class="brand-sub">Tools guide</span></span></a></div>
+  <div class="search-wrap">
+    <svg class="search-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <circle cx="6" cy="6" r="4.2" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M9.2 9.2 12.5 12.5" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round"/></svg>
+    <input id="search" type="search" placeholder="Search the tools" autocomplete="off"
+           spellcheck="false" aria-label="Search the tools guide">
+    <span class="search-kbd">/</span>
+    <div id="search-results" class="search-results"></div>
+  </div>
+  <nav class="pages">
+<div class="grp">pyACAD</div>
+<a href="settings.html"><img class="nav-icon" src="_assets/icons/settings.png" alt="">Settings</a>
+<a href="shortcuts.html"><img class="nav-icon" src="_assets/icons/shortcuts.png" alt="">Shortcuts</a>
+<a href="console.html"><img class="nav-icon" src="_assets/icons/console.png" alt="">Console</a>
+<a href="reload.html"><img class="nav-icon" src="_assets/icons/reload.png" alt="">Reload</a>
+<div class="grp">Data</div>
+<a href="blocks-to-excel.html"><img class="nav-icon" src="_assets/icons/blocks-to-excel.png" alt="">Blocks to Excel</a>
+<a href="excel-to-blocks.html"><img class="nav-icon" src="_assets/icons/excel-to-blocks.png" alt="">Excel to Blocks</a>
+<a href="block-schedule.html" class="active"><img class="nav-icon" src="_assets/icons/block-schedule.png" alt="">Block Schedule</a>
+<a href="find-replace-attributes.html"><img class="nav-icon" src="_assets/icons/find-replace-attributes.png" alt="">Find and Replace Attributes</a>
+<div class="grp">Layers</div>
+<a href="layer-manager.html"><img class="nav-icon" src="_assets/icons/layer-manager.png" alt="">Layer Manager</a>
+<a href="layer-mapper.html"><img class="nav-icon" src="_assets/icons/layer-mapper.png" alt="">Layer Mapper</a>
+<a href="layer-snapshot.html"><img class="nav-icon" src="_assets/icons/layer-snapshot.png" alt="">Layer Snapshot</a>
+<div class="grp">Xrefs</div>
+<a href="xref-manager.html"><img class="nav-icon" src="_assets/icons/xref-manager.png" alt="">Xref Manager</a>
+<a href="xref-repath.html"><img class="nav-icon" src="_assets/icons/xref-repath.png" alt="">Xref Repath</a>
+<div class="grp">Cleanup</div>
+<a href="drawing-cleanup.html"><img class="nav-icon" src="_assets/icons/drawing-cleanup.png" alt="">Drawing Cleanup</a>
+<a href="font-proxy-report.html"><img class="nav-icon" src="_assets/icons/font-proxy-report.png" alt="">Font and Proxy Report</a>
+<div class="grp">Output</div>
+<a href="batch-plot.html"><img class="nav-icon" src="_assets/icons/batch-plot.png" alt="">Batch Plot</a>
+<a href="layout-manager.html"><img class="nav-icon" src="_assets/icons/layout-manager.png" alt="">Layout Manager</a>
+<div class="grp">Takeoff</div>
+<a href="length-takeoff.html"><img class="nav-icon" src="_assets/icons/length-takeoff.png" alt="">Length Takeoff</a>
+<a href="tag-audit.html"><img class="nav-icon" src="_assets/icons/tag-audit.png" alt="">Tag Audit</a>
+<div class="grp">AI (beta)</div>
+<a href="ask-ai.html"><img class="nav-icon" src="_assets/icons/ask-ai.png" alt="">Ask AI</a>
+<a href="ai-settings.html"><img class="nav-icon" src="_assets/icons/ai-settings.png" alt="">AI Settings</a>
+<a href="open-ai-folder.html"><img class="nav-icon" src="_assets/icons/open-ai-folder.png" alt="">Open AI Folder</a>
+</nav>
+  <div class="side-foot">
+    <span>pyACAD 0.1.0</span>
+    <a class="side-link" href="https://docs.pyacad.com/">Authoring guide</a>
+    <button id="theme-toggle" type="button" aria-label="Toggle colour theme">
+      <span>Dark</span></button>
+  </div>
+</div>
+<main class="main">
+<article>
+  <div class="hero"><img class="hero-icon" src="_assets/icons/block-schedule.png" alt=""><div><p class="eyebrow">Data panel</p><h1>Block Schedule</h1><p class="lead">Counts block references by name, or by name and layer, in the selection or the whole drawing, and places the schedule as a table or saves it to Excel.</p></div></div><div class="facts"><div class="fact"><span class="fact-k">On the ribbon</span><span class="fact-v">Button, Data panel</span></div><div class="fact"><span class="fact-k">Needs</span><span class="fact-v">An open drawing; optionally a selection</span></div><div class="fact"><span class="fact-k">Command</span><span class="fact-v"><code>PYBLOCKSCHEDULE</code></span></div><div class="fact"><span class="fact-k">Alias</span><span class="fact-v"><code>BSC</code></span></div><div class="fact"><span class="fact-k">Shortcut</span><span class="fact-v">None set (bind one in Shortcuts)</span></div></div>
+  <h2 id="what-it-does">What it does<a class="anchor" href="#what-it-does" aria-label="Link to this section">#</a></h2>
+<p>Counts block references and writes the result as a schedule: one row per block name (or
+per block name and layer), its count, and a <strong>Total</strong> row at the bottom. The
+schedule goes either into the drawing as an AutoCAD table or into an Excel workbook. The
+command is <code>PYBLOCKSCHEDULE</code>.</p>
+
+
+
+<h2 id="how-to-use-it">How to use it<a class="anchor" href="#how-to-use-it" aria-label="Link to this section">#</a></h2>
+<ol class="steps">
+  <li>Select the block references to count, or clear the selection to count every one in
+    model space and on every layout.</li>
+  <li>Click <strong>Block Schedule</strong> (or type <code>PYBLOCKSCHEDULE</code>).</li>
+  <li>Choose how to count: <strong>Block name</strong>, or <strong>Block name and
+    layer</strong>. The question says how many references it found.</li>
+  <li>Choose where the schedule goes: <strong>Table in the drawing</strong> or <strong>Excel
+    workbook</strong>.</li>
+  <li>For a table, pick its top left corner. It goes into the current space (model space, or
+    the layout you are on) in the drawing's current table style, with a title row, a header
+    row and columns sized to their text.</li>
+  <li>For a workbook, pick where to save. The suggested name is
+    <code><em>drawing</em> - Block Schedule.xlsx</code>, and the sheet is called
+    <strong>Schedule</strong>.</li>
+</ol>
+
+
+
+<h2 id="good-to-know-limits">Good to know / limits<a class="anchor" href="#good-to-know-limits" aria-label="Link to this section">#</a></h2>
+<ul>
+  <li>The table is a snapshot. It does not update when blocks are added or erased: run the
+    tool again and delete the old table.</li>
+  <li>Rows are sorted by block name, then layer, ignoring case. Dynamic blocks count under
+    their real name, so every variation of one dynamic block is one row.</li>
+  <li>Only references placed directly in model space or on a layout count. Blocks nested
+    inside other blocks do not, and xrefs are never counted.</li>
+  <li>The table's look (fonts, text height, borders) comes from the current table style. Make
+    the style you want current first.</li>
+  <li>If the workbook is open in Excel it cannot be replaced; close it and run again.</li>
+</ul>
+
+<h2 id="other-uses">Other uses<a class="anchor" href="#other-uses" aria-label="Link to this section">#</a></h2>
+<ul>
+  <li>A fixture, equipment or furniture count for one floor: select that floor's area and
+    count just the selection.</li>
+  <li>Count by name and layer to find blocks on the wrong layer: a name that appears on two
+    layers stands out.</li>
+  <li>Check a drawing before issue: the schedule shows stray blocks you did not expect.</li>
+</ul>
+<h2 id="source">Source<a class="anchor" href="#source" aria-label="Link to this section">#</a></h2>
+<p>The tool's own files, word for word as shipped in <code>Data.panel/Block_Schedule.pushbutton</code>. Every pyACAD tool is an ordinary bundle: copy these into your own extension and change what you like.</p>
+<div class="code src"><div class="code-head"><span><code>script.py</code> <span class="src-note">Runs on a click.</span> <a href="https://github.com/pyacad/pyACAD/blob/main/extensions/pyACAD.extension/pyACAD.tab/Data.panel/Block_Schedule.pushbutton/script.py" rel="noopener">View on GitHub</a></span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-c"># -*- coding: utf-8 -*-</span>
+<span class="tok-s">&quot;&quot;&quot;Counts block references by name, or by name and layer, and places the result.
+
+Counts the selected block references when there are any, else every one in model
+space and the layouts (xrefs are not blocks here). The schedule goes into the
+drawing as an AutoCAD table at a picked point, in the current table style, or
+into an Excel workbook. Both end with a Total row.
+&quot;&quot;&quot;</span>
+
+<span class="tok-k">import</span> os
+
+<span class="tok-k">from</span> pyacad <span class="tok-k">import</span> blocks, forms, script, sel, toast, xl
+
+__title__ = <span class="tok-s">&#x27;Block Schedule&#x27;</span>
+
+TITLE = <span class="tok-s">&#x27;Block Schedule&#x27;</span>
+XLSX = <span class="tok-s">&#x27;Excel workbook (*.xlsx)|*.xlsx&#x27;</span>
+BY_NAME = <span class="tok-s">&#x27;Block name&#x27;</span>
+BY_LAYER = <span class="tok-s">&#x27;Block name and layer&#x27;</span>
+TO_TABLE = <span class="tok-s">&#x27;Table in the drawing&#x27;</span>
+TO_EXCEL = <span class="tok-s">&#x27;Excel workbook&#x27;</span>
+
+
+<span class="tok-k">def</span> plural(count, word):
+    <span class="tok-k">return</span> <span class="tok-s">&#x27;%d %s%s&#x27;</span> % (count, word, <span class="tok-s">&#x27;&#x27;</span> <span class="tok-k">if</span> count == <span class="tok-n">1</span> <span class="tok-k">else</span> <span class="tok-s">&#x27;s&#x27;</span>)
+
+
+<span class="tok-k">def</span> default_path(drawing, what):
+    <span class="tok-s">&quot;&quot;&quot;&#x27;&lt;drawing&gt; - &lt;what&gt;.xlsx&#x27; beside the drawing; just the name when unsaved.&quot;&quot;&quot;</span>
+    <span class="tok-k">if</span> <span class="tok-k">not</span> drawing <span class="tok-k">or</span> drawing == <span class="tok-s">&#x27;untitled&#x27;</span>:
+        <span class="tok-k">return</span> <span class="tok-s">&#x27;Drawing - %s.xlsx&#x27;</span> % what
+    folder, name = os.path.split(drawing)
+    <span class="tok-k">return</span> os.path.join(folder, <span class="tok-s">&#x27;%s - %s.xlsx&#x27;</span> % (os.path.splitext(name)[<span class="tok-n">0</span>], what))
+
+
+<span class="tok-k">def</span> write_workbook(path, headers, rows, sheet):
+    <span class="tok-s">&quot;&quot;&quot;Writes a fresh workbook; True when it worked. The Save dialog already
+    asked before replacing a file, so an old one is removed rather than merged.&quot;&quot;&quot;</span>
+    <span class="tok-k">try</span>:
+        <span class="tok-k">if</span> os.path.exists(path):
+            os.remove(path)
+        xl.write(path, rows, headers=headers, sheet=sheet)
+    <span class="tok-k">except</span> (IOError, OSError) <span class="tok-k">as</span> error:
+        toast.error(<span class="tok-s">&#x27;Could not write the workbook&#x27;</span>, <span class="tok-s">&#x27;Is it open in Excel? %s&#x27;</span> % error)
+        <span class="tok-k">return</span> <span class="tok-k">False</span>
+    <span class="tok-k">return</span> <span class="tok-k">True</span>
+
+
+<span class="tok-k">def</span> run():
+    drawing = script.get_document_path()
+    <span class="tok-k">if</span> drawing <span class="tok-k">is</span> <span class="tok-k">None</span>:
+        toast.warning(<span class="tok-s">&#x27;No drawing is open&#x27;</span>, <span class="tok-s">&#x27;Open a drawing, then run %s&#x27;</span> % TITLE)
+        <span class="tok-k">return</span>
+
+    picked = sel.current()
+    refs = blocks.snapshots(picked <span class="tok-k">if</span> picked <span class="tok-k">else</span> <span class="tok-k">None</span>)
+    <span class="tok-k">if</span> <span class="tok-k">not</span> refs:
+        <span class="tok-k">if</span> picked:
+            toast.info(<span class="tok-s">&#x27;No block references in the selection&#x27;</span>,
+                       <span class="tok-s">&#x27;Clear the selection to count the whole drawing&#x27;</span>)
+        <span class="tok-k">else</span>:
+            toast.info(<span class="tok-s">&#x27;No block references in this drawing&#x27;</span>)
+        <span class="tok-k">return</span>
+
+    scope = <span class="tok-s">&#x27;the %s selected&#x27;</span> % plural(len(refs), <span class="tok-s">&#x27;block reference&#x27;</span>) <span class="tok-k">if</span> picked \
+        <span class="tok-k">else</span> <span class="tok-s">&#x27;all %s in the drawing&#x27;</span> % plural(len(refs), <span class="tok-s">&#x27;block reference&#x27;</span>)
+    grouping = forms.ask_options(<span class="tok-s">&#x27;Count %s by&#x27;</span> % scope, [BY_NAME, BY_LAYER], TITLE)
+    <span class="tok-k">if</span> grouping <span class="tok-k">is</span> <span class="tok-k">None</span>:
+        <span class="tok-k">return</span>
+    headers, rows = blocks.schedule_rows(refs, by_layer=(grouping == BY_LAYER))
+    kinds = len(set(row[<span class="tok-n">0</span>] <span class="tok-k">for</span> row <span class="tok-k">in</span> rows))
+    rows.append([<span class="tok-s">&#x27;Total&#x27;</span>] + [<span class="tok-s">&#x27;&#x27;</span>] * (len(headers) - <span class="tok-n">2</span>) + [len(refs)])
+
+    target = forms.ask_options(<span class="tok-s">&#x27;Put the schedule in&#x27;</span>, [TO_TABLE, TO_EXCEL], TITLE)
+    <span class="tok-k">if</span> target <span class="tok-k">is</span> <span class="tok-k">None</span>:
+        <span class="tok-k">return</span>
+    summary = <span class="tok-s">&#x27;%s, %s&#x27;</span> % (plural(kinds, <span class="tok-s">&#x27;block&#x27;</span>), plural(len(refs), <span class="tok-s">&#x27;reference&#x27;</span>))
+
+    <span class="tok-k">if</span> target == TO_TABLE:
+        point = sel.pick_point(<span class="tok-s">&#x27;Pick the top left corner of the schedule: &#x27;</span>)
+        <span class="tok-k">if</span> point <span class="tok-k">is</span> <span class="tok-k">None</span>:
+            <span class="tok-k">return</span>
+        blocks.insert_table(point, headers, rows, title=TITLE)
+        toast.success(<span class="tok-s">&#x27;Block schedule placed&#x27;</span>, summary)
+        <span class="tok-k">return</span>
+
+    path = forms.save_file(XLSX, default_path(drawing, TITLE), <span class="tok-s">&#x27;Export block schedule&#x27;</span>)
+    <span class="tok-k">if</span> path <span class="tok-k">and</span> write_workbook(path, headers, rows, <span class="tok-s">&#x27;Schedule&#x27;</span>):
+        toast.success(<span class="tok-s">&#x27;Block schedule exported: &#x27;</span> + summary, path)
+
+
+<span class="tok-k">if</span> <span class="tok-s">&#x27;__commandpath__&#x27;</span> <span class="tok-k">in</span> globals():
+    run()</code></pre></div>
+<div class="code src"><div class="code-head"><span><code>bundle.yaml</code> <span class="src-note">The bundle contract: the keys pyACAD reads for this tool.</span> <a href="https://github.com/pyacad/pyACAD/blob/main/extensions/pyACAD.extension/pyACAD.tab/Data.panel/Block_Schedule.pushbutton/bundle.yaml" rel="noopener">View on GitHub</a></span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-k">title</span>: Block Schedule
+<span class="tok-k">tooltip</span>: Counts block references by name, or by name and layer, in the selection or the whole drawing. Places the schedule as a table in the drawing or saves it to Excel.
+<span class="tok-k">context</span>: doc
+<span class="tok-k">keytip</span>: DS
+<span class="tok-k">alias</span>: BSC</code></pre></div>
+  <div class="pagenav">
+<a href="excel-to-blocks.html"><span class="dir">Previous</span><span class="ttl">Excel to Blocks</span></a>
+<a class="next" href="find-replace-attributes.html"><span class="dir">Next</span><span class="ttl">Find and Replace Attributes</span></a>
+</div>
+</article>
+<aside class="toc"><div class="toc-head">On this page</div>
+<a href="#what-it-does">What it does</a>
+<a href="#how-to-use-it">How to use it</a>
+<a href="#good-to-know-limits">Good to know / limits</a>
+<a href="#other-uses">Other uses</a>
+<a href="#source">Source</a>
+</aside>
+</main>
+</div>
+<script src="_assets/search-index.js"></script>
+<script src="_assets/site.js"></script>
+</body>
+</html>

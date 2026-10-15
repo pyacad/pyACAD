@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Xref Repath - pyACAD tools</title>
+<meta name="description" content="Change every xref&#x27;s saved path in one go: relative, absolute, find and replace, or point them all at one folder, with a preview of each old and new path first.">
+<link rel="stylesheet" href="_assets/site.css">
+<link rel="stylesheet" href="_assets/tools.css">
+</head>
+<body data-base="">
+<div class="layout">
+<div class="sidebar">
+  <div class="brand"><a href="index.html"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="26" height="26" aria-hidden="true"><polygon points="157.0,327.8 351.8,327.8 363.1,342.4 363.1,403.3 168.3,403.3 157.0,388.7" fill="#78082A"/><polygon points="157.0,327.8 351.8,327.8 351.8,388.7 157.0,388.7" fill="#B80C40"/><polygon points="51.5,482.0 234.1,157.4 278.7,181.7 290.1,196.3 152.1,496.6 62.8,496.6" fill="#78082A"/><polygon points="51.5,482.0 140.8,482.0 278.7,181.7 234.1,157.4" fill="#E51050"/><polygon points="359.9,482.0 205.7,108.7 217.0,123.3 371.2,496.6" fill="#78082A"/><polygon points="205.7,108.7 201.6,55.9 213.0,70.5 217.0,123.3" fill="#78082A"/><polygon points="201.6,55.9 246.3,15.4 257.6,30.0 213.0,70.5" fill="#78082A"/><polygon points="246.3,15.4 343.7,23.5 355.0,38.1 257.6,30.0" fill="#78082A"/><polygon points="343.7,23.5 388.3,51.9 399.7,66.5 355.0,38.1" fill="#78082A"/><polygon points="388.3,51.9 347.7,76.2 359.1,90.8 399.7,66.5" fill="#78082A"/><polygon points="347.7,76.2 295.0,84.3 306.3,99.0 359.1,90.8" fill="#78082A"/><polygon points="295.0,84.3 449.2,482.0 460.5,496.6 306.3,99.0" fill="#78082A"/><polygon points="449.2,482.0 359.9,482.0 371.2,496.6 460.5,496.6" fill="#78082A"/><polygon points="359.9,482.0 205.7,108.7 201.6,55.9 246.3,15.4 343.7,23.5 388.3,51.9 347.7,76.2 295.0,84.3 449.2,482.0" fill="#E51050"/><polygon points="270.6,39.7 311.2,35.7 297.0,51.9" fill="#1F2329"/></svg><span class="brand-name">pyACAD
+    <span class="brand-sub">Tools guide</span></span></a></div>
+  <div class="search-wrap">
+    <svg class="search-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <circle cx="6" cy="6" r="4.2" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M9.2 9.2 12.5 12.5" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round"/></svg>
+    <input id="search" type="search" placeholder="Search the tools" autocomplete="off"
+           spellcheck="false" aria-label="Search the tools guide">
+    <span class="search-kbd">/</span>
+    <div id="search-results" class="search-results"></div>
+  </div>
+  <nav class="pages">
+<div class="grp">pyACAD</div>
+<a href="settings.html"><img class="nav-icon" src="_assets/icons/settings.png" alt="">Settings</a>
+<a href="shortcuts.html"><img class="nav-icon" src="_assets/icons/shortcuts.png" alt="">Shortcuts</a>
+<a href="console.html"><img class="nav-icon" src="_assets/icons/console.png" alt="">Console</a>
+<a href="reload.html"><img class="nav-icon" src="_assets/icons/reload.png" alt="">Reload</a>
+<div class="grp">Data</div>
+<a href="blocks-to-excel.html"><img class="nav-icon" src="_assets/icons/blocks-to-excel.png" alt="">Blocks to Excel</a>
+<a href="excel-to-blocks.html"><img class="nav-icon" src="_assets/icons/excel-to-blocks.png" alt="">Excel to Blocks</a>
+<a href="block-schedule.html"><img class="nav-icon" src="_assets/icons/block-schedule.png" alt="">Block Schedule</a>
+<a href="find-replace-attributes.html"><img class="nav-icon" src="_assets/icons/find-replace-attributes.png" alt="">Find and Replace Attributes</a>
+<div class="grp">Layers</div>
+<a href="layer-manager.html"><img class="nav-icon" src="_assets/icons/layer-manager.png" alt="">Layer Manager</a>
+<a href="layer-mapper.html"><img class="nav-icon" src="_assets/icons/layer-mapper.png" alt="">Layer Mapper</a>
+<a href="layer-snapshot.html"><img class="nav-icon" src="_assets/icons/layer-snapshot.png" alt="">Layer Snapshot</a>
+<div class="grp">Xrefs</div>
+<a href="xref-manager.html"><img class="nav-icon" src="_assets/icons/xref-manager.png" alt="">Xref Manager</a>
+<a href="xref-repath.html" class="active"><img class="nav-icon" src="_assets/icons/xref-repath.png" alt="">Xref Repath</a>
+<div class="grp">Cleanup</div>
+<a href="drawing-cleanup.html"><img class="nav-icon" src="_assets/icons/drawing-cleanup.png" alt="">Drawing Cleanup</a>
+<a href="font-proxy-report.html"><img class="nav-icon" src="_assets/icons/font-proxy-report.png" alt="">Font and Proxy Report</a>
+<div class="grp">Output</div>
+<a href="batch-plot.html"><img class="nav-icon" src="_assets/icons/batch-plot.png" alt="">Batch Plot</a>
+<a href="layout-manager.html"><img class="nav-icon" src="_assets/icons/layout-manager.png" alt="">Layout Manager</a>
+<div class="grp">Takeoff</div>
+<a href="length-takeoff.html"><img class="nav-icon" src="_assets/icons/length-takeoff.png" alt="">Length Takeoff</a>
+<a href="tag-audit.html"><img class="nav-icon" src="_assets/icons/tag-audit.png" alt="">Tag Audit</a>
+<div class="grp">AI (beta)</div>
+<a href="ask-ai.html"><img class="nav-icon" src="_assets/icons/ask-ai.png" alt="">Ask AI</a>
+<a href="ai-settings.html"><img class="nav-icon" src="_assets/icons/ai-settings.png" alt="">AI Settings</a>
+<a href="open-ai-folder.html"><img class="nav-icon" src="_assets/icons/open-ai-folder.png" alt="">Open AI Folder</a>
+</nav>
+  <div class="side-foot">
+    <span>pyACAD 0.1.0</span>
+    <a class="side-link" href="https://docs.pyacad.com/">Authoring guide</a>
+    <button id="theme-toggle" type="button" aria-label="Toggle colour theme">
+      <span>Dark</span></button>
+  </div>
+</div>
+<main class="main">
+<article>
+  <div class="hero"><img class="hero-icon" src="_assets/icons/xref-repath.png" alt=""><div><p class="eyebrow">Xrefs panel</p><h1>Xref Repath</h1><p class="lead">Change every xref's saved path in one go: relative, absolute, find and replace, or point them all at one folder, with a preview of each old and new path first.</p></div></div><div class="facts"><div class="fact"><span class="fact-k">On the ribbon</span><span class="fact-v">Button, Xrefs panel</span></div><div class="fact"><span class="fact-k">Needs</span><span class="fact-v">An open drawing with xrefs (saved, for relative and absolute)</span></div><div class="fact"><span class="fact-k">Command</span><span class="fact-v"><code>PYXREFREPATH</code></span></div><div class="fact"><span class="fact-k">Alias</span><span class="fact-v"><code>XRP</code></span></div></div>
+  <h2 id="what-it-does">What it does<a class="anchor" href="#what-it-does" aria-label="Link to this section">#</a></h2>
+<p>Works out a new saved path for each top-level xref in one of four ways, shows you the
+whole plan, and applies it only when you say yes:</p>
+<div class="table-scroll"><table>
+  <thead><tr><th>Mode</th><th>What it does to each path</th><th>Left alone when</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Make relative</strong></td>
+      <td>Relative to the drawing's folder: <code>.\xref.dwg</code> beside the drawing,
+        <code>..\Xref\site.dwg</code> from a sibling folder.</td>
+      <td>It is already relative, or it is on another drive or network share.</td></tr>
+    <tr><td><strong>Make absolute</strong></td>
+      <td>Resolved against the drawing's folder into a full path.</td>
+      <td>It is already absolute.</td></tr>
+    <tr><td><strong>Find and replace in paths</strong></td>
+      <td>Every occurrence of the text you type is replaced, ignoring case.</td>
+      <td>The text is not in its path.</td></tr>
+    <tr><td><strong>Point all at a folder</strong></td>
+      <td>The path becomes <code>&lt;folder&gt;\&lt;the xref's file name&gt;</code>.</td>
+      <td>That file is not in the folder, or the xref already points there.</td></tr>
+  </tbody>
+</table></div>
+<p>An xref with no saved path is always left alone. After the change, each xref is reloaded
+from its new path. An xref that was unloaded keeps its new path and stays unloaded until you
+reload it.</p>
+
+<h2 id="how-to-use-it">How to use it<a class="anchor" href="#how-to-use-it" aria-label="Link to this section">#</a></h2>
+<ol class="steps">
+  <li>Click <strong>Xref Repath</strong>, or type <code>PYXREFREPATH</code>.</li>
+  <li>Pick the mode.</li>
+  <li>Answer what the mode needs. <strong>Make relative</strong> and <strong>Make
+    absolute</strong> need nothing more, but the drawing must have been saved: a toast says
+    "Save the drawing first" otherwise. <strong>Find and replace</strong> asks for the text to
+    find, then the text to put in its place (leave it empty to delete the text).
+    <strong>Point all at a folder</strong> opens a folder picker, starting in the drawing's
+    folder.</li>
+  <li>Read the preview. It lists each change as the xref's name with a <code>from</code>
+    line and a <code>to</code> line, then every xref left alone with the reason. It shows 12 of
+    each; <strong>Copy</strong> puts the full plan on the clipboard. Click OK.</li>
+  <li>If there is anything to change, confirm <strong>Repath ... as shown?</strong> If the
+    plan changes nothing, the tool stops after the preview.</li>
+  <li>A toast reports the result, for example "Repathed 4 xrefs" with "2 left as they were"
+    under it. Failures open a window with the reasons, as in Xref Manager.</li>
+</ol>
+
+
+
+<h2 id="limitations">Limitations<a class="anchor" href="#limitations" aria-label="Link to this section">#</a></h2>
+<ul>
+  <li>Nested xrefs are never repathed: they follow their parent. Open the parent drawing and
+    repath there.</li>
+  <li>AutoCAD accepts a path it cannot resolve without an error. After the repath the tool
+    reads the statuses again: an xref that was loaded and is not loaded now is reported as
+    failed. In the find and replace and folder modes, which are meant to fix paths, an xref
+    that was missing and is still missing is reported too. The new path stays in place
+    either way; Undo puts the old one back.</li>
+  <li><strong>Make absolute</strong> resolves a bare file name such as <code>site.dwg</code>
+    against the drawing's folder, even if AutoCAD had found that file on a support or
+    project path. Check the preview for those.</li>
+  <li><strong>Make relative</strong> cannot make a path on another drive or share relative,
+    since there is no relative path between them. Those are listed as left alone.</li>
+  <li>Find and replace works on the whole path, folders and file name alike, so a short
+    search such as <code>A</code> changes more than you meant. Read the preview.</li>
+</ul>
+
+<h2 id="good-to-know">Good to know<a class="anchor" href="#good-to-know" aria-label="Link to this section">#</a></h2>
+<p>The whole repath is one AutoCAD command, so one <code>U</code> undoes every path it
+changed. Images, PDF underlays and other attachments are not touched: only DWG xrefs.</p>
+
+<h2 id="other-uses">Other uses<a class="anchor" href="#other-uses" aria-label="Link to this section">#</a></h2>
+<ul>
+  <li>The project moved to a new server: find <code>\\oldserver\projects</code>, replace
+    with <code>\\newserver\projects</code>.</li>
+  <li>Make every path relative before you zip the project for a consultant, so the xrefs
+    resolve wherever they unzip it.</li>
+  <li>Swap a whole set of backgrounds for another issue: keep each issue in its own folder
+    with the same file names (<code>Issue B\site.dwg</code>, <code>Issue C\site.dwg</code>)
+    and point all at the new folder. Any file the new folder lacks is reported and left on
+    the old path.</li>
+</ul>
+<h2 id="source">Source<a class="anchor" href="#source" aria-label="Link to this section">#</a></h2>
+<p>The tool's own files, word for word as shipped in <code>Xrefs.panel/Xref_Repath.pushbutton</code>. Every pyACAD tool is an ordinary bundle: copy these into your own extension and change what you like.</p>
+<div class="code src"><div class="code-head"><span><code>script.py</code> <span class="src-note">Runs on a click.</span> <a href="https://github.com/pyacad/pyACAD/blob/main/extensions/pyACAD.extension/pyACAD.tab/Xrefs.panel/Xref_Repath.pushbutton/script.py" rel="noopener">View on GitHub</a></span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-c"># -*- coding: utf-8 -*-</span>
+<span class="tok-s">&quot;&quot;&quot;Change the saved paths of the drawing&#x27;s xrefs in one go.
+
+Four ways: relative to the drawing&#x27;s folder, absolute, find and replace text in
+every path, or point each xref at the file of the same name in one folder (only
+where that file is really there; the rest are reported and left alone). Every
+change is shown, old path and new, before anything is touched. Each repathed
+xref reloads from its new path, except one that was unloaded, which keeps its
+new path and stays unloaded. Nested xrefs follow their parent and are not
+repathed here.
+&quot;&quot;&quot;</span>
+
+<span class="tok-k">import</span> os
+
+<span class="tok-k">from</span> pyacad <span class="tok-k">import</span> doc, forms, script, toast, xrefs
+
+__title__ = <span class="tok-s">&#x27;Xref Repath&#x27;</span>
+
+TITLE = <span class="tok-s">&#x27;Xref Repath&#x27;</span>
+MODES = [
+    (<span class="tok-s">&#x27;Make relative&#x27;</span>, <span class="tok-s">&#x27;relative&#x27;</span>),
+    (<span class="tok-s">&#x27;Make absolute&#x27;</span>, <span class="tok-s">&#x27;absolute&#x27;</span>),
+    (<span class="tok-s">&#x27;Find and replace in paths&#x27;</span>, <span class="tok-s">&#x27;replace&#x27;</span>),
+    (<span class="tok-s">&#x27;Point all at a folder&#x27;</span>, <span class="tok-s">&#x27;folder&#x27;</span>),
+]
+LIMIT = <span class="tok-n">12</span>          <span class="tok-c"># changes shown in the preview; Copy carries them all</span>
+
+
+<span class="tok-k">def</span> run():
+    <span class="tok-k">if</span> script.get_document_path() <span class="tok-k">is</span> <span class="tok-k">None</span>:
+        toast.warning(<span class="tok-s">&#x27;Open a drawing first&#x27;</span>)
+        <span class="tok-k">return</span>
+
+    rows = sorted([x <span class="tok-k">for</span> x <span class="tok-k">in</span> xrefs.list() <span class="tok-k">if</span> <span class="tok-k">not</span> x[<span class="tok-s">&#x27;nested&#x27;</span>]],
+                  key=<span class="tok-k">lambda</span> x: x[<span class="tok-s">&#x27;name&#x27;</span>].lower())
+    <span class="tok-k">if</span> <span class="tok-k">not</span> rows:
+        toast.info(<span class="tok-s">&#x27;This drawing has no xrefs&#x27;</span>)
+        <span class="tok-k">return</span>
+
+    choice = forms.ask_options(<span class="tok-s">&#x27;How should the xref paths change?&#x27;</span>,
+                               [label <span class="tok-k">for</span> label, mode <span class="tok-k">in</span> MODES], title=TITLE)
+    <span class="tok-k">if</span> choice <span class="tok-k">is</span> <span class="tok-k">None</span>:
+        <span class="tok-k">return</span>
+    mode = dict(MODES)[choice]
+
+    drawing = doc.path()
+    host_dir = <span class="tok-k">None</span> <span class="tok-k">if</span> drawing == <span class="tok-s">&#x27;untitled&#x27;</span> <span class="tok-k">else</span> os.path.dirname(drawing)
+    <span class="tok-k">if</span> mode <span class="tok-k">in</span> (<span class="tok-s">&#x27;relative&#x27;</span>, <span class="tok-s">&#x27;absolute&#x27;</span>) <span class="tok-k">and</span> host_dir <span class="tok-k">is</span> <span class="tok-k">None</span>:
+        toast.warning(<span class="tok-s">&#x27;Save the drawing first&#x27;</span>, <span class="tok-s">&#x27;Relative paths start from its folder&#x27;</span>)
+        <span class="tok-k">return</span>
+
+    options = _ask(mode, host_dir)
+    <span class="tok-k">if</span> options <span class="tok-k">is</span> <span class="tok-k">None</span>:
+        <span class="tok-k">return</span>
+    plan = xrefs.plan_repath(rows, mode, host_dir=host_dir, **options)
+
+    full = xrefs.format_plan(rows, plan)
+    forms.alert(xrefs.format_plan(rows, plan, limit=LIMIT), TITLE, copy=full)
+    changes = [(row[<span class="tok-s">&#x27;name&#x27;</span>], new) <span class="tok-k">for</span> row, (old, new, note) <span class="tok-k">in</span> zip(rows, plan) <span class="tok-k">if</span> <span class="tok-k">not</span> note]
+    <span class="tok-k">if</span> <span class="tok-k">not</span> changes:
+        <span class="tok-k">return</span>                      <span class="tok-c"># the preview said so and why</span>
+    <span class="tok-k">if</span> <span class="tok-k">not</span> forms.confirm(<span class="tok-s">&#x27;Repath %s as shown?&#x27;</span> % _what(changes), TITLE):
+        <span class="tok-k">return</span>
+
+    unloaded = set(row[<span class="tok-s">&#x27;name&#x27;</span>] <span class="tok-k">for</span> row <span class="tok-k">in</span> rows <span class="tok-k">if</span> row[<span class="tok-s">&#x27;status&#x27;</span>] == <span class="tok-s">&#x27;unloaded&#x27;</span>)
+    watched = _watched(rows, mode)
+    <span class="tok-k">with</span> doc.lock():
+        results = [_repath(name, new, name <span class="tok-k">not</span> <span class="tok-k">in</span> unloaded) <span class="tok-k">for</span> name, new <span class="tok-k">in</span> changes]
+        <span class="tok-c"># AutoCAD takes a path it cannot resolve without complaint; the status says.</span>
+        results = xrefs.check_loaded(
+            results, [row <span class="tok-k">for</span> row <span class="tok-k">in</span> xrefs.list() <span class="tok-k">if</span> row[<span class="tok-s">&#x27;name&#x27;</span>] <span class="tok-k">in</span> watched])
+    _report(results, len(rows) - len(changes))
+
+
+<span class="tok-k">def</span> _watched(rows, mode):
+    <span class="tok-s">&quot;&quot;&quot;Names whose status after the repath says whether it worked: any that
+    were loaded (a repath must not break them) and, in the two modes meant to
+    fix paths, any that were missing. A missing xref made relative is still
+    missing, and that is not this tool&#x27;s failure.&quot;&quot;&quot;</span>
+    fixing = mode <span class="tok-k">in</span> (<span class="tok-s">&#x27;replace&#x27;</span>, <span class="tok-s">&#x27;folder&#x27;</span>)
+    <span class="tok-k">return</span> set(row[<span class="tok-s">&#x27;name&#x27;</span>] <span class="tok-k">for</span> row <span class="tok-k">in</span> rows
+               <span class="tok-k">if</span> row[<span class="tok-s">&#x27;status&#x27;</span>] == <span class="tok-s">&#x27;loaded&#x27;</span> <span class="tok-k">or</span> (fixing <span class="tok-k">and</span> row[<span class="tok-s">&#x27;status&#x27;</span>] != <span class="tok-s">&#x27;unloaded&#x27;</span>))
+
+
+<span class="tok-k">def</span> _ask(mode, host_dir):
+    <span class="tok-s">&quot;&quot;&quot;plan_repath&#x27;s mode options from the person; None when they cancel.&quot;&quot;&quot;</span>
+    <span class="tok-k">if</span> mode == <span class="tok-s">&#x27;replace&#x27;</span>:
+        find = forms.ask_string(<span class="tok-s">&#x27;Text to find in every xref path (case does not matter):&#x27;</span>,
+                                title=TITLE)
+        <span class="tok-k">if</span> find <span class="tok-k">is</span> <span class="tok-k">None</span>:
+            <span class="tok-k">return</span> <span class="tok-k">None</span>
+        <span class="tok-k">if</span> <span class="tok-k">not</span> find:
+            toast.warning(<span class="tok-s">&#x27;Nothing to find&#x27;</span>, <span class="tok-s">&#x27;Type the text to look for&#x27;</span>)
+            <span class="tok-k">return</span> <span class="tok-k">None</span>
+        replace = forms.ask_string(<span class="tok-s">&#x27;Replace &quot;%s&quot; with:&#x27;</span> % find, title=TITLE)
+        <span class="tok-k">if</span> replace <span class="tok-k">is</span> <span class="tok-k">None</span>:
+            <span class="tok-k">return</span> <span class="tok-k">None</span>
+        <span class="tok-k">return</span> {<span class="tok-s">&#x27;find&#x27;</span>: find, <span class="tok-s">&#x27;replace&#x27;</span>: replace}
+    <span class="tok-k">if</span> mode == <span class="tok-s">&#x27;folder&#x27;</span>:
+        folder = forms.pick_folder(<span class="tok-s">&#x27;Folder holding the xref files&#x27;</span>, initial=host_dir)
+        <span class="tok-k">if</span> <span class="tok-k">not</span> folder:
+            <span class="tok-k">return</span> <span class="tok-k">None</span>
+        <span class="tok-k">return</span> {<span class="tok-s">&#x27;folder&#x27;</span>: folder, <span class="tok-s">&#x27;exists&#x27;</span>: os.path.isfile}
+    <span class="tok-k">return</span> {}
+
+
+<span class="tok-k">def</span> _repath(name, new_path, reload):
+    <span class="tok-s">&quot;&quot;&quot;(name, error) for one xref; error is None when it worked.&quot;&quot;&quot;</span>
+    <span class="tok-k">try</span>:
+        xrefs.repath(name, new_path, reload=reload)
+    <span class="tok-k">except</span> Exception <span class="tok-k">as</span> error:
+        <span class="tok-k">return</span> name, str(error) <span class="tok-k">or</span> error.__class__.__name__
+    <span class="tok-k">return</span> name, <span class="tok-k">None</span>
+
+
+<span class="tok-k">def</span> _report(results, kept):
+    head = xrefs.headline(results, <span class="tok-s">&#x27;Repathed&#x27;</span>)
+    detail = <span class="tok-s">&#x27;%d left as they were&#x27;</span> % kept <span class="tok-k">if</span> kept <span class="tok-k">else</span> <span class="tok-k">None</span>
+    failed = len([<span class="tok-n">1</span> <span class="tok-k">for</span> name, error <span class="tok-k">in</span> results <span class="tok-k">if</span> error])
+    <span class="tok-k">if</span> <span class="tok-k">not</span> failed:
+        toast.success(head, detail)
+        <span class="tok-k">return</span>
+    <span class="tok-k">if</span> failed == len(results):
+        toast.error(head, detail)
+    <span class="tok-k">else</span>:
+        toast.warning(head, detail)
+    forms.alert(xrefs.summarize(results, <span class="tok-s">&#x27;Repathed&#x27;</span>, limit=LIMIT), TITLE,
+                copy=xrefs.summarize(results, <span class="tok-s">&#x27;Repathed&#x27;</span>))
+
+
+<span class="tok-k">def</span> _what(changes):
+    <span class="tok-s">&quot;&quot;&quot;&#x27;Site&#x27; for one change, &#x27;3 xrefs&#x27; for more.&quot;&quot;&quot;</span>
+    <span class="tok-k">return</span> changes[<span class="tok-n">0</span>][<span class="tok-n">0</span>] <span class="tok-k">if</span> len(changes) == <span class="tok-n">1</span> <span class="tok-k">else</span> _xrefs(len(changes))
+
+
+<span class="tok-k">def</span> _xrefs(count):
+    <span class="tok-k">return</span> <span class="tok-s">&#x27;1 xref&#x27;</span> <span class="tok-k">if</span> count == <span class="tok-n">1</span> <span class="tok-k">else</span> <span class="tok-s">&#x27;%d xrefs&#x27;</span> % count
+
+
+<span class="tok-k">if</span> <span class="tok-s">&#x27;__commandpath__&#x27;</span> <span class="tok-k">in</span> globals():
+    run()</code></pre></div>
+<div class="code src"><div class="code-head"><span><code>bundle.yaml</code> <span class="src-note">The bundle contract: the keys pyACAD reads for this tool.</span> <a href="https://github.com/pyacad/pyACAD/blob/main/extensions/pyACAD.extension/pyACAD.tab/Xrefs.panel/Xref_Repath.pushbutton/bundle.yaml" rel="noopener">View on GitHub</a></span><button class="copy-btn" type="button">Copy</button></div><pre><code><span class="tok-k">title</span>: Xref Repath
+<span class="tok-k">tooltip</span>: Change every xref&#x27;s saved path in one go: make them relative or absolute, find and replace text in them, or point them all at one folder. Shows the old and new paths before anything changes.
+<span class="tok-k">context</span>: doc
+<span class="tok-k">keytip</span>: XR
+<span class="tok-k">alias</span>: XRP</code></pre></div>
+  <div class="pagenav">
+<a href="xref-manager.html"><span class="dir">Previous</span><span class="ttl">Xref Manager</span></a>
+<a class="next" href="drawing-cleanup.html"><span class="dir">Next</span><span class="ttl">Drawing Cleanup</span></a>
+</div>
+</article>
+<aside class="toc"><div class="toc-head">On this page</div>
+<a href="#what-it-does">What it does</a>
+<a href="#how-to-use-it">How to use it</a>
+<a href="#limitations">Limitations</a>
+<a href="#good-to-know">Good to know</a>
+<a href="#other-uses">Other uses</a>
+<a href="#source">Source</a>
+</aside>
+</main>
+</div>
+<script src="_assets/search-index.js"></script>
+<script src="_assets/site.js"></script>
+</body>
+</html>

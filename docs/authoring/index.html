@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Build tools for AutoCAD - pyACAD authoring</title>
+<meta name="description" content="Everything you need to turn a folder and a Python file into a button on the AutoCAD ribbon and a command you can type. No compiler, no Visual Studio, no restart.">
+<link rel="stylesheet" href="_assets/site.css">
+</head>
+<body data-base="">
+<div class="layout">
+<div class="sidebar">
+  <div class="brand"><a href="index.html"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="26" height="26" aria-hidden="true"><polygon points="157.0,327.8 351.8,327.8 363.1,342.4 363.1,403.3 168.3,403.3 157.0,388.7" fill="#78082A"/><polygon points="157.0,327.8 351.8,327.8 351.8,388.7 157.0,388.7" fill="#B80C40"/><polygon points="51.5,482.0 234.1,157.4 278.7,181.7 290.1,196.3 152.1,496.6 62.8,496.6" fill="#78082A"/><polygon points="51.5,482.0 140.8,482.0 278.7,181.7 234.1,157.4" fill="#E51050"/><polygon points="359.9,482.0 205.7,108.7 217.0,123.3 371.2,496.6" fill="#78082A"/><polygon points="205.7,108.7 201.6,55.9 213.0,70.5 217.0,123.3" fill="#78082A"/><polygon points="201.6,55.9 246.3,15.4 257.6,30.0 213.0,70.5" fill="#78082A"/><polygon points="246.3,15.4 343.7,23.5 355.0,38.1 257.6,30.0" fill="#78082A"/><polygon points="343.7,23.5 388.3,51.9 399.7,66.5 355.0,38.1" fill="#78082A"/><polygon points="388.3,51.9 347.7,76.2 359.1,90.8 399.7,66.5" fill="#78082A"/><polygon points="347.7,76.2 295.0,84.3 306.3,99.0 359.1,90.8" fill="#78082A"/><polygon points="295.0,84.3 449.2,482.0 460.5,496.6 306.3,99.0" fill="#78082A"/><polygon points="449.2,482.0 359.9,482.0 371.2,496.6 460.5,496.6" fill="#78082A"/><polygon points="359.9,482.0 205.7,108.7 201.6,55.9 246.3,15.4 343.7,23.5 388.3,51.9 347.7,76.2 295.0,84.3 449.2,482.0" fill="#E51050"/><polygon points="270.6,39.7 311.2,35.7 297.0,51.9" fill="#1F2329"/></svg><span class="brand-name">pyACAD
+    <span class="brand-sub">Tool authoring guide</span></span></a></div>
+  <div class="search-wrap">
+    <svg class="search-icon" width="14" height="14" viewBox="0 0 14 14" fill="none">
+      <circle cx="6" cy="6" r="4.2" stroke="currentColor" stroke-width="1.5"/>
+      <path d="M9.2 9.2 12.5 12.5" stroke="currentColor" stroke-width="1.5"
+            stroke-linecap="round"/></svg>
+    <input id="search" type="search" placeholder="Search the docs" autocomplete="off"
+           spellcheck="false" aria-label="Search the documentation">
+    <span class="search-kbd">/</span>
+    <div id="search-results" class="search-results"></div>
+  </div>
+  <nav class="pages">
+<div class="grp">Start</div>
+<a href="overview.html"><span class="num">01</span>How pyACAD works</a>
+<a href="quickstart.html"><span class="num">02</span>Your first button</a>
+<div class="grp">Bundles</div>
+<a href="anatomy.html"><span class="num">03</span>Anatomy of an extension</a>
+<a href="buttons.html"><span class="num">04</span>Buttons, stacks and pulldowns</a>
+<a href="bundle-yaml.html"><span class="num">05</span>The bundle.yaml reference</a>
+<a href="icons.html"><span class="num">06</span>Icons</a>
+<a href="shortcuts.html"><span class="num">07</span>Shortcuts and keytips</a>
+<a href="click-actions.html"><span class="num">08</span>Click actions and config.py</a>
+<a href="hooks.html"><span class="num">09</span>Hooks</a>
+<div class="grp">Scripts</div>
+<a href="script-environment.html"><span class="num">10</span>The script environment</a>
+<a href="user-interface.html"><span class="num">11</span>Talking to the user</a>
+<a href="settings.html"><span class="num">12</span>Settings and per-tool state</a>
+<a href="commands.html"><span class="num">13</span>AutoCAD commands and AutoLISP</a>
+<a href="command-line.html"><span class="num">14</span>pyacad.exe and headless runs</a>
+<div class="grp">Reference</div>
+<a href="api-reference.html"><span class="num">15</span>Python API reference</a>
+<div class="grp">Practice</div>
+<a href="cookbook.html"><span class="num">16</span>Cookbook</a>
+<a href="ai-assistant.html"><span class="num">17</span>Writing tools with an AI assistant</a>
+<a href="troubleshooting.html"><span class="num">18</span>Troubleshooting</a>
+<a href="style-guide.html"><span class="num">19</span>Style guide for tools</a>
+</nav>
+  <div class="side-foot">
+    <span>pyACAD 0.1.0</span>
+    <button id="theme-toggle" type="button" aria-label="Toggle colour theme">
+      <span>Dark</span></button>
+  </div>
+</div>
+<main class="main">
+<article>
+  <p class="eyebrow">pyACAD authoring guide</p>
+  <h1>Build tools for AutoCAD</h1>
+  <p class="lead">Everything you need to turn a folder and a Python file into a button on the AutoCAD ribbon and a command you can type. No compiler, no Visual Studio, no restart.</p>
+  
+<div class="note tip">
+<span class="note-t">New here</span>
+<p>Start with the <a href="quickstart.html">quickstart</a>. It gets a working tool on the
+ribbon in about five minutes, and every other page assumes you have done it.</p>
+</div>
+
+<p>pyACAD loads <strong>extensions</strong> from disk at startup. An extension is a folder
+tree whose folder names describe the ribbon: a <code>.tab</code> becomes a ribbon tab, a
+<code>.panel</code> becomes a panel on it, and a <code>.pushbutton</code> becomes a button
+that runs the <code>script.py</code> inside it. There is no manifest to register, no project
+to compile, and no build step. Create the folders, drop in a script, press
+<strong>Reload</strong>.</p>
+
+<p>Every button is also a real AutoCAD command. Click it, type its name at the command line,
+put it in a macro or a script file, or call it from AutoLISP with arguments and get a value
+back: the tool runs the same way each time, inside the drawing, with one undo step. See
+<a href="commands.html">AutoCAD commands and AutoLISP</a>.</p>
+
+<p>These pages document the authoring surface exhaustively: every folder suffix the runtime
+recognises, every key it reads out of <code>bundle.yaml</code>, every global it injects into
+your script, and every function in the <code>pyacad</code> library. Where the runtime has a
+sharp edge, it is called out rather than glossed over.</p>
+<h2 id="start">Start</h2>
+<div class="cards"><a href="overview.html"><span class="c-t">How pyACAD works</span><span class="c-d">The mental model behind every tool you will write: folders on disk become ribbon buttons, every button is an AutoCAD command, and a command runs a Python file.</span></a>
+<a href="quickstart.html"><span class="c-t">Your first button</span><span class="c-d">Build a working AutoCAD tool from an empty folder, then run it from the ribbon, from the command line and from AutoLISP.</span></a></div>
+<h2 id="bundles">Bundles</h2>
+<div class="cards"><a href="anatomy.html"><span class="c-t">Anatomy of an extension</span><span class="c-d">The folder levels, how discovery walks them, the files that sit outside a bundle, and the ordering and naming rules that decide what your ribbon looks like.</span></a>
+<a href="buttons.html"><span class="c-t">Buttons, stacks and pulldowns</span><span class="c-d">All twelve bundle kinds: the three a panel holds most often, the nine narrower ones, what each costs in ribbon space, and exactly what each one does when clicked.</span></a>
+<a href="bundle-yaml.html"><span class="c-t">The bundle.yaml reference</span><span class="c-d">Every key the runtime reads from bundle.yaml and extension.yaml, which kinds read it, what it falls back to, and the exact rules of the very small parser that reads the file.</span></a>
+<a href="icons.html"><span class="c-t">Icons</span><span class="c-d">Four PNGs per bundle, how the runtime picks between them for AutoCAD&#x27;s light and dark themes, and how to draw them so they sit well on the ribbon.</span></a>
+<a href="shortcuts.html"><span class="c-t">Shortcuts and keytips</span><span class="c-d">Keyboard chords that run a tool without touching the ribbon, the Alt letters that walk to it, and how users rebind both.</span></a>
+<a href="click-actions.html"><span class="c-t">Click actions and config.py</span><span class="c-d">One button, three gestures: a click runs the script, Shift+Click runs the bundle&#x27;s config.py, Alt+Click opens its folder. Every run goes through an AutoCAD command sent to the drawing.</span></a>
+<a href="hooks.html"><span class="c-t">Hooks</span><span class="c-d">Scripts that run themselves when something happens in AutoCAD, plus the startup.py every extension may carry.</span></a></div>
+<h2 id="scripts">Scripts</h2>
+<div class="cards"><a href="script-environment.html"><span class="c-t">The script environment</span><span class="c-d">What the runtime does between the click and the first line of your code, every global it hands you, and every rule that follows from it.</span></a>
+<a href="user-interface.html"><span class="c-t">Talking to the user</span><span class="c-d">Toasts, banners, dialogs and pickers, progress, the HTML output window and your own windows: what each one is for, every function&#x27;s signature, and how they follow AutoCAD&#x27;s theme.</span></a>
+<a href="settings.html"><span class="c-t">Settings and per-tool state</span><span class="c-d">Every key pyACAD reads from config.json, the Settings window that edits them, how a tool remembers its own options, and what lives under %APPDATA%\pyACAD.</span></a>
+<a href="commands.html"><span class="c-t">AutoCAD commands and AutoLISP</span><span class="c-d">Every tool is an AutoCAD command, so it can be clicked, typed, put in a macro or a script file, or called from AutoLISP with arguments and a return value.</span></a>
+<a href="command-line.html"><span class="c-t">pyacad.exe and headless runs</span><span class="c-d">The pyacad command line: check an install, attach the loader, register extension folders, and run a script over a list of drawings in AutoCAD Core Console.</span></a></div>
+<h2 id="reference">Reference</h2>
+<div class="cards"><a href="api-reference.html"><span class="c-t">Python API reference</span><span class="c-d">Every public function in the pyacad library, with its exact signature, what it returns, how it fails and whether it needs AutoCAD.</span></a></div>
+<h2 id="practice">Practice</h2>
+<div class="cards"><a href="cookbook.html"><span class="c-t">Cookbook</span><span class="c-d">Complete, runnable recipes for the jobs an AutoCAD tool actually has to do, each with its sharp edge named.</span></a>
+<a href="ai-assistant.html"><span class="c-t">Writing tools with an AI assistant</span><span class="c-d">The Ask AI panel, what it sends and what it writes, and how to get the same result from any chatbot you already use.</span></a>
+<a href="troubleshooting.html"><span class="c-t">Troubleshooting</span><span class="c-d">Every way pyACAD and a bundle fail, listed by what you actually see, with the cause, the fix, and the log line that proves it.</span></a>
+<a href="style-guide.html"><span class="c-t">Style guide for tools</span><span class="c-d">The conventions every shipped tool follows, in code, in look and in behaviour, so that twenty tools written by ten people still feel like one product.</span></a></div>
+  <div class="pagenav"><span></span><a class="next" href="overview.html"><span class="dir">Start here</span><span class="ttl">How pyACAD works</span></a></div>
+</article>
+<aside class="toc"></aside>
+</main>
+</div>
+<script src="_assets/search-index.js"></script>
+<script src="_assets/site.js"></script>
+</body>
+</html>

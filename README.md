@@ -13,10 +13,9 @@ brings the same idea to AutoCAD.
 
 > pyACAD is an independent project and is not affiliated with or endorsed by Autodesk.
 
-> **Status: early.** This is the 0.1.0 groundwork. The bundle parser, engines, forms, output
-> window, settings and the `pyacad` library are in place; the AutoCAD host wiring (ribbon
-> build at startup, events, context conditions, dock panes as palettes, the command line
-> runner) lands next.
+> **Status: 0.1.0, the first release.** The ribbon, commands and aliases, hooks, dock panes
+> and the bundled tools run in AutoCAD; the automated smoke run covers AutoCAD 2026. Please
+> report what breaks in [Issues](https://github.com/pyacad/pyACAD/issues).
 
 ## What you get
 
@@ -42,14 +41,49 @@ brings the same idea to AutoCAD.
 
 ## Bundled tools
 
-One tab, `pyACAD`, with two panels.
+One tab, `pyACAD`, with eight panels. Every tool is also an AutoCAD command, and the
+drawing tools have a short alias to type (in brackets). The
+[tools guide](https://tools.pyacad.com) has a page for each.
 
 **pyACAD**
 
 - **Settings**: theme, ribbon hints, extension folders and engine paths
-- **Shortcuts**: view and rebind every keyboard chord
+- **Shortcuts**: view and change every keyboard chord and alias
 - **Console**: an interactive Python console inside AutoCAD
 - **Reload**: rescan the extension folders and rebuild the ribbon, no restart
+
+**Data**
+
+- **Blocks to Excel** (`BX`): block references and their attributes to a workbook
+- **Excel to Blocks** (`EXB`): edited attribute values and layers back from that workbook
+- **Block Schedule** (`BSC`): counts blocks by name, or name and layer, as a table or to Excel
+- **Find and Replace Attributes** (`FRA`): replaces text in attribute values across the drawing
+
+**Layers**
+
+- **Layer Manager**: a docked, filterable layer list to isolate, freeze, lock, merge or delete
+- **Layer Mapper** (`LMAP`): applies a layer standard from a CSV, renaming or merging layers
+- **Layer Snapshot** (`LSN`): saves which layers are on, frozen and locked, and restores it
+
+**Xrefs**
+
+- **Xref Manager** (`XM`): reload, unload, detach or bind several xrefs at once
+- **Xref Repath** (`XRP`): make xref paths relative or absolute, or find and replace in them
+
+**Cleanup**
+
+- **Drawing Cleanup** (`DCU`): purge, audit, zero-length and duplicate geometry in one run
+- **Font and Proxy Report** (`FPR`): proxy objects and missing fonts, with an Excel export
+
+**Output**
+
+- **Batch Plot** (`BP`): the layouts you pick to PDF, one file each
+- **Layout Manager** (`LYM`): rename, reorder, copy or delete layouts, or apply a page setup
+
+**Takeoff**
+
+- **Length Takeoff** (`LTO`): total length per layer of lines, arcs, polylines and splines
+- **Tag Audit** (`TAU`): duplicate, blank and missing values of one attribute across blocks
 
 **AI (beta)**
 
@@ -119,6 +153,22 @@ name, the Autodesk manifest and the Settings window. To cut a release, date the 
 entry at the top of [CHANGELOG.md](CHANGELOG.md) as `## [x.y.z] - yyyy-mm-dd`, run the
 tests, then `powershell -ExecutionPolicy Bypass -File tools\package.ps1` with AutoCAD closed.
 
+### Websites
+
+The three websites are plain static files in this repo. Cloudflare Pages deploys each
+folder from `main` as it is, with no build step there, so every push to `main` is a deploy.
+The two guides are generated: edit the fragments in `docs/*/_content/`, never the pages,
+then rebuild and commit the output.
+
+```powershell
+python tools\build_docs.py            # authoring guide, then lint (0 errors expected)
+python tools\build_tools_site.py      # tools guide
+python -m unittest discover -s tests/tools
+python tools\preview.py               # all three sites at http://localhost:8600/ to 8602/
+```
+
+Each builder's `--check` fails when the committed pages are out of date.
+
 ## Write your first button
 
 ```
@@ -148,9 +198,9 @@ Shift+Click runs the bundle's `config.py` if it has one; Alt+Click opens the bun
 
 ## Command line
 
-`pyacad.exe` (`env`, `attach`, `detach`, `extensions`) is installed with pyACAD, in
-`%APPDATA%\pyACAD\cli`. `pyacad run`, which runs a script without the AutoCAD window, is
-not available yet.
+`pyacad.exe` (`env`, `attach`, `detach`, `extensions`, `run`) is installed with pyACAD, in
+`%APPDATA%\pyACAD\cli`. `pyacad run` runs a script on one or more drawings in AutoCAD
+Core Console, without the AutoCAD window; `pyacad run --help` lists its options.
 
 ## Repository layout
 
@@ -162,7 +212,11 @@ not available yet.
 | `pyacadlib/pyacad` | The Python library scripts import |
 | `extensions/` | The shipped pyACAD extension |
 | `tests/fixtures` | A Smoke extension of worked examples covering every bundle kind (not installed; see its README) |
-| `tools/` | Installer, dev deploy script, icon and logo generators |
+| `tests/tools` | Checks that the committed websites match their sources |
+| `site/` | The homepage, published at [pyacad.com](https://pyacad.com) (hand-written static files) |
+| `docs/authoring/` | The tool-authoring guide, published at [docs.pyacad.com](https://docs.pyacad.com) (generated by `tools/build_docs.py`) |
+| `docs/tools/` | The tools guide, published at [tools.pyacad.com](https://tools.pyacad.com) (generated by `tools/build_tools_site.py`) |
+| `tools/` | Installer, dev deploy script, icon and logo generators, website builders |
 
 ## Acknowledgements
 

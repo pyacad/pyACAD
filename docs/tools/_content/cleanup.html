@@ -1,0 +1,204 @@
+<p>Two tools for drawing hygiene. Drawing Cleanup runs the usual tidy-up (purge, audit,
+zero-length and duplicate geometry, ByLayer colour, zoom extents) from one checklist.
+Font and Proxy Report finds what makes a drawing look wrong on someone else's machine:
+objects from software this AutoCAD does not have, and text styles whose font files are
+missing.</p>
+
+<section id="drawing-cleanup" title="Drawing Cleanup" kind="Button"
+         bundle="Cleanup.panel/Drawing_Cleanup.pushbutton"
+         summary="Purge, audit, delete zero-length and duplicate geometry and zoom extents in one run, from a checklist that remembers your last choice."
+         needs="An open drawing (the button is greyed without one)"
+         shift="Resets the checklist to its default ticks">
+
+<h2>What it does</h2>
+<p>Opens a checklist of six steps, runs the ticked ones in order, and reports what each one
+did. The checklist opens with whatever you ticked last time.</p>
+<div class="table-scroll"><table>
+  <thead><tr><th>Step</th><th>Ticked at first</th><th>What it does</th></tr></thead>
+  <tbody>
+    <tr><td>Purge everything unused</td><td>Yes</td>
+      <td>Erases unreferenced blocks, layers, linetypes, text styles, dimension styles,
+        registered applications, multiline styles, table styles and multileader styles. It
+        repeats until a pass finds nothing, so a block that was only used inside another
+        unused block goes too.</td></tr>
+    <tr><td>Audit the drawing and fix errors</td><td>Yes</td>
+      <td>Queues <code>AUDIT</code> with fix set to Yes.</td></tr>
+    <tr><td>Delete zero-length lines and polylines</td><td>Yes</td>
+      <td>Erases lines and lightweight polylines with no length, in model space and every
+        layout.</td></tr>
+    <tr><td>Delete duplicate entities</td><td>Yes</td>
+      <td>Finds entities of the same type, on the same layer and in the same space, with the
+        same geometry, and erases every copy but the first.</td></tr>
+    <tr><td>Set every entity colour to ByLayer</td><td>No</td>
+      <td>Sets the colour of every entity in model space and the layouts, and of the
+        attributes on block references, to ByLayer.</td></tr>
+    <tr><td>Zoom extents</td><td>Yes</td>
+      <td>Queues <code>ZOOM Extents</code>.</td></tr>
+  </tbody>
+</table></div>
+
+<figure data-shot="drawing-cleanup-checklist" data-wide>
+<figcaption>The Drawing Cleanup checklist with the default steps ticked.</figcaption>
+</figure>
+
+<h2>How to use it</h2>
+<ol class="steps">
+  <li>Click <strong>Drawing Cleanup</strong>, or type <code>PYDRAWINGCLEANUP</code>.</li>
+  <li>Tick the steps you want and click OK. The choice is remembered for next time (an empty
+    checklist is not).</li>
+  <li>If a ticked step erases something (purge, zero-length, duplicates), the tool says
+    exactly what it will delete and asks you to continue.</li>
+  <li>A progress window follows the steps. <strong>Cancel</strong> stops the step that is
+    running and skips the rest; whatever already finished stays done.</li>
+  <li>A report window lists one line per step, for example:
+<pre><code>Purge: 14 unused items removed
+Audit: queued; it runs when this tool finishes and reports on the command line
+Zero-length: 3 entities deleted
+Duplicates: 12 extra copies deleted (9 groups), 2 skipped on locked layers
+Zoom extents: queued</code></pre>
+    <strong>Copy</strong> puts the report on the clipboard. A toast sums it up, such as
+    "14 purged, 3 zero-length deleted, 12 duplicates deleted".</li>
+  <li>When the tool closes, AUDIT runs and prints its findings on the command line, then the
+    view zooms to extents.</li>
+</ol>
+
+<figure data-shot="drawing-cleanup-report">
+<figcaption>The report after a run: one line per step, with the Copy button.</figcaption>
+</figure>
+
+<h2>Limitations</h2>
+<ul>
+  <li>AUDIT and ZOOM do not run in checklist order: they are queued as commands of their own
+    and run after every other step has finished. Their results are on the command line, not
+    in the report.</li>
+  <li>Duplicates are judged by type, layer and geometry only. Colour, linetype, lineweight,
+    text style and text rotation are not compared, so two lines in the same place on the
+    same layer are duplicates even if one is red and dashed. Polylines are compared by their
+    vertices and whether they are closed, not by arc segments or widths. Only lines, circles,
+    arcs, lightweight polylines, text, mtext and block references are checked; a block
+    reference's attribute values are part of its match, so two tags on one point with
+    different values are both kept.</li>
+  <li>Zero-length covers lines and lightweight polylines only, not old-style 2D or 3D
+    polylines.</li>
+  <li>Entities on locked layers are never erased or recoloured: the report counts them as
+    skipped. Purge is not affected by layer locks.</li>
+  <li>Geometry inside block definitions is not checked for duplicates or zero length, and
+    ByLayer does not change the colours inside block definitions. Viewports keep their
+    colour.</li>
+  <li>Purge does not cover materials, visual styles, plot styles, groups or empty text. Use
+    AutoCAD's PURGE for those.</li>
+</ul>
+
+<h2>Good to know</h2>
+<p>Every edit the tool makes itself happens inside its own command, so <code>U</code> takes
+it back. AUDIT and ZOOM are separate commands that run after it, so they come off the undo
+stack first: undo those two, then the cleanup itself.</p>
+<p>The remembered checklist is stored in
+<code>%APPDATA%\pyACAD\settings\cfg_pyacad_tab_cleanup_panel_drawing_cleanup_pushbutton.json</code>.
+<kbd>Shift</kbd>+Click (or <code>PYDRAWINGCLEANUPCFG</code>) deletes it, so the next run
+opens with the default ticks again: everything but ByLayer colour.</p>
+
+<h2>Other uses</h2>
+<ul>
+  <li>Before you issue a drawing, or before it goes to someone as an xref background.</li>
+  <li>Tick only <strong>Set every entity colour to ByLayer</strong> to make a consultant's
+    background follow your layer colours.</li>
+  <li>Tick only <strong>Delete duplicate entities</strong> after a careless copy and paste
+    in place.</li>
+</ul>
+</section>
+
+<section id="font-proxy-report" title="Font and Proxy Report" kind="Button"
+         bundle="Cleanup.panel/Font_Proxy_Report.pushbutton"
+         summary="Lists the proxy objects in the drawing and the fonts its text styles name that AutoCAD cannot find, then exports the list to Excel or remaps the missing fonts."
+         needs="An open drawing (the button is greyed without one)">
+
+<h2>What it does</h2>
+<p>Looks for two things that make a drawing behave differently on another machine:</p>
+<ul>
+  <li><strong>Proxies.</strong> An object made by an application this AutoCAD does not have
+    (its object enabler is missing). The tool finds proxy entities in model space, every
+    layout and every block definition, and proxy objects in the drawing's named object
+    dictionary and the dictionaries inside it. It groups them by the original class and the
+    application that made them.</li>
+  <li><strong>Missing fonts.</strong> Each text style's font file, its big font (for Asian
+    text) and any shape file loaded for complex linetypes, looked up the way AutoCAD looks
+    for them: the support paths, the drawing's folder and, for TrueType, the Windows fonts.
+    Styles that come from xrefs are left out.</li>
+</ul>
+<p>If it finds neither, a toast says so and that is all. Otherwise it shows the report and
+offers to export it or remap the fonts.</p>
+
+<figure data-shot="font-proxy-report" data-wide>
+<figcaption>The Font and Proxy Report: proxies grouped by class and application, then the text styles with a missing font.</figcaption>
+</figure>
+
+<h2>How to use it</h2>
+<ol class="steps">
+  <li>Click <strong>Font and Proxy Report</strong>, or type
+    <code>PYFONTANDPROXYREPORT</code>.</li>
+  <li>Read the report. It opens with counts ("3 proxy entities, 1 proxy object"), the proxy
+    classes most common first, then each missing font as <code>Style: file</code>. Each list
+    stops after 15 lines; <strong>Copy</strong> puts the report on the clipboard and the
+    Excel export carries everything. Click OK.</li>
+  <li>Choose what next: <strong>Export to Excel</strong>, <strong>Remap missing
+    fonts</strong> (offered only when a style's own font is missing) or
+    <strong>Done</strong>. After one choice the others are offered again, until you click
+    Done.</li>
+  <li><strong>Export to Excel</strong> asks where to save. The name starts as
+    <code>&lt;drawing&gt; font and proxy report.xlsx</code>. If the file exists it is replaced,
+    not added to.</li>
+  <li><strong>Remap missing fonts</strong> asks once for the missing SHX fonts (suggesting
+    <code>simplex.shx</code>) and once for the missing TrueType fonts (suggesting
+    <code>arial.ttf</code>), naming the styles each answer will change. Leave the box empty
+    or cancel to leave that kind alone. If AutoCAD cannot find the replacement either, the
+    tool asks before using it.</li>
+  <li>The remapped styles are listed in a toast, and a REGENALL is queued so the text
+    redraws in the new font.</li>
+</ol>
+
+<h2>The Excel sheet</h2>
+<p>One sheet, <strong>Fonts and proxies</strong>, with a bold header row and one row per
+proxy, then one per missing font:</p>
+<div class="table-scroll"><table>
+  <thead><tr><th>Column</th><th>For a proxy</th><th>For a missing font</th></tr></thead>
+  <tbody>
+    <tr><td>Issue</td><td><code>Proxy entity</code> or <code>Proxy object</code></td>
+      <td><code>Missing font</code>, <code>Missing big font</code> or <code>Missing shape
+        file</code></td></tr>
+    <tr><td>Name</td><td>The original class name, or <code>(unknown class)</code></td>
+      <td>The text style</td></tr>
+    <tr><td>Detail</td><td>The application that made it</td><td>The font file</td></tr>
+    <tr><td>Where</td><td>The layout (<code>Model</code> or its name),
+      <code>BLOCK:Name</code> for a block definition, or <code>Named objects</code></td>
+      <td>Empty</td></tr>
+    <tr><td>Handle</td><td>The proxy's handle</td><td>Empty</td></tr>
+  </tbody>
+</table></div>
+
+<h2>Limitations</h2>
+<ul>
+  <li>The tool reports proxies; it does not remove or explode them. The fix is the missing
+    object enabler, or the application that made them.</li>
+  <li>Only a style's own font is remapped. Missing big fonts and shape files are reported and
+    left alone.</li>
+  <li>A remap clears the style's TrueType typeface so the font file you typed is what
+    counts. Bold or italic set on a TrueType style is cleared with it.</li>
+  <li>A style that names a font only by typeface, with no font file, is not checked.</li>
+  <li>Mtext that sets its own font inline keeps it; only the style changes.</li>
+</ul>
+
+<h2>Good to know</h2>
+<p>The remap happens inside the tool's own command, so Undo takes it back (the queued
+REGENALL is a separate command after it). The export dialog starts wherever the Save dialog last was, not necessarily in
+the drawing's folder.</p>
+
+<h2>Other uses</h2>
+<ul>
+  <li>Check every drawing a consultant sends before you xref it: proxies there usually mean
+    they work in an AutoCAD-based product you do not have.</li>
+  <li>Keep the Excel export with a transmittal as a record of what you received.</li>
+  <li>Before you send drawings out, remap company SHX fonts the recipient will not have to
+    <code>simplex.shx</code>, on a copy.</li>
+</ul>
+</section>
